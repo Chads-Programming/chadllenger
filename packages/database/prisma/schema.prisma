@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/client"
+}
+
+enum Difficult {
+    Easy
+    Medium
+    Hard
+}
+
+model CodeChallenge {
+    id          String     @id @default(uuid())
+    title       String
+    description String
+    difficult   Difficult
+    TestCase    TestCase[]
+
+    deletedAt DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @default(now()) @updatedAt
+}
+
+model TestCase {
+    id              String        @id @default(uuid())
+    args            String
+    expectedOutput  String
+    codeChallengeId String
+    codeChallenge   CodeChallenge @relation(fields: [codeChallengeId], references: [id])
+    deletedAt       DateTime?
+}

@@ -7,6 +7,7 @@
     "ignore": [
       "apps/web/.next",
       "apps/web/graphql/*",
+      "packages/database/generated/**/*",
       "./**/dist/*",
       "./.vscode/*"
     ]
@@ -43,7 +44,7 @@
   },
   "overrides": [
     {
-      "include": ["apps/api/**"],
+      "include": ["apps/server/**"],
       "linter": {
         "rules": {
           "style": {
