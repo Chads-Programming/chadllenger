@@ -1,8 +1,9 @@
 {
   "name": "@repo/database",
   "version": "1.0.0",
+  "types": "./generated/client/index.d.ts",
   "exports": {
-    ".": "./src/client.ts"
+    ".": "./generated/client/index.js"
   },
   "scripts": {
     "db:migrate:deploy": "prisma migrate deploy",
@@ -22,7 +23,6 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "eslint": "^8.57.0",
     "prisma": "6.5.0",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",

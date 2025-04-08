@@ -10,6 +10,7 @@ export interface CodeChallengeModel {
   id: string
   title: string
   description: string
+  codename: string
   difficult: Difficult
   createdAt: Date
   updatedAt: Date

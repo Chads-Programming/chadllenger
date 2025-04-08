@@ -19,6 +19,7 @@ enum Difficult {
 model CodeChallenge {
     id          String     @id @default(uuid())
     title       String
+    codename    String     @unique
     description String
     difficult   Difficult
     TestCase    TestCase[]

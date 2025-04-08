@@ -22,4 +22,13 @@ export class CodeChallengeRepository {
 
     return this.prisma.codeChallenge.findMany(params);
   }
+
+  findByCodename(codename: string) {
+    return this.prisma.codeChallenge.findFirstOrThrow({
+      where: {
+        codename,
+        deletedAt: null,
+      },
+    });
+  }
 }
