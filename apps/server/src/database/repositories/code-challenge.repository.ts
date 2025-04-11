@@ -23,6 +23,19 @@ export class CodeChallengeRepository {
     return this.prisma.codeChallenge.findMany(params);
   }
 
+  async getRandomChallengesByDifficult(
+    difficulties: Difficult[],
+    limit: number,
+  ): Promise<CodeChallengeModel[]> {
+    return await this.prisma.$queryRaw`
+    SELECT * FROM "CodeChallenge"
+    WHERE "deletedAt" IS NULL
+      AND "difficult" = ANY (${Prisma.sql`ARRAY[${Prisma.join(difficulties.map((d) => Prisma.sql`${d}`))}]`})
+    ORDER BY RANDOM()
+    LIMIT ${limit};
+  `;
+  }
+
   findByCodename(codename: string) {
     return this.prisma.codeChallenge.findFirstOrThrow({
       where: {

@@ -7,7 +7,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsup src/* --watch",
+    "dev": "tsc --watch",
     "build": "tsc",
     "lint:format": "pnpm biome format --write .",
     "lint:fix": "pnpm biome check --apply .",

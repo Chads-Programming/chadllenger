@@ -1,8 +1,16 @@
-import { ChallengeState } from './challenge-state';
+import { ChallengeStateModel } from '../models/challenge-state.model';
 
-export type CreateChallengeStore = Omit<
-  ChallengeState,
-  'id' | 'createdAt' | 'updatedAt' | 'codename'
+export type CreateChallengeRequestType = Omit<
+  ChallengeStateModel,
+  | 'id'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'codename'
+  | 'currentChallenge'
+  | 'playedChallenges'
 >;
 
-export type UpdateChallengeStore = CreateChallengeStore;
+export type UpdateChallengeRequestType = Omit<
+  ChallengeStateModel,
+  'id' | 'createdAt' | 'updatedAt'
+>;
