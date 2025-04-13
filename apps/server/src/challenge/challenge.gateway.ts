@@ -7,18 +7,18 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import {
-  ChallengeEvents,
-  ChallengeNotification,
-  CreateChallenge,
-  MessageTypes,
-} from '@repo/schemas';
 import { Server, Socket } from 'socket.io';
 import { ChallengeService } from './challenge.service';
+import { ChallengeNotificationBuilder } from '@/core/notification-builder';
+import { MessageTypes, CreateChallenge, ChallengeEvents } from '@repo/schemas';
 
 @WebSocketGateway({
   namespace: 'challenge',
   transports: ['websocket'],
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
 })
 export class ChallengeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -47,22 +47,24 @@ export class ChallengeGateway
 
     client.join(challenge.codename);
 
-    this.server
-      .to(client.id)
-      .emit(
-        ChallengeEvents.NOTIFICATIONS,
-        ChallengeNotification.buildCreatedRoomNotification(challenge.codename),
+    const notification =
+      ChallengeNotificationBuilder.buildCreatedRoomNotification(
+        challenge.codename,
       );
+
+    this.server.to(client.id).emit(ChallengeEvents.NOTIFICATIONS, notification);
+
+    return notification;
   }
 
   private getConnectedSockets() {
-    return this.server.of('/').sockets.size;
+    return (this.server.sockets as unknown as { size: number }).size;
   }
 
   private emitTotalOnlinePlayers() {
     this.server.emit(
       ChallengeEvents.PLAYERS,
-      ChallengeNotification.buildPlayersNotification(
+      ChallengeNotificationBuilder.buildPlayersNotification(
         this.getConnectedSockets(),
       ),
     );

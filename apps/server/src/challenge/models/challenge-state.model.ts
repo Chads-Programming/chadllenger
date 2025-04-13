@@ -4,6 +4,7 @@ import { ParticipantModel } from './participant.model';
 
 export class ChallengeStateModel {
   id: string;
+  title: string;
   codename: string;
   participants: ParticipantModel[];
   codeChallenges: CodeChallengeStateModel[];

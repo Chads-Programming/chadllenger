@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "types": "./dist/index.d.ts",
+  "module": "dist/index.mjs",
   "exports": {
-    ".": "./dist/index.js"
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
+    "dev": "tsup src/* --watch",
+    "build": "tsup src/*",
     "lint:format": "pnpm biome format --write .",
     "lint:fix": "pnpm biome check --apply .",
     "lint:check": "pnpm biome check ."

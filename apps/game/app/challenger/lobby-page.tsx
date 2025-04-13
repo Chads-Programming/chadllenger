@@ -1,6 +1,13 @@
-import { Plus, Users } from 'lucide-react'
-import { useState } from 'react'
+import { Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { CreateChallengeForm } from './components/create-challenge-form'
+import { useSocket } from 'socket/use-socket'
+import {
+  ChallengeEvents,
+  type ChallengeNotificationType,
+  type PlayerJoinedGamePayload,
+} from '@repo/schemas'
 
 export function meta() {
   return [
@@ -32,6 +39,9 @@ const mockRooms: Room[] = [
 ]
 
 export default function GameSelection() {
+  const socket = useSocket()
+  const [onlinePlayers, setOnlinePlayers] = useState(0)
+
   const [rooms, setRooms] = useState<Room[]>(mockRooms)
   const [newRoomName, setNewRoomName] = useState('')
   const navigate = useNavigate()
@@ -52,27 +62,23 @@ export default function GameSelection() {
     setNewRoomName('')
   }
 
+  useEffect(() => {
+    socket.listenEvent(
+      ChallengeEvents.PLAYERS,
+      (data: ChallengeNotificationType<PlayerJoinedGamePayload>) => {
+        setOnlinePlayers(data.data.totalOnline)
+      },
+    )
+  }, [socket])
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Create Room</h2>
-        <form onSubmit={createRoom} className="flex gap-4">
-          <input
-            type="text"
-            value={newRoomName}
-            onChange={(e) => setNewRoomName(e.target.value)}
-            placeholder="Enter room name"
-            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          <button
-            type="submit"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Create Room
-          </button>
-        </form>
+        <p className="text-gray-500 mb-4">Online players: {onlinePlayers}</p>
       </div>
+
+      <CreateChallengeForm onCreateChallenge={console.log} />
 
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Rooms</h2>

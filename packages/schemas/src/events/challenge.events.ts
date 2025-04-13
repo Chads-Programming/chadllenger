@@ -1,7 +1,7 @@
 export const ChallengeEvents = {
   NOTIFICATIONS: 'CHALLENGE_NOTIFICATIONS',
   PLAYERS: 'PLAYERS',
-}
+} as const
 
 export const NotificationsType = {
   CREATED_ROOM: 'CREATED_ROOM',
@@ -17,32 +17,16 @@ export const MessageTypes = {
   CREATE_ROOM: 'CREATE_ROOM',
 } as const
 
-export interface ChallengeNotificationType {
-  type: (typeof NotificationsType)[keyof typeof NotificationsType]
-  messageType: 'user' | 'system'
-  data: unknown
+export type CreatedRoomPayload = {
+  codename: string
 }
 
-export class ChallengeNotification implements ChallengeNotificationType {
-  constructor(
-    readonly type: (typeof NotificationsType)[keyof typeof NotificationsType],
-    readonly messageType: 'user' | 'system',
-    readonly data: unknown,
-  ) {}
+export type PlayerJoinedGamePayload = {
+  totalOnline: number
+}
 
-  static buildPlayersNotification(totalOnline: number): ChallengeNotification {
-    return new ChallengeNotification(
-      NotificationsType.TOTAL_ONLINE_PLAYERS,
-      'system',
-      {
-        totalOnline,
-      },
-    )
-  }
-
-  static buildCreatedRoomNotification(codename: string): ChallengeNotification {
-    return new ChallengeNotification(NotificationsType.CREATED_ROOM, 'system', {
-      codename,
-    })
-  }
+export interface ChallengeNotificationType<TData = unknown> {
+  type: (typeof NotificationsType)[keyof typeof NotificationsType]
+  messageType: 'user' | 'system'
+  data: TData
 }

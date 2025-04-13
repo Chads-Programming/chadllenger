@@ -35,6 +35,7 @@ export class ChallengeService {
     );
 
     const challengeStore: CreateChallengeRequestType = {
+      title: createChallenge.title,
       creator: creatorId,
       participants: [creatorParticpant],
       codeChallenges,
@@ -42,8 +43,11 @@ export class ChallengeService {
       expiration: CHALLENGE_EXPIRATION_TIME,
     };
 
+    const challenge =
+      await this.challengeRepository.createChallenge(challengeStore);
     // TODO: Send queue to updated FINISHED according expiration time
-    return this.challengeRepository.createChallenge(challengeStore);
+
+    return challenge;
   }
   addPartipant() {}
   removeParticipant() {}

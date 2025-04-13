@@ -1,7 +1,7 @@
 import { CodeChallengeModel, Difficult } from '@repo/schemas';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@repo/database/generated/client';
+import { Prisma } from '@repo/database';
 
 type FindCodeChallengeParams = { difficult?: Difficult };
 

@@ -27,6 +27,7 @@ export class ChallengeCacheRepository {
     const newChallenge: ChallengeStateModel = {
       ...challenge,
       id,
+      title: challenge.title,
       codename,
       createdAt: new Date(),
       updatedAt: new Date(),
