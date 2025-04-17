@@ -1,6 +1,31 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
 @plugin "daisyui" {
   /* biome-ignore lint/correctness/noUnknownProperty: use custom directives */
-  themes: light --default, black --prefersdark, winter;
+  themes: light --default, dark --prefersdark, winter;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5;
+  }
+  50% {
+    box-shadow: 0 0 10px #4f46e5, 0 0 20px #4f46e5, 0 0 30px #4f46e5;
+  }
+  100% {
+    box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5;
+  }
+}
+
+.lobby-card {
+  animation: float 6s ease-in-out infinite;
+}
+
+.lobby-card:hover {
+  animation: pulse-glow 2s infinite;
 }

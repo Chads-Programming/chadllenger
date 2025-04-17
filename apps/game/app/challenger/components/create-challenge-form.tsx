@@ -3,6 +3,7 @@ import { Difficult, type CreateChallenge, challengeSchema } from '@repo/schemas'
 import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ModalContainer } from 'components/modal/modal'
 
 interface Props {
   onCreateChallenge: (data: CreateChallenge) => void
@@ -54,14 +55,15 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 space-y-6">
+    <ModalContainer id="create-challenge-modal">
+      <ModalContainer.Header>
         <header className="flex items-center space-x-3">
           <Trophy className="w-8 h-8 text-indigo-600" />
           <h1 className="text-2xl font-bold text-gray-900">Create Challenge</h1>
         </header>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      </ModalContainer.Header>
+      <ModalContainer.Content>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full">
           <fieldset className="fieldset w-full">
             <legend className="fieldset-legend">Challenge Title</legend>
             <input
@@ -88,11 +90,11 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
                   type="button"
                   onClick={() => handleDifficultyToggle(difficulty)}
                   className={`btn
-                  ${
-                    selectedDifficulties?.includes(difficulty)
-                      ? 'btn-accent'
-                      : 'btn-primary'
-                  }`}
+              ${
+                selectedDifficulties?.includes(difficulty)
+                  ? 'btn-accent'
+                  : 'btn-primary'
+              }`}
                 >
                   {difficulty}
                 </button>
@@ -127,7 +129,7 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
             Create Challenge
           </button>
         </form>
-      </div>
-    </div>
+      </ModalContainer.Content>
+    </ModalContainer>
   )
 }

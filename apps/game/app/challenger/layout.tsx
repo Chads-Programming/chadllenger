@@ -4,11 +4,13 @@ import { SocketProvider } from 'socket/socket-provider'
 
 const ChallengeLayout = () => {
   return (
-    <UserProvider>
-      <SocketProvider>
-        <Outlet />
-      </SocketProvider>
-    </UserProvider>
+    <>
+      <UserProvider>
+        <SocketProvider>
+          <Outlet />
+        </SocketProvider>
+      </UserProvider>
+    </>
   )
 }
 

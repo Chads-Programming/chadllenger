@@ -1,6 +1,5 @@
-import { Users } from 'lucide-react'
+import { Gamepad2, Plus, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
 import { CreateChallengeForm } from './components/create-challenge-form'
 import { useSocket } from 'socket/use-socket'
 import {
@@ -8,59 +7,21 @@ import {
   type ChallengeNotificationType,
   type PlayerJoinedGamePayload,
 } from '@repo/schemas'
+import { useModalTrigger } from 'components/modal/modal-trigger'
+import { LobbyCard } from './components/lobby-card'
+import { LobbyStrings } from './strings/lobby'
 
 export function meta() {
   return [
-    { title: 'Selection game' },
+    { title: 'Lobby game' },
     { name: 'description', content: 'Select a mode' },
   ]
 }
 
-interface Room {
-  id: string
-  name: string
-  created_at: string
-  player_count: number
-}
-
-const mockRooms: Room[] = [
-  {
-    id: '1',
-    name: 'JavaScript Algorithms',
-    created_at: new Date().toISOString(),
-    player_count: 3,
-  },
-  {
-    id: '2',
-    name: 'React Challenges',
-    created_at: new Date().toISOString(),
-    player_count: 2,
-  },
-]
-
 export default function GameSelection() {
   const socket = useSocket()
   const [onlinePlayers, setOnlinePlayers] = useState(0)
-
-  const [rooms, setRooms] = useState<Room[]>(mockRooms)
-  const [newRoomName, setNewRoomName] = useState('')
-  const navigate = useNavigate()
-
-  const createRoom = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newRoomName.trim()) return
-
-    const newRoom: Room = {
-      id: Math.random().toString(),
-      name: newRoomName,
-      created_at: new Date().toISOString(),
-      player_count: 1,
-    }
-
-    setRooms([newRoom, ...rooms])
-    navigate(`/room/${newRoom.id}`)
-    setNewRoomName('')
-  }
+  const { openModal } = useModalTrigger()
 
   useEffect(() => {
     socket.listenEvent(
@@ -72,43 +33,57 @@ export default function GameSelection() {
   }, [socket])
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Create Room</h2>
+    <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto relative">
+        <div className="flex items-center justify-center gap-3 mb-12">
+          <Gamepad2 className="w-10 h-10 text-indigo-500" />
+          <h1 className="text-5xl font-bold text-center text-white neon-text">
+            {LobbyStrings.title}
+          </h1>
+        </div>
         <p className="text-gray-500 mb-4">Online players: {onlinePlayers}</p>
       </div>
+      <section className="flex flex-wrap justify-center gap-8 mb-6">
+        <LobbyCard
+          title={LobbyStrings.createChallenge.title}
+          description={LobbyStrings.createChallenge.description}
+          banner={LobbyStrings.createChallenge.banner}
+        >
+          <button
+            type="button"
+            onClick={() => openModal('create-challenge-modal')}
+            className="btn btn-primary mb-4 gap-2 w-full font-semibold transition-all duration-300 group-hover:transform group-hover:translate-y-[-2px]"
+          >
+            <Plus
+              size={24}
+              className="group-hover:rotate-90 transition-transform duration-300"
+            />
+            <span className="text-lg">
+              {LobbyStrings.createChallenge.button}
+            </span>
+          </button>
+        </LobbyCard>
+
+        <LobbyCard
+          title={LobbyStrings.joinChallenge.title}
+          description={LobbyStrings.joinChallenge.description}
+          banner={LobbyStrings.joinChallenge.banner}
+        >
+          <button
+            type="button"
+            onClick={() => openModal('create-challenge-modal')}
+            className="btn btn-primary font-semibold mb-4 gap-2 w-full transition-all duration-300 group-hover:transform group-hover:translate-y-[-2px]"
+          >
+            <Users
+              size={24}
+              className="group-hover:scale-110 transition-transform duration-300"
+            />
+            <span className="text-lg">{LobbyStrings.joinChallenge.button}</span>
+          </button>
+        </LobbyCard>
+      </section>
 
       <CreateChallengeForm onCreateChallenge={console.log} />
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Rooms</h2>
-        <div className="grid gap-4">
-          {rooms.map((room) => (
-            // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-            <div
-              key={room.id}
-              onClick={() => navigate(`/challenge/${room.id}`)}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition"
-            >
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {room.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Created {new Date(room.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex items-center text-gray-500">
-                <Users className="h-5 w-5 mr-2" />
-                <span>{room.player_count}</span>
-              </div>
-            </div>
-          ))}
-          {rooms.length === 0 && (
-            <p className="text-center text-gray-500 py-4">No active rooms</p>
-          )}
-        </div>
-      </div>
     </div>
   )
 }
