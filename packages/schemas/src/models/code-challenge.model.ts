@@ -2,6 +2,7 @@ export const Difficult = {
   Easy: 'Easy',
   Medium: 'Medium',
   Hard: 'Hard',
+  Chad: 'Chad',
 } as const
 
 export type Difficult = (typeof Difficult)[keyof typeof Difficult]

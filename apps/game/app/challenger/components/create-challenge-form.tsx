@@ -27,7 +27,12 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
 
   const selectedDifficulties = watch('difficulties', [])
 
-  const difficulties = [Difficult.Easy, Difficult.Medium, Difficult.Hard]
+  const difficulties = [
+    Difficult.Easy,
+    Difficult.Medium,
+    Difficult.Hard,
+    Difficult.Chad,
+  ]
 
   const onSubmit = (data: CreateChallenge) => {
     if (!username) {
@@ -59,7 +64,9 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
       <ModalContainer.Header>
         <header className="flex items-center space-x-3">
           <Trophy className="w-8 h-8 text-indigo-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Create Challenge</h1>
+          <h1 className="text-2xl font-bold dark:text-white text-secondary">
+            Create Challenge
+          </h1>
         </header>
       </ModalContainer.Header>
       <ModalContainer.Content>
@@ -80,7 +87,7 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
           </fieldset>
 
           <div className="w-full">
-            <div className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="block text-sm font-medium fieldset-legend mb-2">
               Difficulty Levels
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -92,8 +99,8 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
                   className={`btn
               ${
                 selectedDifficulties?.includes(difficulty)
-                  ? 'btn-accent'
-                  : 'btn-primary'
+                  ? 'btn-info'
+                  : 'btn-base'
               }`}
                 >
                   {difficulty}
@@ -124,7 +131,7 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-200 font-medium"
+            className="w-full btn btn-primary py-2 px-4 text-lg font-semibold"
           >
             Create Challenge
           </button>

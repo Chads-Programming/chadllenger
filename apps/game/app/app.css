@@ -7,18 +7,59 @@
 
 @plugin "daisyui" {
   /* biome-ignore lint/correctness/noUnknownProperty: use custom directives */
-  themes: light --default, dark --prefersdark, winter;
+  themes: light --default, black --prefersdark, winter;
+}
+
+@plugin "daisyui/theme" {
+  /* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+  name: "black";
+  /* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+  default: false;
+  /* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(14% 0.005 285.823);
+  --color-base-200: oklch(14% 0 0);
+  --color-base-300: oklch(27% 0.006 286.033);
+  --color-base-content: oklch(98% 0.003 247.858);
+  --color-primary: oklch(62% 0.194 149.214);
+  --color-primary-content: oklch(25% 0.09 281.288);
+  --color-secondary: oklch(60% 0.25 292.717);
+  --color-secondary-content: oklch(28% 0.109 3.907);
+  --color-accent: oklch(87% 0.169 91.605);
+  --color-accent-content: oklch(26% 0.079 36.259);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(48% 0.243 264.376);
+  --color-info-content: oklch(98% 0.019 200.873);
+  --color-success: oklch(72% 0.219 149.579);
+  --color-success-content: oklch(98% 0.018 155.826);
+  --color-warning: oklch(64% 0.222 41.116);
+  --color-warning-content: oklch(98% 0.016 73.684);
+  --color-error: oklch(57% 0.245 27.325);
+  --color-error-content: oklch(97% 0.013 17.38);
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 1;
 }
 
 @keyframes pulse-glow {
   0% {
-    box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5;
+    box-shadow: 0 0 5px oklch(62% 0.194 149.214), 0 0 10px
+      oklch(60% 0.25 292.717), 0 0 15px oklch(62% 0.194 149.214);
   }
   50% {
-    box-shadow: 0 0 10px #4f46e5, 0 0 20px #4f46e5, 0 0 30px #4f46e5;
+    box-shadow: 0 0 10px oklch(62% 0.194 149.214), 0 0 20px
+      oklch(60% 0.25 292.717), 0 0 30px oklch(62% 0.194 149.214);
   }
   100% {
-    box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5;
+    box-shadow: 0 0 5px oklch(62% 0.194 149.214), 0 0 10px
+      oklch(60% 0.25 292.717), 0 0 15px oklch(62% 0.194 149.214);
   }
 }
 
@@ -28,4 +69,20 @@
 
 .lobby-card:hover {
   animation: pulse-glow 2s infinite;
+}
+
+@theme inline {
+  --animate-shiny-text: shiny-text 8s infinite;
+
+  @keyframes shiny-text {
+    0%,
+    90%,
+    100% {
+      background-position: calc(-100% - var(--shiny-width)) 0;
+    }
+    30%,
+    60% {
+      background-position: calc(100% + var(--shiny-width)) 0;
+    }
+  }
 }

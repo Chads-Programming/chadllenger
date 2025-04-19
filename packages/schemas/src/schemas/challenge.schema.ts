@@ -4,7 +4,7 @@ import { Difficult } from '..'
 export const challengeSchema = z.object({
   title: z.string().min(1),
   difficulties: z.array(
-    z.enum([Difficult.Easy, Difficult.Medium, Difficult.Hard]),
+    z.enum([Difficult.Easy, Difficult.Medium, Difficult.Hard, Difficult.Chad]),
   ),
   creatorName: z.string().min(2),
 })

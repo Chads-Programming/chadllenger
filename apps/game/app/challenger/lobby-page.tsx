@@ -1,15 +1,10 @@
-import { Gamepad2, Plus, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Code2, Plus, Users } from 'lucide-react'
 import { CreateChallengeForm } from './components/create-challenge-form'
-import { useSocket } from 'socket/use-socket'
-import {
-  ChallengeEvents,
-  type ChallengeNotificationType,
-  type PlayerJoinedGamePayload,
-} from '@repo/schemas'
 import { useModalTrigger } from 'components/modal/modal-trigger'
 import { LobbyCard } from './components/lobby-card'
 import { LobbyStrings } from './strings/lobby'
+import { AuroraText } from 'components/aurora-text'
+import { OnlinePlayers } from './components/online-players'
 
 export function meta() {
   return [
@@ -19,29 +14,19 @@ export function meta() {
 }
 
 export default function GameSelection() {
-  const socket = useSocket()
-  const [onlinePlayers, setOnlinePlayers] = useState(0)
   const { openModal } = useModalTrigger()
-
-  useEffect(() => {
-    socket.listenEvent(
-      ChallengeEvents.PLAYERS,
-      (data: ChallengeNotificationType<PlayerJoinedGamePayload>) => {
-        setOnlinePlayers(data.data.totalOnline)
-      },
-    )
-  }, [socket])
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="max-w-4xl mx-auto relative">
         <div className="flex items-center justify-center gap-3 mb-12">
-          <Gamepad2 className="w-10 h-10 text-indigo-500" />
-          <h1 className="text-5xl font-bold text-center text-white neon-text">
+          <Code2 className="w-10 h-10 text-indigo-500" />
+
+          <AuroraText className="text-4xl font-bold">
             {LobbyStrings.title}
-          </h1>
+          </AuroraText>
         </div>
-        <p className="text-gray-500 mb-4">Online players: {onlinePlayers}</p>
+        <OnlinePlayers />
       </div>
       <section className="flex flex-wrap justify-center gap-8 mb-6">
         <LobbyCard
