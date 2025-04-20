@@ -1,11 +1,11 @@
-import { Status } from './types/challenge-state';
-import { ParticipantModel } from './models/participant.model';
-import { CodeChallengeRepository } from './../database/repositories/code-challenge.repository';
+import { Status } from '../types/challenge-state';
+import { ParticipantModel } from '../models/participant.model';
+import { CodeChallengeRepository } from '../../database/repositories/code-challenge.repository';
 import { Injectable } from '@nestjs/common';
-import { ChallengeCacheRepository } from './challenge-cache.repository';
+import { ChallengeCacheRepository } from '../repositories/challenge-cache.repository';
 import { CreateChallenge } from '@repo/schemas';
-import { CreateChallengeRequestType } from './types/challenge-store';
-import { CodeChallengeStateModel } from './models/code-challenge.model';
+import { CreateChallengeRequestType } from '../types/challenge-store';
+import { CodeChallengeStateModel } from '../models/code-challenge.model';
 import { envs } from '@/config/envs';
 
 const CODE_CHALLENGES_SIZE = 3;

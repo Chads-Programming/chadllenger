@@ -21,7 +21,7 @@ const mockChallenge = {
 const mockPlayers = ['player1', 'player2', 'player3']
 
 export default function GameRoute({ params }: Route.ComponentProps) {
-  const { challengeId } = params
+  const { codename } = params
 
   const [code, setCode] = useState(mockChallenge.initial_code)
   const [output, setOutput] = useState('')
@@ -45,7 +45,7 @@ export default function GameRoute({ params }: Route.ComponentProps) {
           <div className="bg-white rounded-lg shadow-sm mb-6">
             <div className="border-b border-gray-200 p-4">
               <h2 className="text-xl font-bold text-gray-900">
-                Room {challengeId}
+                Room {codename}
               </h2>
             </div>
             <div className="p-4">

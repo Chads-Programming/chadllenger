@@ -1,16 +1,26 @@
 import { useForm } from 'react-hook-form'
-import { Difficult, type CreateChallenge, challengeSchema } from '@repo/schemas'
+import {
+  Difficult,
+  type CreateChallenge,
+  challengeSchema,
+  type CreatedRoomPayload,
+} from '@repo/schemas'
 import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ModalContainer } from 'components/modal/modal'
+import { CREATE_CHALLENGE_REF_ID, useChallenge } from './hooks/use-challenge'
+import { useModalTrigger } from 'components/modal/modal-trigger'
+import { useNavigate } from 'react-router'
+import { useEffect } from 'react'
 
-interface Props {
-  onCreateChallenge: (data: CreateChallenge) => void
-}
-
-export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
+export const SetupChallenge = () => {
   const { setUsername, username } = useUser()
+  const { createChallengeRoom, onCreatedRoom, removeChallengeNotification } =
+    useChallenge()
+  const navigate = useNavigate()
+  const { closeModal } = useModalTrigger()
+
   const {
     register,
     handleSubmit,
@@ -38,7 +48,7 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
     if (!username) {
       setUsername(data.creatorName)
     }
-    onCreateChallenge(data)
+    handleCreateChallenge(data)
   }
 
   const handleDifficultyToggle = (difficulty: Difficult) => {
@@ -58,6 +68,21 @@ export const CreateChallengeForm = ({ onCreateChallenge }: Props) => {
       shouldValidate: true,
     })
   }
+
+  const handleCreateChallenge = (data: CreateChallenge) => {
+    createChallengeRoom(data)
+  }
+
+  useEffect(() => {
+    onCreatedRoom((data: CreatedRoomPayload) => {
+      navigate(`/challenge/${data.codename}`)
+      closeModal(CREATE_CHALLENGE_REF_ID)
+    })
+
+    return () => {
+      removeChallengeNotification()
+    }
+  }, [onCreatedRoom, navigate, closeModal, removeChallengeNotification])
 
   return (
     <ModalContainer id="create-challenge-modal">

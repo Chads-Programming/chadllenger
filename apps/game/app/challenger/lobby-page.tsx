@@ -1,5 +1,5 @@
 import { Code2, Plus, Users } from 'lucide-react'
-import { CreateChallengeForm } from './components/create-challenge-form'
+import { SetupChallenge } from './setup-challenge'
 import { useModalTrigger } from 'components/modal/modal-trigger'
 import { LobbyCard } from './components/lobby-card'
 import { LobbyStrings } from './strings/lobby'
@@ -18,10 +18,9 @@ export default function GameSelection() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="max-w-4xl mx-auto relative">
-        <div className="flex items-center justify-center gap-3 mb-12">
+      <div className="max-w-4xl mx-auto relative flex flex-col items-center justify-start gap-4 mb-12">
+        <div className="flex items-center justify-center gap-3">
           <Code2 className="w-10 h-10 text-indigo-500" />
-
           <AuroraText className="text-4xl font-bold">
             {LobbyStrings.title}
           </AuroraText>
@@ -68,7 +67,7 @@ export default function GameSelection() {
         </LobbyCard>
       </section>
 
-      <CreateChallengeForm onCreateChallenge={console.log} />
+      <SetupChallenge />
     </div>
   )
 }

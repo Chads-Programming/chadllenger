@@ -6,10 +6,10 @@ import { envs } from '@/config/envs';
 import {
   CreateChallengeRequestType,
   UpdateChallengeRequestType,
-} from './types/challenge-store';
+} from '../types/challenge-store';
 import * as codeGenerator from '@/utils/code-generator';
 import { ErrorCodes } from '@/lib/errors';
-import { ChallengeStateModel } from './models/challenge-state.model';
+import { ChallengeStateModel } from '../models/challenge-state.model';
 
 const CODENAME_SIZE = 6;
 

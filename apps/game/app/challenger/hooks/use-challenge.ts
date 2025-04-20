@@ -5,7 +5,10 @@ import {
   type CreatedRoomPayload,
   type PlayerJoinedGamePayload,
 } from '@repo/schemas'
+import { useCallback } from 'react'
 import { useSocket } from 'socket/use-socket'
+
+export const CREATE_CHALLENGE_REF_ID = 'create-challenge-modal'
 
 export const useChallenge = () => {
   const { socket, emitEvent, listenEvent, removeListener } = useSocket()
@@ -15,9 +18,12 @@ export const useChallenge = () => {
     emitEvent(MessageTypes.CREATE_ROOM, data as any)
   }
 
-  const onCreatedRoom = (callback: (data: CreatedRoomPayload) => void) => {
-    listenEvent(ChallengeEvents.NOTIFICATIONS, callback)
-  }
+  const onCreatedRoom = useCallback(
+    (callback: (data: CreatedRoomPayload) => void) => {
+      listenEvent(ChallengeEvents.NOTIFICATIONS, callback)
+    },
+    [listenEvent],
+  )
 
   const onPlayerJoinedGame = (
     callback: (data: PlayerJoinedGamePayload) => void,
@@ -25,15 +31,15 @@ export const useChallenge = () => {
     listenEvent(ChallengeEvents.NOTIFICATIONS, callback)
   }
 
-  const removePlayerJoinedGameListener = () => {
+  const removeChallengeNotification = useCallback(() => {
     removeListener(ChallengeEvents.NOTIFICATIONS)
-  }
+  }, [removeListener])
 
   return {
     socket,
     createChallengeRoom,
     onCreatedRoom,
     onPlayerJoinedGame,
-    removePlayerJoinedGameListener,
+    removeChallengeNotification,
   }
 }

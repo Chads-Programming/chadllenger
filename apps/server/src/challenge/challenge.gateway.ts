@@ -1,3 +1,4 @@
+import { LobbyService } from './services/lobby.service';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,15 +9,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChallengeService } from './challenge.service';
+import { ChallengeService } from './services/challenge.service';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
 import { MessageTypes, CreateChallenge, ChallengeEvents } from '@repo/schemas';
+import { envs } from '@/config/envs';
 
 @WebSocketGateway({
   namespace: 'challenge',
   transports: ['websocket'],
   cors: {
-    origin: '*',
+    origin: envs.CLIENT_URL,
     methods: ['GET', 'POST'],
   },
 })
@@ -26,15 +28,29 @@ export class ChallengeGateway
   @WebSocketServer()
   private server: Server;
 
-  constructor(private readonly challengeService: ChallengeService) {}
+  constructor(
+    private readonly challengeService: ChallengeService,
+    private readonly lobbyService: LobbyService,
+  ) {}
 
   handleConnection() {
-    this.emitTotalOnlinePlayers();
+    this.handleSocketConnection();
   }
   handleDisconnect() {
-    this.emitTotalOnlinePlayers();
+    this.handleSocketConnection();
   }
 
+  /**
+   * Handles the creation of a challenge room. This method is triggered when a client
+   * requests to create a new challenge room. It performs the following actions:
+   * - Creates a new challenge using the provided data and the client's ID.
+   * - Joins the client to the newly created challenge room.
+   * - Builds and sends a notification to the client about the created room.
+   *
+   * @param data - The data required to create a challenge, provided by the client.
+   * @param client - The socket instance of the connected client.
+   * @returns A notification object containing details about the created challenge room.
+   */
   @SubscribeMessage(MessageTypes.CREATE_ROOM)
   async createChallengeRoom(
     @MessageBody() data: CreateChallenge,
@@ -61,12 +77,22 @@ export class ChallengeGateway
     return (this.server.sockets as unknown as { size: number }).size;
   }
 
-  private emitTotalOnlinePlayers() {
+  /**
+   * Handles a new socket connection event.
+   * Updates the total number of connected sockets and notifies all clients
+   * about the current number of players online.
+   *
+   * This method retrieves the total number of connected sockets, updates the
+   * lobby service with the current online total, and emits a notification
+   * to all connected clients with the updated player information.
+   */
+  private async handleSocketConnection() {
+    const onlineTotal = this.getConnectedSockets();
+    await this.lobbyService.setOnlineTotalOnline(onlineTotal);
+
     this.server.emit(
       ChallengeEvents.PLAYERS,
-      ChallengeNotificationBuilder.buildPlayersNotification(
-        this.getConnectedSockets(),
-      ),
+      ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
     );
   }
 }
