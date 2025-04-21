@@ -11,7 +11,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChallengeService } from './services/challenge.service';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
-import { MessageTypes, CreateChallenge, ChallengeEvents } from '@repo/schemas';
+import {
+  MessageTypes,
+  CreateChallenge,
+  NotificationsChannels,
+} from '@repo/schemas';
 import { envs } from '@/config/envs';
 
 @WebSocketGateway({
@@ -68,13 +72,11 @@ export class ChallengeGateway
         challenge.codename,
       );
 
-    this.server.to(client.id).emit(ChallengeEvents.NOTIFICATIONS, notification);
+    this.server
+      .to(client.id)
+      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
 
     return notification;
-  }
-
-  private getConnectedSockets() {
-    return (this.server.sockets as unknown as { size: number }).size;
   }
 
   /**
@@ -91,8 +93,17 @@ export class ChallengeGateway
     await this.lobbyService.setOnlineTotalOnline(onlineTotal);
 
     this.server.emit(
-      ChallengeEvents.PLAYERS,
+      NotificationsChannels.LOBBY_NOTIFICATIONS,
       ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
     );
+  }
+
+  /**
+   * Retrieves the number of currently connected sockets to the server.
+   *
+   * @returns The total number of connected sockets.
+   */
+  private getConnectedSockets() {
+    return (this.server.sockets as unknown as { size: number }).size;
   }
 }

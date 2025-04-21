@@ -10,8 +10,8 @@ export const ChallengeNotificationBuilder = {
     totalOnline: number,
   ): ChallengeNotificationType<PlayerJoinedGamePayload> {
     return {
-      type: NotificationsType.PLAYER_JOINED_GAME,
-      messageType: 'user',
+      type: NotificationsType.CONNECTED_PLAYERS,
+      messageType: 'system',
       data: {
         totalOnline,
       },

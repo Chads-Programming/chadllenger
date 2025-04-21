@@ -1,25 +1,20 @@
 import { useForm } from 'react-hook-form'
 import {
-  Difficult,
+  type Difficult,
   type CreateChallenge,
   challengeSchema,
-  type CreatedRoomPayload,
 } from '@repo/schemas'
 import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ModalContainer } from 'components/modal/modal'
-import { CREATE_CHALLENGE_REF_ID, useChallenge } from './hooks/use-challenge'
-import { useModalTrigger } from 'components/modal/modal-trigger'
-import { useNavigate } from 'react-router'
-import { useEffect } from 'react'
+import { useCreateChallenge } from './hooks/use-create-challenge'
+import ChallengeStrings from './strings/challenge'
+import { DIFFICULTIES } from './consts'
 
 export const SetupChallenge = () => {
   const { setUsername, username } = useUser()
-  const { createChallengeRoom, onCreatedRoom, removeChallengeNotification } =
-    useChallenge()
-  const navigate = useNavigate()
-  const { closeModal } = useModalTrigger()
+  const { createChallengeRoom } = useCreateChallenge()
 
   const {
     register,
@@ -36,13 +31,6 @@ export const SetupChallenge = () => {
   })
 
   const selectedDifficulties = watch('difficulties', [])
-
-  const difficulties = [
-    Difficult.Easy,
-    Difficult.Medium,
-    Difficult.Hard,
-    Difficult.Chad,
-  ]
 
   const onSubmit = (data: CreateChallenge) => {
     if (!username) {
@@ -73,36 +61,27 @@ export const SetupChallenge = () => {
     createChallengeRoom(data)
   }
 
-  useEffect(() => {
-    onCreatedRoom((data: CreatedRoomPayload) => {
-      navigate(`/challenge/${data.codename}`)
-      closeModal(CREATE_CHALLENGE_REF_ID)
-    })
-
-    return () => {
-      removeChallengeNotification()
-    }
-  }, [onCreatedRoom, navigate, closeModal, removeChallengeNotification])
-
   return (
     <ModalContainer id="create-challenge-modal">
       <ModalContainer.Header>
         <header className="flex items-center space-x-3">
           <Trophy className="w-8 h-8 text-indigo-600" />
           <h1 className="text-2xl font-bold dark:text-white text-secondary">
-            Create Challenge
+            {ChallengeStrings.create.title}
           </h1>
         </header>
       </ModalContainer.Header>
       <ModalContainer.Content>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full">
           <fieldset className="fieldset w-full">
-            <legend className="fieldset-legend">Challenge Title</legend>
+            <legend className="fieldset-legend">
+              {ChallengeStrings.create.name.label}
+            </legend>
             <input
               type="text"
               className="input w-full"
               {...register('title')}
-              placeholder="My awesome challenge"
+              placeholder={ChallengeStrings.create.name.placeholder}
             />
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">
@@ -113,22 +92,22 @@ export const SetupChallenge = () => {
 
           <div className="w-full">
             <div className="block text-sm font-medium fieldset-legend mb-2">
-              Difficulty Levels
+              {ChallengeStrings.create.difficulty.label}
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {difficulties.map((difficulty) => (
+              {DIFFICULTIES.map((difficulty) => (
                 <button
-                  key={difficulty}
+                  key={difficulty.value}
                   type="button"
-                  onClick={() => handleDifficultyToggle(difficulty)}
+                  onClick={() => handleDifficultyToggle(difficulty.value)}
                   className={`btn
               ${
-                selectedDifficulties?.includes(difficulty)
+                selectedDifficulties?.includes(difficulty.value)
                   ? 'btn-info'
                   : 'btn-base'
               }`}
                 >
-                  {difficulty}
+                  {difficulty.label}
                 </button>
               ))}
             </div>
@@ -140,12 +119,14 @@ export const SetupChallenge = () => {
           </div>
 
           <fieldset className="fieldset w-full">
-            <legend className="fieldset-legend">Creator Username</legend>
+            <legend className="fieldset-legend">
+              {ChallengeStrings.create.creator.label}
+            </legend>
             <input
               type="text"
               className="input w-full"
               {...register('creatorName')}
-              placeholder="Enter your username"
+              placeholder={ChallengeStrings.create.creator.placeholder}
             />
             {errors.creatorName && (
               <p className="mt-1 text-sm text-red-600">
@@ -158,7 +139,7 @@ export const SetupChallenge = () => {
             type="submit"
             className="w-full btn btn-primary py-2 px-4 text-lg font-semibold"
           >
-            Create Challenge
+            {ChallengeStrings.create.submit}
           </button>
         </form>
       </ModalContainer.Content>

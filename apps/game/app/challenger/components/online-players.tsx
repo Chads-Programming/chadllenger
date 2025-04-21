@@ -1,20 +1,21 @@
-import {
-  ChallengeEvents,
-  type ChallengeNotificationType,
-  type PlayerJoinedGamePayload,
-} from '@repo/schemas'
 import { AnimatedShinyText } from 'components/animated-shiny-text'
 import { cn } from 'lib/utils'
 import { useState, useEffect } from 'react'
+import {
+  NotificationsChannels,
+  NotificationsType,
+  type PlayerJoinedGamePayload,
+} from '@repo/schemas'
 import { useSocket } from 'socket/use-socket'
 import { LobbyStrings } from '../strings/lobby'
 import lobbyApi from 'api/lobby'
-import { useChallenge } from '../hooks/use-challenge'
+import { useChallengeNotifications } from '../hooks/use-challenge-notifications'
 
 export const OnlinePlayers = () => {
   const socket = useSocket()
   const [onlinePlayers, setOnlinePlayers] = useState(0)
-  const { removeChallengeNotification } = useChallenge()
+  const { registryNotification, unRegistryNotification } =
+    useChallengeNotifications(NotificationsChannels.LOBBY_NOTIFICATIONS)
 
   useEffect(() => {
     if (socket.isConnected) {
@@ -23,19 +24,17 @@ export const OnlinePlayers = () => {
   }, [socket.isConnected])
 
   useEffect(() => {
-    socket.listenEvent(
-      ChallengeEvents.PLAYERS,
-      (data: ChallengeNotificationType<PlayerJoinedGamePayload>) => {
-        setOnlinePlayers(data.data.totalOnline)
+    registryNotification<PlayerJoinedGamePayload>(
+      NotificationsType.CONNECTED_PLAYERS,
+      (notification) => {
+        setOnlinePlayers(notification.data.totalOnline)
       },
     )
-  }, [socket])
 
-  useEffect(() => {
     return () => {
-      removeChallengeNotification()
+      unRegistryNotification(NotificationsType.CONNECTED_PLAYERS)
     }
-  }, [removeChallengeNotification])
+  }, [registryNotification, unRegistryNotification])
 
   return (
     <div className="z-10 flex items-center justify-center">

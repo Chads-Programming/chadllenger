@@ -10,7 +10,11 @@ type SocketContext = {
     event: string,
     callback: (data: TNotification) => void,
   ) => void
-  emitEvent: <TData>(event: string, callback: (data: TData) => void) => void
+  emitEvent: <TData, TResponse>(
+    event: string,
+    data?: TData,
+    ack?: (response: TResponse) => void,
+  ) => void
   removeListener: (event: string) => void
 }
 
@@ -21,9 +25,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false)
 
   const emitEvent = useCallback(
-    <TData,>(event: string, data?: TData) => {
+    <TData, TResponse>(
+      event: string,
+      data?: TData,
+      ack?: (response: TResponse) => void,
+    ) => {
       if (isConnected) {
-        socketRef?.current?.emit(event, data)
+        socketRef?.current?.emit(event, data, ack)
       }
     },
     [isConnected],
