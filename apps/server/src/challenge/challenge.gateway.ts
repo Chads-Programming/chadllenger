@@ -20,6 +20,7 @@ import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
 import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
+import { ChallengeQueueService } from './services/challenge-queue.service';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -39,6 +40,7 @@ export class ChallengeGateway
   constructor(
     private readonly challengeService: ChallengeService,
     private readonly lobbyService: LobbyService,
+    private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
   ) {}
 
@@ -80,6 +82,8 @@ export class ChallengeGateway
     this.server
       .to(client.id)
       .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
+
+    this.challengeQueue.finishChallengeToQueue(challenge.codename);
 
     return notification;
   }

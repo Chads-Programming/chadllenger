@@ -58,6 +58,17 @@ export class ChallengeService {
       });
     }
   }
+
+  getByCodename(codename: string) {
+    return this.challengeRepository.findChallengeByCodename(codename);
+  }
+
+  async finishChallenge(codename: string) {
+    return await this.challengeRepository.updateChallenge(codename, {
+      status: Status.FINISHED,
+    });
+  }
+
   addPartipant() {}
   removeParticipant() {}
   updateParticipantScore() {}

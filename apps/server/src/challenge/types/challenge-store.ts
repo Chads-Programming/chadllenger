@@ -10,7 +10,6 @@ export type CreateChallengeRequestType = Omit<
   | 'playedChallenges'
 >;
 
-export type UpdateChallengeRequestType = Omit<
-  ChallengeStateModel,
-  'id' | 'createdAt' | 'updatedAt'
+export type UpdateChallengeRequestType = Partial<
+  Omit<ChallengeStateModel, 'id' | 'createdAt' | 'updatedAt'>
 >;

@@ -7,6 +7,8 @@ import { DatabaseModule } from './database/database.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { LoggerModule } from './logger/logger.module';
 import { AuthModule } from './auth/auth.module';
+import { BullModule } from '@nestjs/bullmq';
+import { envs } from './config/envs';
 
 @Module({
   imports: [
@@ -15,6 +17,12 @@ import { AuthModule } from './auth/auth.module';
     CacheModule.registerAsync(cacheOptions),
     DatabaseModule,
     ChallengeModule,
+    BullModule.forRoot({
+      connection: {
+        host: envs.REDIS_HOST,
+        port: Number(envs.REDIS_PORT),
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

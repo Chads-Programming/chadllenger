@@ -5,16 +5,27 @@ import { ChallengeService } from './services/challenge.service';
 import { LobbyController } from './controllers/lobby.controller';
 import { LobbyCacheRepository } from './repositories/lobby-cache.repository';
 import { LobbyService } from './services/lobby.service';
+import { ChallengeController } from './controllers/challenge.controller';
+import { BullModule } from '@nestjs/bullmq';
+import { CHALLENGE_QUEUE } from './consts';
+import { ChallengeQueueService } from './services/challenge-queue.service';
+import { ChallengeConsumer } from './consumers/challenge.consumer';
 
 @Module({
-  imports: [],
+  imports: [
+    BullModule.registerQueue({
+      name: CHALLENGE_QUEUE.NAME,
+    }),
+  ],
   providers: [
     ChallengeGateway,
     ChallengeCacheRepository,
     LobbyCacheRepository,
     ChallengeService,
     LobbyService,
+    ChallengeQueueService,
+    ChallengeConsumer,
   ],
-  controllers: [LobbyController],
+  controllers: [LobbyController, ChallengeController],
 })
 export class ChallengeModule {}
