@@ -28,12 +28,12 @@ export class CodeChallengeRepository {
     limit: number,
   ): Promise<CodeChallengeModel[]> {
     return await this.prisma.$queryRaw`
-    SELECT * FROM "CodeChallenge"
-    WHERE "deletedAt" IS NULL
-      AND "difficult" = ANY (${Prisma.sql`ARRAY[${Prisma.join(difficulties.map((d) => Prisma.sql`${d}`))}]`})
-    ORDER BY RANDOM()
-    LIMIT ${limit};
-  `;
+      SELECT * FROM "CodeChallenge"
+      WHERE "deletedAt" IS NULL
+      AND "difficult" = ANY (${Prisma.sql`ARRAY[${Prisma.join(difficulties.map((d) => Prisma.sql`${d}`))}]::"Difficult"[]`})
+      ORDER BY RANDOM()
+      LIMIT ${limit};
+    `;
   }
 
   findByCodename(codename: string) {

@@ -71,6 +71,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setIsConnected(false)
     })
 
+    socketRef.current?.on('connect_error', (error) => {
+      console.error('Connection error:', error)
+    })
+
+    socketRef.current?.on('error', (error) => {
+      console.error(error)
+    })
+
     return () => {
       socketRef.current?.disconnect()
       socketRef.current = null

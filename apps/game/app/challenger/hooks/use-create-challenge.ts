@@ -25,7 +25,7 @@ export const useCreateChallenge = () => {
   }
 
   const createChallengeRoom = (data: CreateChallenge) => {
-    emitEvent(MessageTypes.CREATE_ROOM, onCreateRoomHandler)
+    emitEvent(MessageTypes.CREATE_ROOM, data, onCreateRoomHandler)
   }
 
   return {

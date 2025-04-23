@@ -7,6 +7,7 @@ import { CreateChallenge } from '@repo/schemas';
 import { CreateChallengeRequestType } from '../types/challenge-store';
 import { CodeChallengeStateModel } from '../models/code-challenge.model';
 import { envs } from '@/config/envs';
+import { CustomError } from '@/core/errors/custom-error';
 
 const CODE_CHALLENGES_SIZE = 3;
 const CHALLENGE_EXPIRATION_TIME = Math.ceil(Number(envs.CHALLENGE_TTL) / 2);
@@ -19,35 +20,43 @@ export class ChallengeService {
   ) {}
 
   async createChallenge(creatorId: string, createChallenge: CreateChallenge) {
-    const challenges =
-      await this.codeChallengeRepository.getRandomChallengesByDifficult(
-        createChallenge.difficulties,
-        CODE_CHALLENGES_SIZE,
+    try {
+      const challenges =
+        await this.codeChallengeRepository.getRandomChallengesByDifficult(
+          createChallenge.difficulties,
+          CODE_CHALLENGES_SIZE,
+        );
+
+      const codeChallenges = challenges.map(
+        (codeChallenge) => new CodeChallengeStateModel(codeChallenge.id),
       );
 
-    const codeChallenges = challenges.map(
-      (codeChallenge) => new CodeChallengeStateModel(codeChallenge.id),
-    );
+      const creatorParticpant = new ParticipantModel(
+        creatorId,
+        createChallenge.creatorName,
+      );
 
-    const creatorParticpant = new ParticipantModel(
-      creatorId,
-      createChallenge.creatorName,
-    );
+      const challengeStore: CreateChallengeRequestType = {
+        title: createChallenge.title,
+        creator: creatorId,
+        participants: [creatorParticpant],
+        codeChallenges,
+        status: Status.PENDING,
+        expiration: CHALLENGE_EXPIRATION_TIME,
+      };
 
-    const challengeStore: CreateChallengeRequestType = {
-      title: createChallenge.title,
-      creator: creatorId,
-      participants: [creatorParticpant],
-      codeChallenges,
-      status: Status.PENDING,
-      expiration: CHALLENGE_EXPIRATION_TIME,
-    };
+      const challenge =
+        await this.challengeRepository.createChallenge(challengeStore);
+      // TODO: Send queue to updated FINISHED according expiration time
 
-    const challenge =
-      await this.challengeRepository.createChallenge(challengeStore);
-    // TODO: Send queue to updated FINISHED according expiration time
-
-    return challenge;
+      return challenge;
+    } catch (error) {
+      throw CustomError.serverError({
+        origin: 'ChallengeService',
+        message: 'Error creating challenge',
+        data: error,
+      });
+    }
   }
   addPartipant() {}
   removeParticipant() {}

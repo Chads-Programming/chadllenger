@@ -3,7 +3,7 @@ export function generateCode(len: number) {
   let code = '';
   for (let i = 0; i < len; i++) {
     const index = Math.floor(Math.random() * characters.length);
-    code += code[index];
+    code += characters[index];
   }
   return code;
 }

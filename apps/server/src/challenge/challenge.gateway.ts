@@ -17,7 +17,10 @@ import {
   NotificationsChannels,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
+import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
+import { UseFilters } from '@nestjs/common';
 
+@UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
   namespace: 'challenge',
   transports: ['websocket'],
