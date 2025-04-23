@@ -1,3 +1,4 @@
+import { useUser } from 'providers/user-provider'
 import { createContext, useCallback, useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 
@@ -21,6 +22,7 @@ type SocketContext = {
 export const SocketContext = createContext<SocketContext | null>(null)
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+  const { userID } = useUser()
   const socketRef = useRef<Socket>(null)
   const [isConnected, setIsConnected] = useState(false)
 
@@ -59,8 +61,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   )
 
   useEffect(() => {
+    if (!userID) {
+      return
+    }
     socketRef.current = io(`${SOCKET_SERVER_URL}/challenge`, {
       transports: ['websocket'],
+      withCredentials: true,
     })
 
     socketRef.current?.on('connect', () => {
@@ -83,7 +89,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketRef.current?.disconnect()
       socketRef.current = null
     }
-  }, [])
+  }, [userID])
 
   return (
     <SocketContext.Provider

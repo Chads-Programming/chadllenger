@@ -1,4 +1,4 @@
-import { AnimatedShinyText } from 'components/animated-shiny-text'
+import { AnimatedShinyText } from 'components/ui/animated-shiny-text'
 import { cn } from 'lib/utils'
 import { useState, useEffect } from 'react'
 import {

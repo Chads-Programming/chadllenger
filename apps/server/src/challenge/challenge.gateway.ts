@@ -19,6 +19,7 @@ import {
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
 import { UseFilters } from '@nestjs/common';
+import { ChadLogger } from '@/logger/chad-logger';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -38,6 +39,7 @@ export class ChallengeGateway
   constructor(
     private readonly challengeService: ChallengeService,
     private readonly lobbyService: LobbyService,
+    private readonly logger: ChadLogger,
   ) {}
 
   handleConnection() {
@@ -93,6 +95,15 @@ export class ChallengeGateway
    */
   private async handleSocketConnection() {
     const onlineTotal = this.getConnectedSockets();
+
+    this.logger.log(
+      'Client connected 🦊🚬',
+      'ChallengeGateway::handleSocketConnection',
+      {
+        onlineTotal,
+      },
+    );
+
     await this.lobbyService.setOnlineTotalOnline(onlineTotal);
 
     this.server.emit(

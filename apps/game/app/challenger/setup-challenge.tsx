@@ -11,9 +11,10 @@ import { ModalContainer } from 'components/modal/modal'
 import { useCreateChallenge } from './hooks/use-create-challenge'
 import ChallengeStrings from './strings/challenge'
 import { DIFFICULTIES } from './consts'
+import PlayerCard from './components/player-card'
 
 export const SetupChallenge = () => {
-  const { setUsername, username } = useUser()
+  const { username } = useUser()
   const { createChallengeRoom } = useCreateChallenge()
 
   const {
@@ -33,10 +34,11 @@ export const SetupChallenge = () => {
   const selectedDifficulties = watch('difficulties', [])
 
   const onSubmit = (data: CreateChallenge) => {
-    if (!username) {
-      setUsername(data.creatorName)
-    }
     handleCreateChallenge(data)
+  }
+
+  const onUsernameChange = (username: string) => {
+    setValue('creatorName', username)
   }
 
   const handleDifficultyToggle = (difficulty: Difficult) => {
@@ -74,7 +76,7 @@ export const SetupChallenge = () => {
       <ModalContainer.Content>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full">
           <fieldset className="fieldset w-full">
-            <legend className="fieldset-legend">
+            <legend className="fieldset-legend text-base">
               {ChallengeStrings.create.name.label}
             </legend>
             <input
@@ -91,9 +93,12 @@ export const SetupChallenge = () => {
           </fieldset>
 
           <div className="w-full">
-            <div className="block text-sm font-medium fieldset-legend mb-2">
+            <legend className="block font-medium fieldset-legend">
               {ChallengeStrings.create.difficulty.label}
-            </div>
+            </legend>
+            <p className="text-sm text-gray-300 mb-2">
+              {ChallengeStrings.create.difficulty.description}
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {DIFFICULTIES.map((difficulty) => (
                 <button
@@ -119,14 +124,12 @@ export const SetupChallenge = () => {
           </div>
 
           <fieldset className="fieldset w-full">
-            <legend className="fieldset-legend">
+            <legend className="fieldset-legend text-base">
               {ChallengeStrings.create.creator.label}
             </legend>
-            <input
-              type="text"
-              className="input w-full"
-              {...register('creatorName')}
-              placeholder={ChallengeStrings.create.creator.placeholder}
+            <PlayerCard
+              editable
+              onChange={({ username }) => onUsernameChange(username)}
             />
             {errors.creatorName && (
               <p className="mt-1 text-sm text-red-600">

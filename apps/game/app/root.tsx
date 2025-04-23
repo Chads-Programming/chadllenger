@@ -9,8 +9,8 @@ import {
 
 import type { Route } from './+types/root'
 import './app.css'
-import Navbar from 'components/navbar'
-import { ChallengeBackground } from 'components/background'
+import Navbar from 'components/navigation/navbar'
+import { ChallengeBackground } from 'components/ui/background'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

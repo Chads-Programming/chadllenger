@@ -7,7 +7,9 @@ const ChallengeStrings = {
       placeholder: 'Escribe el nombre del desafío',
     },
     difficulty: {
-      label: 'Nivel de dificultad',
+      label: 'Selecciona los niveles de dificultad 🦊 🚬',
+      description:
+        'Para tener una diversidad de preguntas, selecciona los niveles de dificultad que deseas incluir en el desafío.',
       easy: 'Fácil',
       medium: 'Medio',
       hard: 'Difícil',

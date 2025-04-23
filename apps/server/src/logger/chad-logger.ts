@@ -3,20 +3,20 @@ import { Injectable, LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class ChadLogger implements LoggerService {
-  log(message: unknown, context?: string) {
-    this.print('LOG', message, context);
+  log(message: unknown, context?: string, data?: unknown) {
+    this.print('LOG', message, context, null, data);
   }
 
-  error(message: unknown, trace?: string, context?: string) {
-    this.print('ERROR', message, context, trace);
+  error(message: unknown, trace?: string, context?: string, data?: unknown) {
+    this.print('ERROR', message, context, trace, data);
   }
 
-  warn(message: unknown, context?: string) {
-    this.print('WARN', message, context);
+  warn(message: unknown, context?: string, data?: unknown) {
+    this.print('WARN', message, context, null, data);
   }
 
-  debug(message: unknown, context?: string) {
-    this.print('DEBUG', message, context);
+  debug(message: unknown, context?: string, data?: unknown) {
+    this.print('DEBUG', message, context, null, data);
   }
 
   private print(
@@ -24,6 +24,7 @@ export class ChadLogger implements LoggerService {
     message: unknown,
     context?: string,
     trace?: string,
+    data?: unknown,
   ) {
     const time = new Date().toISOString();
 
@@ -44,8 +45,9 @@ export class ChadLogger implements LoggerService {
             context,
             message,
             trace,
+            data,
           };
 
-    console.log(JSON.stringify(formattedMessage, null, 1));
+    console.log(JSON.stringify(formattedMessage, null, 0));
   }
 }

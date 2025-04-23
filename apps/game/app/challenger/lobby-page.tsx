@@ -3,7 +3,7 @@ import { SetupChallenge } from './setup-challenge'
 import { useModalTrigger } from 'components/modal/modal-trigger'
 import { LobbyCard } from './components/lobby-card'
 import { LobbyStrings } from './strings/lobby'
-import { AuroraText } from 'components/aurora-text'
+import { AuroraText } from 'components/ui/aurora-text'
 import { OnlinePlayers } from './components/online-players'
 
 export function meta() {

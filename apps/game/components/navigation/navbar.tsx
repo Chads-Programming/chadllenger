@@ -1,6 +1,6 @@
+import { AuroraText } from 'components/ui/aurora-text'
 import { Code2 } from 'lucide-react'
 import { Link } from 'react-router'
-import { AuroraText } from './aurora-text'
 
 const Navbar = () => {
   return (

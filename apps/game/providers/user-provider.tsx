@@ -1,15 +1,18 @@
+import auth from 'api/auth'
 import type React from 'react'
 import {
   createContext,
+  useCallback,
   useContext,
-  useState,
   useEffect,
+  useState,
   type ReactNode,
 } from 'react'
 
 interface UserContextType {
+  userID: string
   username: string
-  setUsername: (username: string) => void
+  changeUsername: (username: string) => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -23,12 +26,35 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     return localStorage.getItem('username') || ''
   })
 
-  useEffect(() => {
+  const [userID, setUserId] = useState<string>(() => {
+    return localStorage.getItem('sessionId') || ''
+  })
+
+  const changeUserID = useCallback((userID: string) => {
+    setUserId(userID)
+    localStorage.setItem('sessionId', userID)
+  }, [])
+
+  const changeUsername = useCallback((username: string) => {
+    setUsername(username)
     localStorage.setItem('username', username)
-  }, [username])
+  }, [])
+
+  useEffect(() => {
+    const storedSessionId = localStorage.getItem('sessionId')
+    if (storedSessionId) {
+      setUserId(storedSessionId)
+
+      return
+    }
+
+    auth.createSession().then(({ sessionId }) => {
+      changeUserID(sessionId)
+    })
+  }, [changeUserID])
 
   return (
-    <UserContext.Provider value={{ username, setUsername }}>
+    <UserContext.Provider value={{ userID, username, changeUsername }}>
       {children}
     </UserContext.Provider>
   )

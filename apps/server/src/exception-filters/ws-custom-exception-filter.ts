@@ -20,6 +20,16 @@ export class WsCustomExceptionFilter extends BaseWsExceptionFilter {
         message: 'An error occurred',
       });
 
+      this.logger.error(
+        CustomError.serverError({
+          origin: 'WsCustomExceptionFilter',
+          message: 'An error occurred',
+          data: exception,
+        }),
+        undefined,
+        'WsCustomExceptionFilter',
+      );
+
       return;
     }
 

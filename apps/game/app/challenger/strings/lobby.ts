@@ -16,4 +16,7 @@ export const LobbyStrings = {
   onlinePlayers: {
     title: 'En línea',
   },
+  playerCard: {
+    placeholder: 'Escribe tu nombre',
+  },
 }

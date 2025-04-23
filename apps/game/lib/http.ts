@@ -33,6 +33,40 @@ const create = ({ baseURL, headers = {} }: Options) => {
         ...methodHeaders,
       },
       signal,
+      credentials: 'include',
+    })
+
+    const data = await res.json()
+
+    return { data }
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const postMethod = async <TResponse = any, TBody = any>(
+    path: string,
+    body: TBody,
+    options: MethodOptions = { controller: null },
+  ): Promise<{ data: TResponse }> => {
+    const { headers: methodHeaders = {}, params = {} } = options ?? {}
+    const queryString = new URLSearchParams(JSON.parse(JSON.stringify(params)))
+
+    if (options?.controller) {
+      options.controller.abort()
+    }
+
+    options.controller = new AbortController()
+
+    const signal = options.controller.signal
+
+    const res = await fetch(`${baseURL}${path}?${queryString.toString()}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        ...headers,
+        ...methodHeaders,
+      },
+      signal,
+      credentials: 'include',
     })
 
     const data = await res.json()
@@ -42,6 +76,7 @@ const create = ({ baseURL, headers = {} }: Options) => {
 
   return {
     get: getMethod,
+    post: postMethod,
   }
 }
 
