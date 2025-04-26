@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
+import { generateUniqueId } from '@/utils/unique-id';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,7 @@ export class AuthService {
     };
 
     return {
-      sessionId: uuidv4(),
+      sessionId: generateUniqueId(),
       cookieOptions: options,
     };
   }

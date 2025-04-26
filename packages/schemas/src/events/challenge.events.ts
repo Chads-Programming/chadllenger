@@ -22,8 +22,18 @@ export type CreatedRoomPayload = {
   codename: string
 }
 
-export type PlayerJoinedGamePayload = {
+export type PlayerConnectedPayload = {
   totalOnline: number
+}
+
+export type PlayerJoinedGame = {
+  id: string
+  username: string
+}
+
+export type PlayerLeftGame = {
+  id: string
+  username: string
 }
 
 export type NotificationsChannelsType =
@@ -33,7 +43,9 @@ export type NotificationKeyType =
   (typeof NotificationsType)[keyof typeof NotificationsType]
 
 export interface ChallengeNotificationType<TData = unknown> {
+  id: string
   type: (typeof NotificationsType)[keyof typeof NotificationsType]
   messageType: 'user' | 'system'
   data: TData
+  createdAt: Date
 }

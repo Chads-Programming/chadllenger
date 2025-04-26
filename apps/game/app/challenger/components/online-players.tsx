@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   NotificationsChannels,
   NotificationsType,
-  type PlayerJoinedGamePayload,
+  type PlayerConnectedPayload,
 } from '@repo/schemas'
 import { useSocket } from 'socket/use-socket'
 import { LobbyStrings } from '../strings/lobby'
@@ -24,7 +24,7 @@ export const OnlinePlayers = () => {
   }, [socket.isConnected])
 
   useEffect(() => {
-    registryNotification<PlayerJoinedGamePayload>(
+    registryNotification<PlayerConnectedPayload>(
       NotificationsType.CONNECTED_PLAYERS,
       (notification) => {
         setOnlinePlayers(notification.data.totalOnline)

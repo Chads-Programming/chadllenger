@@ -21,6 +21,12 @@ const ChallengeStrings = {
     },
     submit: 'Crear desafío',
   },
+  playerNotifications: {
+    playerJoined: 'Se unió a la sala',
+    playerLeft: 'Salió de la sala',
+    cardColor: '#00C9A7',
+    iconEmote: '👤',
+  },
 }
 
 export default ChallengeStrings

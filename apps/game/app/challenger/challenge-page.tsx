@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Route } from './+types/challenge-page'
 import { Editor } from '@monaco-editor/react'
 import { Play, Users } from 'lucide-react'
+import PlayerNotificationBox from './components/player-notification-box'
 
 export function meta() {
   return [
@@ -39,7 +40,8 @@ export default function GameRoute({ params }: Route.ComponentProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto relative">
+      <PlayerNotificationBox />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <div className="bg-white rounded-lg shadow-sm mb-6">

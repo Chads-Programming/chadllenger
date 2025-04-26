@@ -1,6 +1,7 @@
+import { generateUniqueId } from '@/utils/unique-id';
 import {
   ChallengeNotificationType,
-  PlayerJoinedGamePayload,
+  PlayerConnectedPayload,
   NotificationsType,
   CreatedRoomPayload,
 } from '@repo/schemas';
@@ -8,13 +9,15 @@ import {
 export const ChallengeNotificationBuilder = {
   buildPlayersNotification(
     totalOnline: number,
-  ): ChallengeNotificationType<PlayerJoinedGamePayload> {
+  ): ChallengeNotificationType<PlayerConnectedPayload> {
     return {
+      id: generateUniqueId(),
       type: NotificationsType.CONNECTED_PLAYERS,
       messageType: 'system',
       data: {
         totalOnline,
       },
+      createdAt: new Date(),
     };
   },
 
@@ -22,11 +25,13 @@ export const ChallengeNotificationBuilder = {
     codename: string,
   ): ChallengeNotificationType<CreatedRoomPayload> {
     return {
+      id: generateUniqueId(),
       type: NotificationsType.CREATED_ROOM,
       messageType: 'system',
       data: {
         codename,
       },
+      createdAt: new Date(),
     };
   },
 };

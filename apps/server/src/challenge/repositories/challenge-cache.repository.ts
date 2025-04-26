@@ -1,6 +1,5 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 
 import { envs } from '@/config/envs';
 import {
@@ -10,6 +9,7 @@ import {
 import * as codeGenerator from '@/utils/code-generator';
 import { ErrorCodes } from '@/lib/errors';
 import { ChallengeStateModel } from '../models/challenge-state.model';
+import { generateUniqueId } from '@/utils/unique-id';
 
 const CODENAME_SIZE = 6;
 
@@ -20,7 +20,7 @@ export class ChallengeCacheRepository {
   async createChallenge(
     challenge: CreateChallengeRequestType,
   ): Promise<ChallengeStateModel> {
-    const id = uuidv4();
+    const id = generateUniqueId();
     const codename = codeGenerator.generateCode(CODENAME_SIZE);
     const challengeKey = this.getKey(codename);
 
