@@ -21,6 +21,9 @@ import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception
 import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
 import { ChallengeQueueService } from './services/challenge-queue.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { ChallengeStateModel } from './models/challenge-state.model';
+import { CHALLENGE_EVENTS } from './consts';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -123,5 +126,17 @@ export class ChallengeGateway
    */
   private getConnectedSockets() {
     return (this.server.sockets as unknown as { size: number }).size;
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.CHALLENGE_FINISHED)
+  async finishChallenge(challenge: ChallengeStateModel) {
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.buildFinishChallengeNotification(
+          challenge,
+        ),
+      );
   }
 }

@@ -24,7 +24,7 @@ export class ChallengeCacheRepository {
     const codename = codeGenerator.generateCode(CODENAME_SIZE);
     const challengeKey = this.getKey(codename);
 
-    const newChallenge: ChallengeStateModel = {
+    const newChallenge = ChallengeStateModel.fromJson({
       ...challenge,
       id,
       title: challenge.title,
@@ -33,11 +33,11 @@ export class ChallengeCacheRepository {
       updatedAt: new Date(),
       currentChallenge: '',
       playedChallenges: [],
-    };
+    });
 
     await this.cache.set(
       challengeKey,
-      JSON.stringify(newChallenge),
+      newChallenge.serialize(),
       Number(envs.CHALLENGE_TTL),
     );
 
@@ -57,12 +57,12 @@ export class ChallengeCacheRepository {
       throw ErrorCodes.CHALLENGE_NOT_FOUND;
     }
 
-    const parsedUpdatedChallenge = JSON.stringify({
+    const updatedChallenge = ChallengeStateModel.fromJson({
       ...currentChallenge,
       ...challenge,
     });
 
-    await this.cache.set(key, parsedUpdatedChallenge, ttl);
+    await this.cache.set(key, updatedChallenge.serialize(), ttl);
   }
 
   async findChallengeByCodename(

@@ -64,9 +64,11 @@ export class ChallengeService {
   }
 
   async finishChallenge(codename: string) {
-    return await this.challengeRepository.updateChallenge(codename, {
+    await this.challengeRepository.updateChallenge(codename, {
       status: Status.FINISHED,
     });
+
+    return this.getByCodename(codename);
   }
 
   addPartipant() {}

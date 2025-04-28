@@ -1,7 +1,10 @@
-import { ChallengeStateModel } from '../models/challenge-state.model';
+import {
+  ChallengeStateModel,
+  ChallengeStateType,
+} from '../models/challenge-state.model';
 
 export type CreateChallengeRequestType = Omit<
-  ChallengeStateModel,
+  ChallengeStateType,
   | 'id'
   | 'createdAt'
   | 'updatedAt'

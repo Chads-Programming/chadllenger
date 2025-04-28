@@ -9,6 +9,7 @@ import { LoggerModule } from './logger/logger.module';
 import { AuthModule } from './auth/auth.module';
 import { BullModule } from '@nestjs/bullmq';
 import { envs } from './config/envs';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { envs } from './config/envs';
     CacheModule.registerAsync(cacheOptions),
     DatabaseModule,
     ChallengeModule,
+    EventEmitterModule.forRoot(),
     BullModule.forRoot({
       connection: {
         host: envs.REDIS_HOST,

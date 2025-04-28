@@ -5,3 +5,7 @@ export const CHALLENGE_QUEUE = {
     START_CHALLENGE: 'start-challenge',
   },
 };
+
+export const CHALLENGE_EVENTS = {
+  CHALLENGE_FINISHED: 'challenge.finished',
+};
