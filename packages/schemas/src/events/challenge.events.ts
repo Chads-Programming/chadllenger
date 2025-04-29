@@ -7,6 +7,7 @@ export const NotificationsType = {
   CREATED_ROOM: 'CREATED_ROOM',
   PLAYER_JOINED_GAME: 'PLAYER_JOINED_GAME',
   PLAYER_LEFT_GAME: 'PLAYER_LEFT_GAME',
+  FINISH_CHALLENGE: 'FINISH_CHALLENGE',
   STARTED_ROUND: 'STARTED_ROUND',
   END_ROUND: 'END_ROUND',
   END_GAME: 'END_GAME',
@@ -15,7 +16,8 @@ export const NotificationsType = {
 } as const
 
 export const MessageTypes = {
-  CREATE_ROOM: 'CREATE_ROOM',
+  CREATE_ROOM: 'CREATE_CHALLENGE_ROOM',
+  JOIN_CHALLENGE_ROOM: 'JOIN_CHALLENGE_ROOM',
 } as const
 
 export type CreatedRoomPayload = {
@@ -34,6 +36,18 @@ export type PlayerJoinedGame = {
 export type PlayerLeftGame = {
   id: string
   username: string
+}
+
+export type ChallengeLeaderboard = {
+  id: string
+  name: string
+  score: number
+}
+
+export type ChallengeSummary = {
+  id: string
+  codename: string
+  leaderboard: ChallengeLeaderboard[]
 }
 
 export type NotificationsChannelsType =

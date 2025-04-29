@@ -9,4 +9,10 @@ export const challengeSchema = z.object({
   creatorName: z.string().min(2),
 })
 
+export const joinChallengeRoomSchema = z.object({
+  codename: z.string().min(1),
+  username: z.string().min(2),
+})
+
 export type CreateChallenge = z.infer<typeof challengeSchema>
+export type JoinChallengeRoom = z.infer<typeof joinChallengeRoomSchema>

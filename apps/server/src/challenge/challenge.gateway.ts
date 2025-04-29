@@ -15,6 +15,7 @@ import {
   MessageTypes,
   CreateChallenge,
   NotificationsChannels,
+  JoinChallengeRoom,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
@@ -47,11 +48,12 @@ export class ChallengeGateway
     private readonly logger: ChadLogger,
   ) {}
 
-  handleConnection() {
-    this.handleSocketConnection();
+  handleConnection(client: Socket) {
+    this.handleGeneralConnection();
+    this.handleRejoinChallenge(client);
   }
   handleDisconnect() {
-    this.handleSocketConnection();
+    this.handleGeneralConnection();
   }
 
   /**
@@ -100,7 +102,7 @@ export class ChallengeGateway
    * lobby service with the current online total, and emits a notification
    * to all connected clients with the updated player information.
    */
-  private async handleSocketConnection() {
+  private async handleGeneralConnection() {
     const onlineTotal = this.getConnectedSockets();
 
     this.logger.log(
@@ -120,14 +122,55 @@ export class ChallengeGateway
   }
 
   /**
-   * Retrieves the number of currently connected sockets to the server.
+   * Handles a client request to join a challenge room. This method adds the participant
+   * to the challenge, joins the client to the corresponding room, and notifies all
+   * participants in the room about the new participant.
    *
-   * @returns The total number of connected sockets.
+   * @param data - The data required to join the challenge room, including the challenge codename
+   *               and the username of the participant.
+   * @param client - The connected socket client making the request.
+   * @returns A notification object indicating that the participant has joined the challenge.
+   *
+   * @throws Will throw an error if adding the participant to the challenge fails.
    */
-  private getConnectedSockets() {
-    return (this.server.sockets as unknown as { size: number }).size;
+  @SubscribeMessage(MessageTypes.JOIN_CHALLENGE_ROOM)
+  async joinChallengeRoom(
+    @MessageBody() data: JoinChallengeRoom,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const response = await this.challengeService.addPartipant({
+      challengeCodename: data.codename,
+      participantId: client.id,
+      participantName: data.username,
+    });
+
+    const participant = response.participant;
+
+    client.join(data.codename);
+
+    const notification =
+      ChallengeNotificationBuilder.joinedChallengeNotification(
+        participant.id,
+        participant.name,
+      );
+
+    this.server
+      .to(data.codename)
+      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
+
+    return notification;
   }
 
+  /**
+   * Notifies all connected clients in the specified challenge room that the challenge has been finished.
+   *
+   * @param challenge - The state model of the challenge containing details such as the codename
+   *                    used to identify the challenge room and other relevant information.
+   *
+   * Emits:
+   * - A notification to the `NotificationsChannels.CHALLENGE_NOTIFICATIONS` channel
+   *   with a payload built using `ChallengeNotificationBuilder.buildFinishChallengeNotification`.
+   */
   @OnEvent(CHALLENGE_EVENTS.CHALLENGE_FINISHED)
   async finishChallenge(challenge: ChallengeStateModel) {
     this.server
@@ -138,5 +181,41 @@ export class ChallengeGateway
           challenge,
         ),
       );
+  }
+
+  /**
+   * Retrieves the number of currently connected sockets to the server.
+   *
+   * @returns The total number of connected sockets.
+   */
+  private getConnectedSockets() {
+    return (this.server.sockets as unknown as { size: number }).size;
+  }
+
+  /**
+   * Handles the rejoining of a challenge by a client.
+   * This method checks if the client is currently associated with a room
+   * and, if so, makes the client rejoin that room.
+   *
+   * @param client - The socket client attempting to rejoin a challenge.
+   * @returns A promise that resolves when the operation is complete.
+   *          If the client is not associated with any room, the method returns early.
+   */
+  private async handleRejoinChallenge(client: Socket) {
+    const room = await this.challengeService.findPlayerCurrentRoom(client.id);
+
+    if (!room) {
+      return;
+    }
+
+    client.join(room);
+
+    this.logger.log(
+      'Client rejoined to challenge room',
+      'ChallengeGateway::handleRejoinChallenge',
+      {
+        codename: room,
+      },
+    );
   }
 }

@@ -10,6 +10,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { CHALLENGE_QUEUE } from './consts';
 import { ChallengeQueueService } from './services/challenge-queue.service';
 import { ChallengeConsumer } from './consumers/challenge.consumer';
+import { PlayerCacheRepository } from './repositories/player-cache.repository';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ChallengeConsumer } from './consumers/challenge.consumer';
   providers: [
     ChallengeGateway,
     ChallengeCacheRepository,
+    PlayerCacheRepository,
     LobbyCacheRepository,
     ChallengeService,
     LobbyService,

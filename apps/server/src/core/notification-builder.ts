@@ -6,6 +6,7 @@ import {
   NotificationsType,
   CreatedRoomPayload,
   ChallengeSummary,
+  PlayerJoinedGame,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -32,6 +33,22 @@ export const ChallengeNotificationBuilder = {
       messageType: 'system',
       data: {
         codename,
+      },
+      createdAt: new Date(),
+    };
+  },
+
+  joinedChallengeNotification(
+    participantId: string,
+    participantName: string,
+  ): ChallengeNotificationType<PlayerJoinedGame> {
+    return {
+      id: generateUniqueId(),
+      type: NotificationsType.PLAYER_JOINED_GAME,
+      messageType: 'system',
+      data: {
+        id: participantId,
+        username: participantName,
       },
       createdAt: new Date(),
     };
