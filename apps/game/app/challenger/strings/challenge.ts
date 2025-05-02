@@ -20,6 +20,19 @@ const ChallengeStrings = {
       placeholder: 'Escribe un nombre',
     },
     submit: 'Crear desafío',
+    success: 'Desafío creado con éxito 🦊🚬',
+    loading: 'Creando desafío...',
+  },
+  join: {
+    title: 'Join a Challenge',
+    codename: {
+      label: 'Challenge Codename',
+      placeholder: 'Enter the challenge codename',
+    },
+    username: {
+      label: 'Your Name',
+    },
+    submit: 'Join Challenge',
   },
   playerNotifications: {
     playerJoined: 'Se unió a la sala',

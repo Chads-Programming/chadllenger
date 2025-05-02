@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router'
+import { Toaster } from 'sonner'
 
 import type { Route } from './+types/root'
 import './app.css'
@@ -37,6 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <Navbar />
         <main className="container mx-auto px-4 py-8">{children}</main>
+        <Toaster />
         <ChallengeBackground />
         <ScrollRestoration />
         <Scripts />

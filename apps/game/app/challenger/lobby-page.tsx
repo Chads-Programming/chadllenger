@@ -5,12 +5,11 @@ import { LobbyCard } from './components/lobby-card'
 import { LobbyStrings } from './strings/lobby'
 import { AuroraText } from 'components/ui/aurora-text'
 import { OnlinePlayers } from './components/online-players'
+import { JOIN_REF_MODAL_ID, JoinChallenge } from './join-challenge'
+import { CREATE_CHALLENGE_REF_ID } from './hooks/use-create-challenge'
 
 export function meta() {
-  return [
-    { title: 'Lobby game' },
-    { name: 'description', content: 'Select a mode' },
-  ]
+  return [{ title: 'Lobby' }, { name: 'description', content: 'Select a mode' }]
 }
 
 export default function GameSelection() {
@@ -35,7 +34,7 @@ export default function GameSelection() {
         >
           <button
             type="button"
-            onClick={() => openModal('create-challenge-modal')}
+            onClick={() => openModal(CREATE_CHALLENGE_REF_ID)}
             className="btn btn-primary mb-4 gap-2 w-full font-semibold transition-all duration-300 group-hover:transform group-hover:translate-y-[-2px]"
           >
             <Plus
@@ -55,7 +54,7 @@ export default function GameSelection() {
         >
           <button
             type="button"
-            onClick={() => openModal('create-challenge-modal')}
+            onClick={() => openModal(JOIN_REF_MODAL_ID)}
             className="btn btn-primary font-semibold mb-4 gap-2 w-full transition-all duration-300 group-hover:transform group-hover:translate-y-[-2px]"
           >
             <Users
@@ -66,8 +65,8 @@ export default function GameSelection() {
           </button>
         </LobbyCard>
       </section>
-
       <SetupChallenge />
+      <JoinChallenge />
     </div>
   )
 }
