@@ -1,3 +1,5 @@
 export const ErrorCodes = {
   CHALLENGE_NOT_FOUND: 1000,
+  CHALLENGE_IS_NOT_PENDING: 1001,
+  DEFAULT_ERROR: 1002,
 } as const;

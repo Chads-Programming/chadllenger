@@ -1,12 +1,13 @@
+import { QueryBus } from '@nestjs/cqrs';
 import { Controller, Get, Param } from '@nestjs/common';
-import { ChallengeService } from '../services/challenge.service';
+import { GetChallengeQuery } from '../queries/impl/get-challenge.query';
 
 @Controller('challenge')
 export class ChallengeController {
-  constructor(private readonly challengeService: ChallengeService) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get('code/:codename')
   getOnlineTotalOnline(@Param('codename') codename: string) {
-    return this.challengeService.getByCodename(codename);
+    return this.queryBus.execute(new GetChallengeQuery(codename));
   }
 }

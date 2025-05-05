@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ChallengeGateway } from './challenge.gateway';
 import { ChallengeCacheRepository } from './repositories/challenge-cache.repository';
-import { ChallengeService } from './services/challenge.service';
 import { LobbyController } from './controllers/lobby.controller';
 import { LobbyCacheRepository } from './repositories/lobby-cache.repository';
-import { LobbyService } from './services/lobby.service';
 import { ChallengeController } from './controllers/challenge.controller';
 import { BullModule } from '@nestjs/bullmq';
 import { CHALLENGE_QUEUE } from './consts';
 import { ChallengeQueueService } from './services/challenge-queue.service';
-import { ChallengeConsumer } from './consumers/challenge.consumer';
+import { ChallengeScheduler } from './schedulers/challenge.scheduler';
 import { PlayerCacheRepository } from './repositories/player-cache.repository';
+
+import CommandHandlers from './commands/handlers';
+import QueryHandlers from './queries/handlers';
+import EventHandlers from './events/handlers';
 
 @Module({
   imports: [
@@ -23,10 +25,11 @@ import { PlayerCacheRepository } from './repositories/player-cache.repository';
     ChallengeCacheRepository,
     PlayerCacheRepository,
     LobbyCacheRepository,
-    ChallengeService,
-    LobbyService,
     ChallengeQueueService,
-    ChallengeConsumer,
+    ChallengeScheduler,
+    ...CommandHandlers,
+    ...EventHandlers,
+    ...QueryHandlers,
   ],
   controllers: [LobbyController, ChallengeController],
 })

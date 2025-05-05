@@ -1,16 +1,15 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { CHALLENGE_EVENTS, CHALLENGE_QUEUE } from '../consts';
-import { ChallengeService } from '../services/challenge.service';
+import { CHALLENGE_QUEUE } from '../consts';
 import { ChadLogger } from '@/logger/chad-logger';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CommandBus } from '@nestjs/cqrs';
+import { FinishChallengeCommand } from '../commands/impl/finish-challenge.command';
 
 @Processor(CHALLENGE_QUEUE.NAME)
-export class ChallengeConsumer extends WorkerHost {
+export class ChallengeScheduler extends WorkerHost {
   constructor(
-    private readonly challengeService: ChallengeService,
     private readonly logger: ChadLogger,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly commandBus: CommandBus,
   ) {
     super();
   }
@@ -25,12 +24,8 @@ export class ChallengeConsumer extends WorkerHost {
     const challengeCodename = job.data;
 
     try {
-      const updatedChallenge =
-        await this.challengeService.finishChallenge(challengeCodename);
-
-      this.eventEmitter.emit(
-        CHALLENGE_EVENTS.CHALLENGE_FINISHED,
-        updatedChallenge,
+      await this.commandBus.execute(
+        new FinishChallengeCommand(challengeCodename),
       );
     } catch (error) {
       this.logger.error(

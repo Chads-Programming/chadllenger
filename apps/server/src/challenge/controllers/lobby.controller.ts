@@ -1,12 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
-import { LobbyService } from '../services/lobby.service';
+import { QueryBus } from '@nestjs/cqrs';
+import { GetOnlineCountQuery } from '../queries/impl/get-online-count.query';
 
 @Controller('lobby')
 export class LobbyController {
-  constructor(private readonly lobbyService: LobbyService) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   @Get('online')
   getOnlineTotalOnline() {
-    return this.lobbyService.getOnlineTotalOnline();
+    return this.queryBus.execute(new GetOnlineCountQuery());
   }
 }

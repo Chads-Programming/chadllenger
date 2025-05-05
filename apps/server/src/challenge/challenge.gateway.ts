@@ -1,4 +1,4 @@
-import { LobbyService } from './services/lobby.service';
+import { GetPlayerChallengeQuery } from './queries/impl/get-player-challenge.query';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,7 +9,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChallengeService } from './services/challenge.service';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
 import {
   MessageTypes,
@@ -25,6 +24,10 @@ import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateModel } from './models/challenge-state.model';
 import { CHALLENGE_EVENTS } from './consts';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateChallengeCommand } from './commands/impl/create-challenge.comand';
+import { UpdateOnlineCountCommand } from './commands/impl/update-online-count.command';
+import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -42,8 +45,8 @@ export class ChallengeGateway
   private server: Server;
 
   constructor(
-    private readonly challengeService: ChallengeService,
-    private readonly lobbyService: LobbyService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
   ) {}
@@ -72,9 +75,8 @@ export class ChallengeGateway
     @MessageBody() data: CreateChallenge,
     @ConnectedSocket() client: Socket,
   ) {
-    const challenge = await this.challengeService.createChallenge(
-      client.id,
-      data,
+    const challenge = await this.commandBus.execute(
+      new CreateChallengeCommand(client.id, data),
     );
 
     client.join(challenge.codename);
@@ -113,7 +115,7 @@ export class ChallengeGateway
       },
     );
 
-    await this.lobbyService.setOnlineTotalOnline(onlineTotal);
+    await this.commandBus.execute(new UpdateOnlineCountCommand(onlineTotal));
 
     this.server.emit(
       NotificationsChannels.LOBBY_NOTIFICATIONS,
@@ -138,11 +140,13 @@ export class ChallengeGateway
     @MessageBody() data: JoinChallengeRoom,
     @ConnectedSocket() client: Socket,
   ) {
-    const response = await this.challengeService.addPartipant({
-      challengeCodename: data.codename,
-      participantId: client.id,
-      participantName: data.username,
-    });
+    const response = await this.commandBus.execute(
+      new JoinChallengeCommand({
+        challengeCodename: data.codename,
+        participantId: client.id,
+        participantName: data.username,
+      }),
+    );
 
     const participant = response.participant;
 
@@ -202,7 +206,9 @@ export class ChallengeGateway
    *          If the client is not associated with any room, the method returns early.
    */
   private async handleRejoinChallenge(client: Socket) {
-    const room = await this.challengeService.findPlayerCurrentRoom(client.id);
+    const room = await this.queryBus.execute(
+      new GetPlayerChallengeQuery(client.id),
+    );
 
     if (!room) {
       return;

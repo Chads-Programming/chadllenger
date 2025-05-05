@@ -1,4 +1,5 @@
 import { CustomError } from '@/core/errors/custom-error';
+import { ErrorCodes } from '@/lib/errors';
 import { ChadLogger } from '@/logger/chad-logger';
 import { Catch, ArgumentsHost } from '@nestjs/common';
 import { BaseWsExceptionFilter } from '@nestjs/websockets';
@@ -22,6 +23,7 @@ export class WsCustomExceptionFilter extends BaseWsExceptionFilter {
 
       this.logger.error(
         CustomError.serverError({
+          code: ErrorCodes.DEFAULT_ERROR,
           origin: 'WsCustomExceptionFilter',
           message: 'An error occurred',
           data: exception,

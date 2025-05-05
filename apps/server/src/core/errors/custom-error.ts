@@ -9,6 +9,7 @@ interface ErrorContext {
   type: ErrorType;
   origin: string;
   message: string;
+  code: number | string;
   data?: unknown;
 }
 

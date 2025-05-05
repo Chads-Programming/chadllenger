@@ -1,0 +1,108 @@
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import { ChallengeCacheRepository } from '@/challenge/repositories/challenge-cache.repository';
+import { JoinChallengeCommand } from '../impl/join-challenge.command';
+import {
+  JoinChallengeResponseType,
+  JoinStatus,
+} from '@/challenge/types/challenge-store';
+import { ParticipantModel } from '@/challenge/models/participant.model';
+import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query';
+import { CustomError } from '@/core/errors/custom-error';
+import { Status } from '@/challenge/types/challenge-state';
+import { PlayerCacheRepository } from '@/challenge/repositories/player-cache.repository';
+import { ChadLogger } from '@/logger/chad-logger';
+import { ErrorCodes } from '@/lib/errors';
+
+@CommandHandler(JoinChallengeCommand)
+export class JoinChallengeHandler
+  implements ICommandHandler<JoinChallengeCommand, JoinChallengeResponseType>
+{
+  constructor(
+    private readonly challengeRepository: ChallengeCacheRepository,
+    private readonly playerCacheRepository: PlayerCacheRepository,
+    private readonly queryBus: QueryBus,
+    private readonly logger: ChadLogger,
+  ) {}
+
+  async execute(
+    command: JoinChallengeCommand,
+  ): Promise<JoinChallengeResponseType> {
+    const challenge = await this.queryBus.execute(
+      new GetChallengeQuery(command.joinRequest.challengeCodename),
+    );
+
+    if (!challenge) {
+      throw CustomError.notFound({
+        origin: 'ChallengeService',
+        code: ErrorCodes.CHALLENGE_NOT_FOUND,
+        message: 'Challenge not found',
+      });
+    }
+
+    if (challenge.status !== Status.PENDING) {
+      throw CustomError.badArguments({
+        origin: 'ChallengeService',
+        code: ErrorCodes.CHALLENGE_IS_NOT_PENDING,
+        message: 'Challenge is not in pending status',
+      });
+    }
+
+    const existinParticipant = await this.findParticipantById(
+      command.joinRequest.challengeCodename,
+      command.joinRequest.participantId,
+    );
+
+    if (existinParticipant) {
+      return {
+        status: JoinStatus.ALREADY_JOINED,
+        participant: existinParticipant,
+      };
+    }
+
+    const participant = new ParticipantModel(
+      command.joinRequest.participantId,
+      command.joinRequest.participantName,
+    );
+
+    await Promise.all([
+      this.challengeRepository.updateChallenge(
+        command.joinRequest.challengeCodename,
+        {
+          participants: [...challenge.participants, participant],
+        },
+      ),
+      this.playerCacheRepository.setPlayerRoom(
+        command.joinRequest.participantId,
+        challenge.codename,
+      ),
+    ]);
+
+    this.logger.log('Participant added', 'JoinChallengeHandler::execute', {
+      participant,
+    });
+
+    return {
+      status: JoinStatus.JOINED,
+      participant,
+    };
+  }
+
+  private async findParticipantById(
+    codename: string,
+    id: string,
+  ): Promise<ParticipantModel | null> {
+    const challenge = await this.queryBus.execute(
+      new GetChallengeQuery(codename),
+    );
+
+    const participant = challenge.participants.find(
+      (participant) => participant.id === id,
+    );
+
+    if (!participant) {
+      return null;
+    }
+
+    return participant;
+  }
+}

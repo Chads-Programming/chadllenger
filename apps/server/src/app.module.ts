@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CqrsModule } from '@nestjs/cqrs';
+
 import { cacheOptions } from './config/cache';
 import { DatabaseModule } from './database/database.module';
 import { ChallengeModule } from './challenge/challenge.module';
@@ -18,7 +20,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CacheModule.registerAsync(cacheOptions),
     DatabaseModule,
     ChallengeModule,
+    CqrsModule,
     EventEmitterModule.forRoot(),
+    CqrsModule.forRoot(),
     BullModule.forRoot({
       connection: {
         host: envs.REDIS_HOST,
