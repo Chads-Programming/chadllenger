@@ -1,39 +1,123 @@
-import { ChallengeSummary } from '@repo/schemas';
-import { ChallengeStatus } from '../types/challenge-state';
+import {
+  ChallengeStatusType,
+  ChallengeSummary,
+  IChallengeState,
+  ICodeChallenge,
+  ICodeChallengeState,
+  IParticipant,
+  Status,
+} from '@repo/schemas';
+import * as codeGenerator from '@/utils/code-generator';
+
 import { CodeChallengeStateModel } from './code-challenge.model';
 import { ParticipantModel } from './participant.model';
 
-export interface ChallengeStateType {
+const CODENAME_SIZE = 6;
+
+export class ChallengeStateBuilder {
   id: string;
   title: string;
   codename: string;
-  participants: ParticipantModel[];
-  codeChallenges: CodeChallengeStateModel[];
+  participants: IParticipant[];
+  codeChallenges: ICodeChallenge[];
   currentChallenge: string;
-  playedChallenges: CodeChallengeStateModel[];
+  playedChallenges: ICodeChallengeState[];
   createdAt: Date;
   updatedAt: Date;
   creator: string;
-  status: ChallengeStatus;
-  expiration: number;
-}
-
-export class ChallengeStateModel {
-  id: string;
-  title: string;
-  codename: string;
-  participants: ParticipantModel[];
-  codeChallenges: CodeChallengeStateModel[];
-  currentChallenge: string;
-  playedChallenges: CodeChallengeStateModel[];
-  createdAt: Date;
-  updatedAt: Date;
-  creator: string;
-  status: ChallengeStatus;
+  status: ChallengeStatusType;
   expiration: number;
 
-  static fromJson(props: ChallengeStateType): ChallengeStateModel {
-    const challengeState = new ChallengeStateModel();
+  constructor() {
+    this.id = '';
+    this.title = '';
+    this.codename = codeGenerator.generateCode(CODENAME_SIZE);
+    this.participants = [];
+    this.codeChallenges = [];
+    this.currentChallenge = '';
+    this.playedChallenges = [];
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+    this.creator = '';
+    this.status = Status.PENDING;
+    this.expiration = 0;
+  }
+
+  setId(id: string) {
+    this.id = id;
+    return this;
+  }
+
+  setTitle(title: string) {
+    this.title = title;
+    return this;
+  }
+
+  setCodename(codename: string) {
+    this.codename = codename;
+    return this;
+  }
+
+  setParticipants(participants: ParticipantModel[]) {
+    this.participants = participants;
+    return this;
+  }
+
+  setCodeChallenges(codeChallenges: ICodeChallenge[]) {
+    this.codeChallenges = codeChallenges;
+    return this;
+  }
+
+  setCurrentChallenge(currentChallenge: string) {
+    this.currentChallenge = currentChallenge;
+    return this;
+  }
+
+  setPlayedChallenges(playedChallenges: CodeChallengeStateModel[]) {
+    this.playedChallenges = playedChallenges;
+    return this;
+  }
+
+  setCreatedAt(createdAt: Date) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  setUpdatedAt(updatedAt: Date) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
+  setCreator(creator: string) {
+    this.creator = creator;
+    return this;
+  }
+
+  setExpiration(expiration: number) {
+    this.expiration = expiration;
+    return this;
+  }
+
+  setStatus(status: ChallengeStatusType) {
+    this.status = status;
+
+    return this;
+  }
+
+  addParticipant(participant: ParticipantModel) {
+    this.participants.push(participant);
+
+    return this;
+  }
+
+  addCodeChallenge(codeChallenge: ICodeChallenge) {
+    this.codeChallenges.push(codeChallenge);
+
+    return this;
+  }
+
+  static fromProps(props: IChallengeState): ChallengeStateBuilder {
+    const challengeState = new ChallengeStateBuilder();
 
     challengeState.id = props.id;
     challengeState.title = props.title;
@@ -49,6 +133,23 @@ export class ChallengeStateModel {
     challengeState.expiration = props.expiration;
 
     return challengeState;
+  }
+
+  getProps(): IChallengeState {
+    return {
+      id: this.id,
+      title: this.title,
+      codename: this.codename,
+      participants: this.participants,
+      codeChallenges: this.codeChallenges,
+      currentChallenge: this.currentChallenge,
+      playedChallenges: this.playedChallenges,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      creator: this.creator,
+      status: this.status,
+      expiration: this.expiration,
+    };
   }
 
   serialize() {

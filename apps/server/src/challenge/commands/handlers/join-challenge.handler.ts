@@ -5,13 +5,13 @@ import {
   JoinChallengeResponseType,
   JoinStatus,
 } from '@/challenge/types/challenge-store';
-import { ParticipantModel } from '@/challenge/models/participant.model';
 import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query';
 import { CustomError } from '@/core/errors/custom-error';
-import { Status } from '@/challenge/types/challenge-state';
 import { PlayerCacheRepository } from '@/challenge/repositories/player-cache.repository';
 import { ChadLogger } from '@/logger/chad-logger';
 import { ErrorCodes } from '@/lib/errors';
+import { Status } from '@repo/schemas';
+import { ParticipantModel } from '@/challenge/models/participant.model';
 
 @CommandHandler(JoinChallengeCommand)
 export class JoinChallengeHandler

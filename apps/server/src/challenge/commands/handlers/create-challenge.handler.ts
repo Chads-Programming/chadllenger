@@ -2,23 +2,22 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CreateChallengeCommand } from '../impl/create-challenge.comand';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
 import { CodeChallengeRepository } from '@/database/repositories/code-challenge.repository';
-import { ChallengeStateModel } from '../../models/challenge-state.model';
+import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 import { envs } from '@/config/envs';
-import { CodeChallengeStateModel } from '../../models/code-challenge.model';
-import { ParticipantModel } from '../../models/participant.model';
 import { CreateChallengeRequestType } from '../../types/challenge-store';
-import { Status } from '../../types/challenge-state';
 import { PlayerCacheRepository } from '../../repositories/player-cache.repository';
 import { CustomError } from '@/core/errors/custom-error';
 import { CreatedChallengeEvent } from '../../events/impl/created-challenge.event';
 import { ErrorCodes } from '@/lib/errors';
+import { Status } from '@repo/schemas';
+import { ParticipantModel } from '@/challenge/models/participant.model';
 
 const CODE_CHALLENGES_SIZE = 3;
 const CHALLENGE_EXPIRATION_TIME = Math.ceil(Number(envs.CHALLENGE_TTL) / 2);
 
 @CommandHandler(CreateChallengeCommand)
 export class CreateChallengeHandler
-  implements ICommandHandler<CreateChallengeCommand, ChallengeStateModel>
+  implements ICommandHandler<CreateChallengeCommand, ChallengeStateBuilder>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
@@ -27,18 +26,17 @@ export class CreateChallengeHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateChallengeCommand): Promise<ChallengeStateModel> {
+  async execute(
+    command: CreateChallengeCommand,
+  ): Promise<ChallengeStateBuilder> {
     const { creatorId, createChallenge } = command;
 
     try {
-      const challenges =
+      const codeChallenges =
         await this.codeChallengeRepository.getRandomChallengesByDifficult(
           createChallenge.difficulties,
           CODE_CHALLENGES_SIZE,
         );
-      const codeChallenges = challenges.map(
-        (codeChallenge) => new CodeChallengeStateModel(codeChallenge.id),
-      );
       const creatorParticpant = new ParticipantModel(
         creatorId,
         createChallenge.creatorName,
@@ -51,6 +49,7 @@ export class CreateChallengeHandler
         status: Status.PENDING,
         expiration: CHALLENGE_EXPIRATION_TIME,
       };
+
       const challenge =
         await this.challengeRepository.createChallenge(challengeStore);
       await this.playerCacheRepository.setPlayerRoom(

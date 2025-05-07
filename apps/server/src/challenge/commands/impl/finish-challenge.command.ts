@@ -1,7 +1,7 @@
 import { Command } from '@nestjs/cqrs';
-import { ChallengeStateModel } from '../../models/challenge-state.model';
+import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 
-export class FinishChallengeCommand extends Command<ChallengeStateModel> {
+export class FinishChallengeCommand extends Command<ChallengeStateBuilder> {
   constructor(public readonly codename: string) {
     super();
   }

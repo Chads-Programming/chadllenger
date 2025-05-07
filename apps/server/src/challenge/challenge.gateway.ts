@@ -22,7 +22,7 @@ import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
 import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
-import { ChallengeStateModel } from './models/challenge-state.model';
+import { ChallengeStateBuilder } from './models/challenge-state.model';
 import { CHALLENGE_EVENTS } from './consts';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateChallengeCommand } from './commands/impl/create-challenge.comand';
@@ -176,7 +176,7 @@ export class ChallengeGateway
    *   with a payload built using `ChallengeNotificationBuilder.buildFinishChallengeNotification`.
    */
   @OnEvent(CHALLENGE_EVENTS.CHALLENGE_FINISHED)
-  async finishChallenge(challenge: ChallengeStateModel) {
+  async finishChallenge(challenge: ChallengeStateBuilder) {
     this.server
       .to(challenge.codename)
       .emit(

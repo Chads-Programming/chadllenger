@@ -1,15 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { FinishChallengeCommand } from '../impl/finish-challenge.command';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
-import { Status } from '../../types/challenge-state';
-import { ChallengeStateModel } from '../../models/challenge-state.model';
+import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 import { ChadLogger } from '@/logger/chad-logger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CHALLENGE_EVENTS } from '../../consts';
+import { Status } from '@repo/schemas';
 
 @CommandHandler(FinishChallengeCommand)
 export class FinishChallengeHandler
-  implements ICommandHandler<FinishChallengeCommand, ChallengeStateModel>
+  implements ICommandHandler<FinishChallengeCommand, ChallengeStateBuilder>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
@@ -17,7 +17,9 @@ export class FinishChallengeHandler
     private readonly logger: ChadLogger,
   ) {}
 
-  async execute(command: FinishChallengeCommand): Promise<ChallengeStateModel> {
+  async execute(
+    command: FinishChallengeCommand,
+  ): Promise<ChallengeStateBuilder> {
     try {
       await this.challengeRepository.updateChallenge(command.codename, {
         status: Status.FINISHED,

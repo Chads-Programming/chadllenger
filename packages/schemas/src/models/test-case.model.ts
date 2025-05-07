@@ -1,4 +1,4 @@
-export interface TestCaseModel {
+export interface ITestCase {
   id: string
   args: string
   expectedOutput: string

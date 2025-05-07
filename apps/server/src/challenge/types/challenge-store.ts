@@ -1,11 +1,7 @@
-import { ParticipantModel } from './../models/participant.model';
-import {
-  ChallengeStateModel,
-  ChallengeStateType,
-} from '../models/challenge-state.model';
+import { IParticipant, IChallengeState } from '@repo/schemas';
 
 export type CreateChallengeRequestType = Omit<
-  ChallengeStateType,
+  IChallengeState,
   | 'id'
   | 'createdAt'
   | 'updatedAt'
@@ -15,7 +11,7 @@ export type CreateChallengeRequestType = Omit<
 >;
 
 export type UpdateChallengeRequestType = Partial<
-  Omit<ChallengeStateModel, 'id' | 'createdAt' | 'updatedAt'>
+  Omit<IChallengeState, 'id' | 'createdAt' | 'updatedAt'>
 >;
 
 export const JoinStatus = {
@@ -32,6 +28,6 @@ export type JoinChallengeRequestType = {
 };
 
 export type JoinChallengeResponseType = {
-  participant: ParticipantModel;
+  participant: IParticipant;
   status: JoinStatus;
 };
