@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ModalContainer } from 'components/modal/modal'
 import ChallengeStrings from './strings/challenge'
 import PlayerCard from './components/player-card'
-import { useJoinChallenge } from './hooks/use-join-challenge'
 import { useNavigate } from 'react-router'
 import { useModalTrigger } from 'components/modal/modal-trigger'
 
@@ -18,7 +17,6 @@ export interface JoinChallengeProps {
 
 export const JoinChallenge = ({ codename }: JoinChallengeProps) => {
   const { username } = useUser()
-  const { joinChallengeRoom } = useJoinChallenge()
   const navigate = useNavigate()
 
   const { closeModal } = useModalTrigger()
@@ -45,10 +43,8 @@ export const JoinChallenge = ({ codename }: JoinChallengeProps) => {
   }
 
   const handleCreateChallenge = (data: JoinChallengeRoom) => {
-    joinChallengeRoom(data, () => {
-      navigate(`/challenge/${data.codename}`)
-      closeModal(JOIN_REF_MODAL_ID)
-    })
+    navigate(`/challenge/${data.codename}`)
+    closeModal(JOIN_REF_MODAL_ID)
   }
 
   return (

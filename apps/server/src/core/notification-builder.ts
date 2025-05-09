@@ -48,7 +48,7 @@ export const ChallengeNotificationBuilder = {
       messageType: 'system',
       data: {
         id: participantId,
-        username: participantName,
+        name: participantName,
       },
       createdAt: new Date(),
     };

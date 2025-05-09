@@ -10,9 +10,12 @@ const challengeApi = http.create({
 const getChallengeByCodename = async (codename: string) => {
   const abortController = new AbortController()
 
-  const { data } = await challengeApi.get<IChallengeState>(`/${codename}`, {
-    controller: abortController,
-  })
+  const { data } = await challengeApi.get<IChallengeState>(
+    `/code/${codename}`,
+    {
+      controller: abortController,
+    },
+  )
 
   return data
 }

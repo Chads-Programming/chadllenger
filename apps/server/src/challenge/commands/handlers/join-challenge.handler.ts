@@ -33,7 +33,7 @@ export class JoinChallengeHandler
 
     if (!challenge) {
       throw CustomError.notFound({
-        origin: 'ChallengeService',
+        origin: 'JoinChallengeHandler',
         code: ErrorCodes.CHALLENGE_NOT_FOUND,
         message: 'Challenge not found',
       });
@@ -41,7 +41,7 @@ export class JoinChallengeHandler
 
     if (challenge.status !== Status.PENDING) {
       throw CustomError.badArguments({
-        origin: 'ChallengeService',
+        origin: 'JoinChallengeHandler',
         code: ErrorCodes.CHALLENGE_IS_NOT_PENDING,
         message: 'Challenge is not in pending status',
       });

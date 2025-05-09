@@ -8,7 +8,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
 import {
   MessageTypes,
@@ -28,6 +28,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateChallengeCommand } from './commands/impl/create-challenge.comand';
 import { UpdateOnlineCountCommand } from './commands/impl/update-online-count.command';
 import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
+import { AuthenticatedSocket } from '@/adapters/redis-io.adapter';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -51,7 +52,7 @@ export class ChallengeGateway
     private readonly logger: ChadLogger,
   ) {}
 
-  handleConnection(client: Socket) {
+  handleConnection(client: AuthenticatedSocket) {
     this.handleGeneralConnection();
     this.handleRejoinChallenge(client);
   }
@@ -73,10 +74,10 @@ export class ChallengeGateway
   @SubscribeMessage(MessageTypes.CREATE_ROOM)
   async createChallengeRoom(
     @MessageBody() data: CreateChallenge,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const challenge = await this.commandBus.execute(
-      new CreateChallengeCommand(client.id, data),
+      new CreateChallengeCommand(client.auth.userId, data),
     );
 
     client.join(challenge.codename);
@@ -87,40 +88,12 @@ export class ChallengeGateway
       );
 
     this.server
-      .to(client.id)
+      .to(client.auth.userId)
       .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
 
     this.challengeQueue.finishChallengeToQueue(challenge.codename);
 
     return notification;
-  }
-
-  /**
-   * Handles a new socket connection event.
-   * Updates the total number of connected sockets and notifies all clients
-   * about the current number of players online.
-   *
-   * This method retrieves the total number of connected sockets, updates the
-   * lobby service with the current online total, and emits a notification
-   * to all connected clients with the updated player information.
-   */
-  private async handleGeneralConnection() {
-    const onlineTotal = this.getConnectedSockets();
-
-    this.logger.log(
-      'Client connected 🦊🚬',
-      'ChallengeGateway::handleSocketConnection',
-      {
-        onlineTotal,
-      },
-    );
-
-    await this.commandBus.execute(new UpdateOnlineCountCommand(onlineTotal));
-
-    this.server.emit(
-      NotificationsChannels.LOBBY_NOTIFICATIONS,
-      ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
-    );
   }
 
   /**
@@ -137,20 +110,26 @@ export class ChallengeGateway
    */
   @SubscribeMessage(MessageTypes.JOIN_CHALLENGE_ROOM)
   async joinChallengeRoom(
-    @MessageBody() data: JoinChallengeRoom,
-    @ConnectedSocket() client: Socket,
+    @MessageBody() joinPayload: JoinChallengeRoom,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
+    this.logger.log(
+      'Start joining to room',
+      'ChallengeGateway::joinChallengeRoom',
+      joinPayload,
+    );
+
     const response = await this.commandBus.execute(
       new JoinChallengeCommand({
-        challengeCodename: data.codename,
-        participantId: client.id,
-        participantName: data.username,
+        challengeCodename: joinPayload.codename,
+        participantId: client.auth.userId,
+        participantName: joinPayload.username,
       }),
     );
 
     const participant = response.participant;
 
-    client.join(data.codename);
+    client.join(joinPayload.codename);
 
     const notification =
       ChallengeNotificationBuilder.joinedChallengeNotification(
@@ -159,7 +138,7 @@ export class ChallengeGateway
       );
 
     this.server
-      .to(data.codename)
+      .to(joinPayload.codename)
       .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
 
     return notification;
@@ -205,9 +184,9 @@ export class ChallengeGateway
    * @returns A promise that resolves when the operation is complete.
    *          If the client is not associated with any room, the method returns early.
    */
-  private async handleRejoinChallenge(client: Socket) {
+  private async handleRejoinChallenge(client: AuthenticatedSocket) {
     const room = await this.queryBus.execute(
-      new GetPlayerChallengeQuery(client.id),
+      new GetPlayerChallengeQuery(client.auth.userId),
     );
 
     if (!room) {
@@ -222,6 +201,34 @@ export class ChallengeGateway
       {
         codename: room,
       },
+    );
+  }
+
+  /**
+   * Handles a new socket connection event.
+   * Updates the total number of connected sockets and notifies all clients
+   * about the current number of players online.
+   *
+   * This method retrieves the total number of connected sockets, updates the
+   * lobby service with the current online total, and emits a notification
+   * to all connected clients with the updated player information.
+   */
+  private async handleGeneralConnection() {
+    const onlineTotal = this.getConnectedSockets();
+
+    this.logger.log(
+      'Client connected 🦊🚬',
+      'ChallengeGateway::handleSocketConnection',
+      {
+        onlineTotal,
+      },
+    );
+
+    await this.commandBus.execute(new UpdateOnlineCountCommand(onlineTotal));
+
+    this.server.emit(
+      NotificationsChannels.LOBBY_NOTIFICATIONS,
+      ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
     );
   }
 }

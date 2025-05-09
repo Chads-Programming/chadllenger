@@ -7,7 +7,7 @@ export class ChallengeController {
   constructor(private readonly queryBus: QueryBus) {}
 
   @Get('code/:codename')
-  getOnlineTotalOnline(@Param('codename') codename: string) {
+  getChallenge(@Param('codename') codename: string) {
     return this.queryBus.execute(new GetChallengeQuery(codename));
   }
 }

@@ -30,7 +30,7 @@ export type PlayerConnectedPayload = {
 
 export type PlayerJoinedGame = {
   id: string
-  username: string
+  name: string
 }
 
 export type PlayerLeftGame = {
