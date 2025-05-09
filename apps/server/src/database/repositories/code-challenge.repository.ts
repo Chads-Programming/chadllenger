@@ -1,4 +1,4 @@
-import { CodeChallengeModel, Difficult } from '@repo/schemas';
+import { Difficult, ICodeChallenge } from '@repo/schemas';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@repo/database';
@@ -11,7 +11,7 @@ export class CodeChallengeRepository {
 
   async findAll({
     difficult,
-  }: FindCodeChallengeParams): Promise<CodeChallengeModel[]> {
+  }: FindCodeChallengeParams): Promise<ICodeChallenge[]> {
     const params: Prisma.CodeChallengeFindManyArgs = {};
 
     params.where.deletedAt = null;
@@ -26,7 +26,7 @@ export class CodeChallengeRepository {
   async getRandomChallengesByDifficult(
     difficulties: Difficult[],
     limit: number,
-  ): Promise<CodeChallengeModel[]> {
+  ): Promise<ICodeChallenge[]> {
     return await this.prisma.$queryRaw`
       SELECT * FROM "CodeChallenge"
       WHERE "deletedAt" IS NULL

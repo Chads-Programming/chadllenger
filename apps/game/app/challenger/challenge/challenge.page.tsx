@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import type { Route } from './+types/challenge-page'
 import { Editor } from '@monaco-editor/react'
-import { Play, Users } from 'lucide-react'
-import PlayerNotificationBox from './components/player-notification-box'
+import { Play } from 'lucide-react'
+import type { Route } from './+types/challenge.page'
+import { useChallenge } from './use-challenge'
+import ChallengeParticipants from './challenge-participants'
 
 export function meta() {
   return [
@@ -23,6 +24,7 @@ const mockPlayers = ['player1', 'player2', 'player3']
 
 export default function GameRoute({ params }: Route.ComponentProps) {
   const { codename } = params
+  const { challengeState } = useChallenge(codename)
 
   const [code, setCode] = useState(mockChallenge.initial_code)
   const [output, setOutput] = useState('')
@@ -41,7 +43,6 @@ export default function GameRoute({ params }: Route.ComponentProps) {
 
   return (
     <div className="max-w-6xl mx-auto relative">
-      <PlayerNotificationBox />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <div className="bg-white rounded-lg shadow-sm mb-6">
@@ -88,31 +89,7 @@ export default function GameRoute({ params }: Route.ComponentProps) {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="border-b border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">Players</h3>
-                <div className="flex items-center text-gray-500">
-                  <Users className="h-5 w-5 mr-2" />
-                  <span>{players.length}</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-4">
-              <ul className="space-y-2">
-                {players.map((player) => (
-                  <li
-                    key={player}
-                    className="flex items-center space-x-2 text-gray-700"
-                  >
-                    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span>Player {player}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <ChallengeParticipants participants={challengeState.participants} />
 
           <div className="bg-white rounded-lg shadow-sm">
             <div className="border-b border-gray-200 p-4">

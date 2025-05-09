@@ -7,7 +7,7 @@ export const Difficult = {
 
 export type Difficult = (typeof Difficult)[keyof typeof Difficult]
 
-export interface CodeChallengeModel {
+export interface ICodeChallenge {
   id: string
   title: string
   description: string
@@ -15,4 +15,10 @@ export interface CodeChallengeModel {
   difficult: Difficult
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ICodeChallengeState {
+  id: string
+  startedAt?: Date
+  winner?: string
 }

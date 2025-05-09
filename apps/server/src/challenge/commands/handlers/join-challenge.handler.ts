@@ -5,13 +5,13 @@ import {
   JoinChallengeResponseType,
   JoinStatus,
 } from '@/challenge/types/challenge-store';
-import { ParticipantModel } from '@/challenge/models/participant.model';
 import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query';
 import { CustomError } from '@/core/errors/custom-error';
-import { Status } from '@/challenge/types/challenge-state';
 import { PlayerCacheRepository } from '@/challenge/repositories/player-cache.repository';
 import { ChadLogger } from '@/logger/chad-logger';
 import { ErrorCodes } from '@/lib/errors';
+import { Status } from '@repo/schemas';
+import { ParticipantModel } from '@/challenge/models/participant.model';
 
 @CommandHandler(JoinChallengeCommand)
 export class JoinChallengeHandler
@@ -33,7 +33,7 @@ export class JoinChallengeHandler
 
     if (!challenge) {
       throw CustomError.notFound({
-        origin: 'ChallengeService',
+        origin: 'JoinChallengeHandler',
         code: ErrorCodes.CHALLENGE_NOT_FOUND,
         message: 'Challenge not found',
       });
@@ -41,7 +41,7 @@ export class JoinChallengeHandler
 
     if (challenge.status !== Status.PENDING) {
       throw CustomError.badArguments({
-        origin: 'ChallengeService',
+        origin: 'JoinChallengeHandler',
         code: ErrorCodes.CHALLENGE_IS_NOT_PENDING,
         message: 'Challenge is not in pending status',
       });

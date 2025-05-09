@@ -1,12 +1,17 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions, Socket } from 'socket.io';
+import { Server, ServerOptions, Socket } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import { envs } from '@/config/envs';
 import * as cookie from 'cookie';
 
+export type AuthenticatedSocket = Socket & {
+  auth: { userId: string };
+};
+
 export class RedisIoAdapter extends IoAdapter {
   private adapterConstructor: ReturnType<typeof createAdapter>;
+  private server: Server;
 
   async connectToRedis(): Promise<void> {
     const pubClient = createClient({
@@ -19,30 +24,32 @@ export class RedisIoAdapter extends IoAdapter {
     this.adapterConstructor = createAdapter(pubClient, subClient);
   }
 
-  createIOServer(port: number, options?: ServerOptions) {
-    const server = super.createIOServer(port, {
-      ...options,
-      cors: {
-        origin: true,
-        credentials: true,
-      },
-    });
+  create(port: number, options?: ServerOptions): Server {
+    const server = super.create(port, options);
 
-    server.adapter(this.adapterConstructor);
+    this.server = server;
 
-    server.use((socket: Socket, next) => {
+    this.server.use(async (socket: AuthenticatedSocket, next) => {
       const cookieHeader = socket.handshake.headers.cookie;
       const cookies = cookie.parse(cookieHeader || '');
-      const userId = cookies.userId;
+      const userId = cookies.sessionId;
 
       if (!userId) {
+        socket.auth = null;
         return next(new Error('userId missing in cookie'));
       }
 
-      socket.data.userId = userId;
-      return next();
+      try {
+        socket.auth = {
+          userId,
+        };
+
+        return next();
+      } catch (e) {
+        return next(e);
+      }
     });
 
-    return server;
+    return this.server;
   }
 }

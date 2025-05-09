@@ -1,7 +1,7 @@
-import { ChallengeStateModel } from '@/challenge/models/challenge-state.model';
+import { ChallengeStateBuilder } from '@/challenge/models/challenge-state.model';
 import { Query } from '@nestjs/cqrs';
 
-export class GetChallengeQuery extends Query<ChallengeStateModel> {
+export class GetChallengeQuery extends Query<ChallengeStateBuilder> {
   constructor(public readonly codename: string) {
     super();
   }

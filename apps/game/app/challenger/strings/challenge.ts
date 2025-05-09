@@ -35,10 +35,16 @@ const ChallengeStrings = {
     submit: 'Join Challenge',
   },
   playerNotifications: {
-    playerJoined: 'Se unió a la sala',
+    playerJoined: '$1 se ha unido a la sala',
     playerLeft: 'Salió de la sala',
     cardColor: '#00C9A7',
     iconEmote: '👤',
+  },
+  challenge: {
+    participants: {
+      title: 'Participantes',
+      empty: 'No hay participantes aún',
+    },
   },
 }
 

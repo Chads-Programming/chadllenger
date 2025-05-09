@@ -1,4 +1,4 @@
-import { ChallengeStateModel } from '@/challenge/models/challenge-state.model';
+import { ChallengeStateBuilder } from '@/challenge/models/challenge-state.model';
 import { generateUniqueId } from '@/utils/unique-id';
 import {
   ChallengeNotificationType,
@@ -48,14 +48,14 @@ export const ChallengeNotificationBuilder = {
       messageType: 'system',
       data: {
         id: participantId,
-        username: participantName,
+        name: participantName,
       },
       createdAt: new Date(),
     };
   },
 
   buildFinishChallengeNotification(
-    challengeState: ChallengeStateModel,
+    challengeState: ChallengeStateBuilder,
   ): ChallengeNotificationType<ChallengeSummary> {
     return {
       id: generateUniqueId(),

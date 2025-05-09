@@ -32,8 +32,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       data?: TData,
       ack?: (response: TResponse) => void,
     ) => {
-      if (isConnected) {
-        socketRef?.current?.emit(event, data, ack)
+      if (!isConnected) {
+        socketRef?.current?.emit(event, data, ack || (() => {}))
+        return
       }
     },
     [isConnected],

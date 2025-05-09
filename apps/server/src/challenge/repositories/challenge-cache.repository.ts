@@ -6,12 +6,9 @@ import {
   CreateChallengeRequestType,
   UpdateChallengeRequestType,
 } from '../types/challenge-store';
-import * as codeGenerator from '@/utils/code-generator';
 import { ErrorCodes } from '@/lib/errors';
-import { ChallengeStateModel } from '../models/challenge-state.model';
+import { ChallengeStateBuilder } from '../models/challenge-state.model';
 import { generateUniqueId } from '@/utils/unique-id';
-
-const CODENAME_SIZE = 6;
 
 @Injectable()
 export class ChallengeCacheRepository {
@@ -19,21 +16,19 @@ export class ChallengeCacheRepository {
 
   async createChallenge(
     challenge: CreateChallengeRequestType,
-  ): Promise<ChallengeStateModel> {
+  ): Promise<ChallengeStateBuilder> {
     const id = generateUniqueId();
-    const codename = codeGenerator.generateCode(CODENAME_SIZE);
-    const challengeKey = this.getKey(codename);
 
-    const newChallenge = ChallengeStateModel.fromJson({
-      ...challenge,
-      id,
-      title: challenge.title,
-      codename,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      currentChallenge: '',
-      playedChallenges: [],
-    });
+    const newChallenge = new ChallengeStateBuilder()
+      .setId(id)
+      .setTitle(challenge.title)
+      .setCreator(challenge.creator)
+      .setStatus(challenge.status)
+      .setExpiration(challenge.expiration)
+      .setCodeChallenges(challenge.codeChallenges)
+      .setParticipants(challenge.participants);
+
+    const challengeKey = this.getKey(newChallenge.codename);
 
     await this.cache.set(
       challengeKey,
@@ -57,7 +52,7 @@ export class ChallengeCacheRepository {
       throw ErrorCodes.CHALLENGE_NOT_FOUND;
     }
 
-    const updatedChallenge = ChallengeStateModel.fromJson({
+    const updatedChallenge = ChallengeStateBuilder.fromProps({
       ...currentChallenge,
       ...challenge,
     });
@@ -67,7 +62,7 @@ export class ChallengeCacheRepository {
 
   async findChallengeByCodename(
     codename: string,
-  ): Promise<ChallengeStateModel> {
+  ): Promise<ChallengeStateBuilder> {
     const key = this.getKey(codename);
     const challenge = await this.cache.get<string>(key);
 

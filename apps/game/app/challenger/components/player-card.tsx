@@ -2,7 +2,6 @@ import Avatar from 'components/ui/avatar'
 import { Check, Edit, X } from 'lucide-react'
 import { useUser } from 'providers/user-provider'
 import { useState } from 'react'
-import { useSocket } from 'socket/use-socket'
 import { LobbyStrings } from '../strings/lobby'
 
 type UpdateCaller = (value: { username: string }) => void
@@ -19,7 +18,6 @@ interface BaseProps {
 type Props = BaseProps | EditableProps
 
 const PlayerCard = ({ editable, ...rest }: Props) => {
-  const { isConnected } = useSocket()
   const { userID, username, changeUsername } = useUser()
 
   const [text, setText] = useState(username)
@@ -55,7 +53,7 @@ const PlayerCard = ({ editable, ...rest }: Props) => {
 
   return (
     <div className="card card-side bg-base-100 shadow-sm overflow-hidden">
-      <Avatar id={userID} name={username} online={isConnected} />
+      <Avatar id={userID} name={username} />
       <div className="card-body relative">
         <div className="relative flex items-center gap-2">
           {isEditing ? (
