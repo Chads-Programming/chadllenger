@@ -3,6 +3,7 @@ import {
   type Difficult,
   type CreateChallenge,
   challengeSchema,
+  ChallengeType,
 } from '@repo/schemas'
 import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
@@ -12,11 +13,12 @@ import { useCreateChallenge } from './lobby/hooks/use-create-challenge'
 import ChallengeStrings from './common/strings/challenge'
 import { DIFFICULTIES } from './consts'
 import PlayerCard from './common/components/player-card'
+import { useLobby } from './lobby/providers/lobby.provider'
 
 export const SetupChallenge = () => {
   const { username } = useUser()
   const { createChallengeRoom } = useCreateChallenge()
-
+  const { challengeType } = useLobby()
   const {
     register,
     handleSubmit,
@@ -27,6 +29,7 @@ export const SetupChallenge = () => {
     defaultValues: {
       difficulties: [],
       creatorName: username || '',
+      type: challengeType || ChallengeType.Clash,
     },
     resolver: zodResolver(challengeSchema),
   })
@@ -36,7 +39,6 @@ export const SetupChallenge = () => {
   const onSubmit = (data: CreateChallenge) => {
     handleCreateChallenge(data)
   }
-
   const onUsernameChange = (username: string) => {
     setValue('creatorName', username)
   }

@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Editor } from '@monaco-editor/react'
 import { Play } from 'lucide-react'
-import type { Route } from './+types/challenge.page'
-import { useChallenge } from './use-challenge'
+import { useClash } from './use-clash'
 import ChallengeParticipants from './challenge-participants'
 
 export function meta() {
@@ -22,9 +21,12 @@ const mockChallenge = {
 
 const mockPlayers = ['player1', 'player2', 'player3']
 
-export default function GameRoute({ params }: Route.ComponentProps) {
-  const { codename } = params
-  const { challengeState } = useChallenge(codename)
+type CodeChallengeProps = {
+codename: string
+}
+
+export default function ClashChallenge({ codename }: CodeChallengeProps) {
+  const { challengeState } = useClash(codename)
 
   const [code, setCode] = useState(mockChallenge.initial_code)
   const [output, setOutput] = useState('')

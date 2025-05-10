@@ -6,6 +6,7 @@ import {
   IQuestChallenge,
   IQuestChallengeState,
   Status,
+  ChallengeType,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
@@ -26,7 +27,8 @@ export class ChallengeStateBuilder {
   creator: string;
   status: ChallengeStatusType;
   expiration: number;
-
+  type: ChallengeType;
+  
   constructor() {
     this.id = '';
     this.title = '';
@@ -40,6 +42,7 @@ export class ChallengeStateBuilder {
     this.creator = '';
     this.status = Status.PENDING;
     this.expiration = 0;
+    this.type = ChallengeType.Clash;
   }
 
   setId(id: string) {
@@ -74,6 +77,11 @@ export class ChallengeStateBuilder {
 
   setPlayedChallenges(playedChallenges: IQuestChallenge[]) {
     this.playedChallenges = playedChallenges;
+    return this;
+  }
+
+  setType(type: ChallengeType) {
+    this.type = type;
     return this;
   }
 
@@ -130,6 +138,7 @@ export class ChallengeStateBuilder {
     challengeState.creator = props.creator;
     challengeState.status = props.status;
     challengeState.expiration = props.expiration;
+    challengeState.type = props.type;
 
     return challengeState;
   }
@@ -148,6 +157,7 @@ export class ChallengeStateBuilder {
       creator: this.creator,
       status: this.status,
       expiration: this.expiration,
+      type: this.type,
     };
   }
 
@@ -165,6 +175,7 @@ export class ChallengeStateBuilder {
       creator: this.creator,
       status: this.status,
       expiration: this.expiration,
+      type: this.type,
     });
   }
 
@@ -179,6 +190,7 @@ export class ChallengeStateBuilder {
       id: this.id,
       codename: this.codename,
       leaderboard,
+      type: this.type,
     };
   }
 }

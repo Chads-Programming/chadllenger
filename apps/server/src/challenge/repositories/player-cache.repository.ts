@@ -6,9 +6,9 @@ import { Inject, Injectable } from '@nestjs/common';
 export class PlayerCacheRepository {
   constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
-  async getPlayerRoom(type: string, playerId: string): Promise<string | null> {
+  async getPlayerRoom(playerId: string): Promise<string | null> {
     const room = await this.cache.get<string>(
-      `player:${playerId}:${type}:room`,
+      `player:${playerId}:room`,
     );
 
     if (!room) {
@@ -19,12 +19,11 @@ export class PlayerCacheRepository {
   }
 
   async setPlayerRoom(
-    type: string,
     playerId: string,
     room: string,
   ): Promise<void> {
     await this.cache.set<string>(
-      `player:${playerId}:${type}:room`,
+      `player:${playerId}:room`,
       room,
       this.getTttl(),
     );

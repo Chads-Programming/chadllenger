@@ -1,4 +1,4 @@
-import { ChallengeType } from "types/challenge.type";
+import { ChallengeType } from '@repo/schemas'
 
 export type ChallengeStrings = {
   createChallenge: {
@@ -31,7 +31,7 @@ type LobbyStrings = {
 export const LobbyStrings: LobbyStrings = {
   title: 'Elige tu próximo desafío',
   challengeType: {
-    [ChallengeType.QUIZ]: {
+    [ChallengeType.Quiz]: {
       createChallenge: {
         title: 'Crear un Quiz',
         description: 'Crea y configura tu propio desafío para jugar con tus amigos',
@@ -49,7 +49,7 @@ export const LobbyStrings: LobbyStrings = {
         placeholder: 'Escribe tu nombre',
       },
     },
-    [ChallengeType.CLASH]: {
+    [ChallengeType.Clash]: {
       createChallenge: {
         title: 'Crear un clash of code',
         description: 'Crea y configura tu propio desafío para jugar con tus amigos',

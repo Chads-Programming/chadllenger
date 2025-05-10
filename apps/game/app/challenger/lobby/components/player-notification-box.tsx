@@ -11,7 +11,7 @@ import Notification, { type NotificationItem } from 'components/ui/notification'
 import { AnimatedList } from 'components/ui/animated-list'
 import dateHelpers from 'lib/date-helpers'
 import { useDebounceCallback } from 'hooks/use-debounce-callback'
-import ChallengeStrings from '../strings/challenge'
+import ChallengeStrings from '~/challenger/common/strings/challenge'
 
 const PlayerNotificationBox = () => {
   const [notifications, setNotification] = useState<NotificationItem[]>([])

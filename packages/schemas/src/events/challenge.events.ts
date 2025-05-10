@@ -1,3 +1,5 @@
+import type { ChallengeType } from "@/models"
+
 export const NotificationsChannels = {
   CHALLENGE_NOTIFICATIONS: 'CHALLENGE_NOTIFICATIONS',
   LOBBY_NOTIFICATIONS: 'LOBBY_NOTIFICATIONS',
@@ -22,6 +24,7 @@ export const MessageTypes = {
 
 export type CreatedRoomPayload = {
   codename: string
+  type: ChallengeType
 }
 
 export type PlayerConnectedPayload = {

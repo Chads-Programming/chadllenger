@@ -6,7 +6,7 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { ChallengeType } from 'types/challenge.type'
+import { ChallengeType } from '@repo/schemas'
 import {
   LobbyStrings,
   type ChallengeStrings,
@@ -32,12 +32,12 @@ export const LobbyProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   const [challengeType, setChallengeType] = useState<ChallengeType | null>(
-    getLastChallengeType(),
+    null //getLastChallengeType(),
   )
 
   const lobbyTexts: ChallengeStrings = useMemo(() => {
     return !challengeType
-      ? LobbyStrings.challengeType[ChallengeType.CLASH]
+      ? LobbyStrings.challengeType[ChallengeType.Clash]
       : LobbyStrings.challengeType[challengeType]
   }, [challengeType])
 

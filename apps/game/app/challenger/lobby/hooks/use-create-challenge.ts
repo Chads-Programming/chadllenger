@@ -25,8 +25,8 @@ export const useCreateChallenge = () => {
   const onCreateRoomHandler = (
     response: ChallengeNotificationType<CreatedRoomPayload>,
   ) => {
-    console.log('onCreateRoomHandler', response)
-    const { codename } = response.data
+    console.log({response})
+    const { codename, type} = response.data
     
     dismiss(toastIdRef.current as string | number)
     
@@ -34,8 +34,7 @@ export const useCreateChallenge = () => {
       type: 'info',
       dissmissAction: true,
     })
-    console.log('nashe :v')
-    navigate(`/challenge/${codename}`)
+    navigate(`/challenge/${type.toLowerCase()}/${codename}`)
     closeModal(CREATE_CHALLENGE_REF_ID)
   }
 

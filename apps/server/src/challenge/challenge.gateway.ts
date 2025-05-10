@@ -85,6 +85,7 @@ export class ChallengeGateway
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
+        challenge.type
       );
 
     this.server
