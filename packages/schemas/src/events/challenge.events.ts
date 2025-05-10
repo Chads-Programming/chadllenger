@@ -51,6 +51,7 @@ export type ChallengeSummary = {
   id: string
   codename: string
   leaderboard: ChallengeLeaderboard[]
+  type: ChallengeType
 }
 
 export type NotificationsChannelsType =
