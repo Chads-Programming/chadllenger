@@ -10,15 +10,15 @@ import {
 } from '@repo/schemas'
 import { useEffect, useReducer } from 'react'
 import challengeApi from 'api/challenge'
-import { useChallengeNotifications } from '../common/hooks/use-challenge-notifications'
+import { useChallengeNotifications } from '../../common/hooks/use-challenge-notifications'
 import { ACTIONS, INITIAL_STATE, reducer } from './challenge-reducer'
 import { useToast } from 'hooks/use-toast'
-import ChallengeStrings from '../common/strings/challenge'
+import ChallengeStrings from '../../common/strings/challenge'
 import { useUser } from 'providers/user-provider'
 import { useNavigate } from 'react-router'
 import { useSocket } from 'socket/use-socket'
 
-export const useChallenge = (codename: string) => {
+export const useClash = (codename: string) => {
   const [challengeState, dispatch] = useReducer(reducer, INITIAL_STATE)
   const { emitEvent } = useSocket()
   const { username } = useUser()

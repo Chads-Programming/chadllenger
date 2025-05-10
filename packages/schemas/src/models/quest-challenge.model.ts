@@ -9,7 +9,7 @@ export const Difficult = {
 
 export const ChallengeType = {
   Clash: 'Clash',
-  Quiz: 'Clash',
+  Quiz: 'Quiz',
 } as const
 
 export type Difficult = (typeof Difficult)[keyof typeof Difficult]

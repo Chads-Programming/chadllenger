@@ -49,12 +49,12 @@ export class CreateChallengeHandler
         challenges,
         status: Status.PENDING,
         expiration: CHALLENGE_EXPIRATION_TIME,
+        type: createChallenge.type
       };
 
       const challenge =
         await this.challengeRepository.createChallenge(challengeStore);
       await this.playerCacheRepository.setPlayerRoom(
-        createChallenge.type,
         creatorId,
         challenge.codename,
       );

@@ -1,4 +1,5 @@
 import type {
+  ChallengeType,
   IQuestChallenge,
   IQuestChallengeState,
 } from './quest-challenge.model'
@@ -17,6 +18,7 @@ export interface IChallengeState {
   creator: string
   status: ChallengeStatusType
   expiration: number
+  type: ChallengeType
 }
 
 export const Status = {

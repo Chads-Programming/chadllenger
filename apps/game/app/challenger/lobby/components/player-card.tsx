@@ -2,7 +2,6 @@ import Avatar from 'components/ui/avatar'
 import { Check, Edit, X } from 'lucide-react'
 import { useUser } from 'providers/user-provider'
 import { useState } from 'react'
-import { LobbyStrings } from '../strings/lobby'
 import { useLobby } from '../providers/lobby.provider'
 
 type UpdateCaller = (value: { username: string }) => void
@@ -20,7 +19,7 @@ type Props = BaseProps | EditableProps
 
 const PlayerCard = ({ editable, ...rest }: Props) => {
   const { userID, username, changeUsername } = useUser()
-  const { challengeType } = useLobby()
+  const { challengeType, lobbyTexts } = useLobby()
   
   const [text, setText] = useState(username)
   const [editedText, setEditedText] = useState(username)
@@ -66,7 +65,7 @@ const PlayerCard = ({ editable, ...rest }: Props) => {
                 onChange={handleChange}
                 className="input input-bordered w-full"
                 placeholder={
-                  LobbyStrings.challengeType[challengeType].playerCard
+                  lobbyTexts.playerCard
                     .placeholder
                 }
               />
@@ -94,7 +93,7 @@ const PlayerCard = ({ editable, ...rest }: Props) => {
               <div className="flex-1 py-2">
                 {text || (
                   <span className="text-secondary text-sm">
-                    {LobbyStrings.challengeType[challengeType].playerCard.placeholder}
+                    {lobbyTexts.playerCard.placeholder}
                   </span>
                 )}
               </div>
