@@ -76,22 +76,28 @@ export class ChallengeGateway
     @MessageBody() data: CreateChallenge,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
+    console.log('createChallengeRoom', data);
     const challenge = await this.commandBus.execute(
       new CreateChallengeCommand(client.auth.userId, data),
     );
-
+    
     client.join(challenge.codename);
-
+    
+    console.log('joined1');
     const notification =
-      ChallengeNotificationBuilder.buildCreatedRoomNotification(
-        challenge.codename,
-      );
-
+    ChallengeNotificationBuilder.buildCreatedRoomNotification(
+      challenge.codename,
+    );
+    
+    console.log('joined2');
     this.server
-      .to(client.auth.userId)
-      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
-
+    .to(client.auth.userId)
+    .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
+    
+    console.log('joined3');
     this.challengeQueue.finishChallengeToQueue(challenge.codename);
+    
+    console.log('joined4');
 
     return notification;
   }

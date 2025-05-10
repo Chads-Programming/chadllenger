@@ -7,9 +7,10 @@ import {
   type PlayerConnectedPayload,
 } from '@repo/schemas'
 import { useSocket } from 'socket/use-socket'
-import { LobbyStrings } from '../strings/lobby'
 import lobbyApi from 'api/lobby'
 import { useChallengeNotifications } from '../hooks/use-challenge-notifications'
+import { LobbyStrings } from '~/challenger/common/strings/lobby'
+
 
 export const OnlinePlayers = () => {
   const socket = useSocket()

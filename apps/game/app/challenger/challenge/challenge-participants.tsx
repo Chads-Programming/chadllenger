@@ -2,7 +2,7 @@ import type { IParticipant } from '@repo/schemas'
 import Avatar from 'components/ui/avatar'
 import { Users } from 'lucide-react'
 import { memo } from 'react'
-import ChallengeStrings from '../strings/challenge'
+import ChallengeStrings from '../common/strings/challenge'
 
 interface Props {
   participants: IParticipant[]

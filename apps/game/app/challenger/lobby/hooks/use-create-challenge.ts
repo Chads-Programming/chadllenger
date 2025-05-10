@@ -9,7 +9,8 @@ import { useToast } from 'hooks/use-toast'
 import { useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useSocket } from 'socket/use-socket'
-import ChallengeStrings from '../strings/challenge'
+
+import ChallengeStrings from '~/challenger/common/strings/challenge'
 
 export const CREATE_CHALLENGE_REF_ID = 'create-challenge-modal'
 
@@ -24,14 +25,16 @@ export const useCreateChallenge = () => {
   const onCreateRoomHandler = (
     response: ChallengeNotificationType<CreatedRoomPayload>,
   ) => {
+    console.log('onCreateRoomHandler', response)
     const { codename } = response.data
-
+    
     dismiss(toastIdRef.current as string | number)
-
+    
     toast(ChallengeStrings.create.success, {
       type: 'info',
       dissmissAction: true,
     })
+    console.log('nashe :v')
     navigate(`/challenge/${codename}`)
     closeModal(CREATE_CHALLENGE_REF_ID)
   }
