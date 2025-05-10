@@ -1,7 +1,7 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CreateChallengeCommand } from '../impl/create-challenge.comand';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
-import { CodeChallengeRepository } from '@/database/repositories/code-challenge.repository';
+import { QuestChallengeRepository } from '@/database/repositories/quest-challenge.repository';
 import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 import { envs } from '@/config/envs';
 import { CreateChallengeRequestType } from '../../types/challenge-store';
@@ -21,7 +21,7 @@ export class CreateChallengeHandler
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
-    private readonly codeChallengeRepository: CodeChallengeRepository,
+    private readonly codeChallengeRepository: QuestChallengeRepository,
     private readonly playerCacheRepository: PlayerCacheRepository,
     private readonly eventBus: EventBus,
   ) {}
@@ -34,6 +34,7 @@ export class CreateChallengeHandler
     try {
       const challenges =
         await this.codeChallengeRepository.getRandomChallengesByDifficult(
+          createChallenge.type,
           createChallenge.difficulties,
           CODE_CHALLENGES_SIZE,
         );
@@ -53,6 +54,7 @@ export class CreateChallengeHandler
       const challenge =
         await this.challengeRepository.createChallenge(challengeStore);
       await this.playerCacheRepository.setPlayerRoom(
+        createChallenge.type,
         creatorId,
         challenge.codename,
       );
