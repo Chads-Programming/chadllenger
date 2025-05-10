@@ -1,7 +1,7 @@
 import type {
-  ICodeChallenge,
-  ICodeChallengeState,
-} from './code-challenge.model'
+  IQuestChallenge,
+  IQuestChallengeState,
+} from './quest-challenge.model'
 import type { IParticipant } from './participant.model'
 
 export interface IChallengeState {
@@ -9,9 +9,9 @@ export interface IChallengeState {
   title: string
   codename: string
   participants: IParticipant[]
-  codeChallenges: ICodeChallenge[]
+  challenges: IQuestChallenge[]
   currentChallenge: string
-  playedChallenges: ICodeChallengeState[]
+  playedChallenges: IQuestChallengeState[]
   createdAt: Date
   updatedAt: Date
   creator: string

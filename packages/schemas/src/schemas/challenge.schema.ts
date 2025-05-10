@@ -1,8 +1,9 @@
 import * as z from 'zod'
-import { Difficult } from '..'
+import { ChallengeType, Difficult } from '..'
 
 export const challengeSchema = z.object({
   title: z.string().min(1),
+  type: z.enum([ChallengeType.Clash, ChallengeType.Quiz]),
   difficulties: z.array(
     z.enum([Difficult.Easy, Difficult.Medium, Difficult.Hard, Difficult.Chad]),
   ),

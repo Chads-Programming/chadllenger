@@ -25,7 +25,7 @@ export class ChallengeCacheRepository {
       .setCreator(challenge.creator)
       .setStatus(challenge.status)
       .setExpiration(challenge.expiration)
-      .setCodeChallenges(challenge.codeChallenges)
+      .setChallenges(challenge.challenges)
       .setParticipants(challenge.participants);
 
     const challengeKey = this.getKey(newChallenge.codename);
