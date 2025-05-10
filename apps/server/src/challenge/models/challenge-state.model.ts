@@ -1,15 +1,14 @@
 import {
   ChallengeStatusType,
   ChallengeSummary,
-  IChallengeState,
-  ICodeChallenge,
-  ICodeChallengeState,
   IParticipant,
+  IChallengeState,
+  IQuestChallenge,
+  IQuestChallengeState,
   Status,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
-import { CodeChallengeStateModel } from './code-challenge.model';
 import { ParticipantModel } from './participant.model';
 
 const CODENAME_SIZE = 6;
@@ -19,9 +18,9 @@ export class ChallengeStateBuilder {
   title: string;
   codename: string;
   participants: IParticipant[];
-  codeChallenges: ICodeChallenge[];
+  challenges: IQuestChallenge[];
   currentChallenge: string;
-  playedChallenges: ICodeChallengeState[];
+  playedChallenges: IQuestChallengeState[];
   createdAt: Date;
   updatedAt: Date;
   creator: string;
@@ -33,7 +32,7 @@ export class ChallengeStateBuilder {
     this.title = '';
     this.codename = codeGenerator.generateCode(CODENAME_SIZE);
     this.participants = [];
-    this.codeChallenges = [];
+    this.challenges = [];
     this.currentChallenge = '';
     this.playedChallenges = [];
     this.createdAt = new Date();
@@ -63,8 +62,8 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  setCodeChallenges(codeChallenges: ICodeChallenge[]) {
-    this.codeChallenges = codeChallenges;
+  setChallenges(codeChallenges: IQuestChallenge[]) {
+    this.challenges = codeChallenges;
     return this;
   }
 
@@ -73,7 +72,7 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  setPlayedChallenges(playedChallenges: CodeChallengeStateModel[]) {
+  setPlayedChallenges(playedChallenges: IQuestChallenge[]) {
     this.playedChallenges = playedChallenges;
     return this;
   }
@@ -110,8 +109,8 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  addCodeChallenge(codeChallenge: ICodeChallenge) {
-    this.codeChallenges.push(codeChallenge);
+  addCodeChallenge(codeChallenge: IQuestChallenge) {
+    this.challenges.push(codeChallenge);
 
     return this;
   }
@@ -123,7 +122,7 @@ export class ChallengeStateBuilder {
     challengeState.title = props.title;
     challengeState.codename = props.codename;
     challengeState.participants = props.participants;
-    challengeState.codeChallenges = props.codeChallenges;
+    challengeState.challenges = props.challenges;
     challengeState.currentChallenge = props.currentChallenge;
     challengeState.playedChallenges = props.playedChallenges;
     challengeState.createdAt = props.createdAt;
@@ -135,13 +134,13 @@ export class ChallengeStateBuilder {
     return challengeState;
   }
 
-  getProps(): IChallengeState {
+  getProps() {
     return {
       id: this.id,
       title: this.title,
       codename: this.codename,
       participants: this.participants,
-      codeChallenges: this.codeChallenges,
+      challenges: this.challenges,
       currentChallenge: this.currentChallenge,
       playedChallenges: this.playedChallenges,
       createdAt: this.createdAt,
@@ -158,7 +157,7 @@ export class ChallengeStateBuilder {
       title: this.title,
       codename: this.codename,
       participants: this.participants,
-      codeChallenges: this.codeChallenges,
+      challenges: this.challenges,
       currentChallenge: this.currentChallenge,
       playedChallenges: this.playedChallenges,
       createdAt: this.createdAt,

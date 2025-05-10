@@ -32,7 +32,7 @@ export class CreateChallengeHandler
     const { creatorId, createChallenge } = command;
 
     try {
-      const codeChallenges =
+      const challenges =
         await this.codeChallengeRepository.getRandomChallengesByDifficult(
           createChallenge.difficulties,
           CODE_CHALLENGES_SIZE,
@@ -45,7 +45,7 @@ export class CreateChallengeHandler
         title: createChallenge.title,
         creator: creatorId,
         participants: [creatorParticpant],
-        codeChallenges,
+        challenges,
         status: Status.PENDING,
         expiration: CHALLENGE_EXPIRATION_TIME,
       };
