@@ -1,4 +1,3 @@
-import { CodeChallengeRepository } from './repositories/code-challenge.repository';
-import { TestCaseRepository } from './repositories/test-case.repository';
+import { QuestChallengeRepository } from './repositories/quest-challenge.repository';
 
-export const REPOSITORIES = [CodeChallengeRepository, TestCaseRepository];
+export const REPOSITORIES = [QuestChallengeRepository];

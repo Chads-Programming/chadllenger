@@ -11,6 +11,7 @@ export const challengeSchema = z.object({
 })
 
 export const joinChallengeRoomSchema = z.object({
+  type: z.enum([ChallengeType.Clash, ChallengeType.Quiz]),
   codename: z.string().min(1),
   username: z.string().min(2),
 })

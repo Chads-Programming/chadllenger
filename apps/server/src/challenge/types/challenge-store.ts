@@ -1,4 +1,4 @@
-import { IParticipant, IChallengeState } from '@repo/schemas';
+import { IParticipant, IChallengeState, ChallengeType } from '@repo/schemas';
 
 export type CreateChallengeRequestType = Omit<
   IChallengeState,
@@ -22,6 +22,7 @@ export const JoinStatus = {
 export type JoinStatus = (typeof JoinStatus)[keyof typeof JoinStatus];
 
 export type JoinChallengeRequestType = {
+  type: ChallengeType;
   participantId: string;
   participantName: string;
   challengeCodename: string;

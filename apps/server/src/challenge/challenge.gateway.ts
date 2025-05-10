@@ -121,6 +121,7 @@ export class ChallengeGateway
 
     const response = await this.commandBus.execute(
       new JoinChallengeCommand({
+        type: joinPayload.type,
         challengeCodename: joinPayload.codename,
         participantId: client.auth.userId,
         participantName: joinPayload.username,

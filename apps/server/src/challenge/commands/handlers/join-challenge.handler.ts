@@ -72,6 +72,7 @@ export class JoinChallengeHandler
         },
       ),
       this.playerCacheRepository.setPlayerRoom(
+        command.joinRequest.type,
         command.joinRequest.participantId,
         challenge.codename,
       ),
