@@ -5,11 +5,11 @@ import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 import { ChadLogger } from '@/logger/chad-logger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CHALLENGE_EVENTS } from '../../consts';
-import { Status } from '@repo/schemas';
+import { IChallengeState, Status } from '@repo/schemas';
 
 @CommandHandler(FinishChallengeCommand)
 export class FinishChallengeHandler
-  implements ICommandHandler<FinishChallengeCommand, ChallengeStateBuilder>
+  implements ICommandHandler<FinishChallengeCommand, IChallengeState>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,

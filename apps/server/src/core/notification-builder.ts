@@ -8,6 +8,7 @@ import {
   ChallengeSummary,
   PlayerJoinedGame,
   ChallengeType,
+  IChallengeState,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -27,7 +28,7 @@ export const ChallengeNotificationBuilder = {
 
   buildCreatedRoomNotification(
     codename: string,
-    type: ChallengeType
+    type: ChallengeType,
   ): ChallengeNotificationType<CreatedRoomPayload> {
     return {
       id: generateUniqueId(),
@@ -35,7 +36,7 @@ export const ChallengeNotificationBuilder = {
       messageType: 'system',
       data: {
         codename,
-        type
+        type,
       },
       createdAt: new Date(),
     };
@@ -53,6 +54,18 @@ export const ChallengeNotificationBuilder = {
         id: participantId,
         name: participantName,
       },
+      createdAt: new Date(),
+    };
+  },
+
+  startedRoundNotification(
+    challenge: IChallengeState,
+  ): ChallengeNotificationType<IChallengeState> {
+    return {
+      id: generateUniqueId(),
+      type: NotificationsType.STARTED_ROUND,
+      messageType: 'system',
+      data: challenge,
       createdAt: new Date(),
     };
   },

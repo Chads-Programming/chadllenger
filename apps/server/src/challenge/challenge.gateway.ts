@@ -15,6 +15,7 @@ import {
   CreateChallenge,
   NotificationsChannels,
   JoinChallengeRoom,
+  ChallengeType,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
@@ -25,10 +26,12 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateBuilder } from './models/challenge-state.model';
 import { CHALLENGE_EVENTS } from './consts';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateChallengeCommand } from './commands/impl/create-challenge.comand';
+import { CreateClashChallengeCommand } from './commands/impl/create-clash-challenge.command';
 import { UpdateOnlineCountCommand } from './commands/impl/update-online-count.command';
 import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
 import { AuthenticatedSocket } from '@/adapters/redis-io.adapter';
+import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challenge.command';
+import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -76,16 +79,23 @@ export class ChallengeGateway
     @MessageBody() data: CreateChallenge,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    const challenge = await this.commandBus.execute(
-      new CreateChallengeCommand(client.auth.userId, data),
-    );
+    const challengeCommandStrategy = {
+      [ChallengeType.Clash]: () =>
+        new CreateClashChallengeCommand(client.auth.userId, data),
+      [ChallengeType.Quiz]: () =>
+        new CreateQuizChallengeCommand(client.auth.userId, data),
+    };
+
+    const creationCommand = challengeCommandStrategy[data.type]();
+
+    const challenge = await this.commandBus.execute(creationCommand);
 
     client.join(challenge.codename);
 
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
-        challenge.type
+        challenge.type,
       );
 
     this.server
@@ -144,6 +154,30 @@ export class ChallengeGateway
       .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
 
     return notification;
+  }
+
+  @SubscribeMessage(MessageTypes.START_CHALLENGE)
+  async startChallenge(
+    @MessageBody() codename: string,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    this.logger.log(
+      'Start challenge',
+      'ChallengeGateway::startChallenge',
+      codename,
+    );
+
+    const updatedChallenge = await this.commandBus.execute(
+      new StartChallengeCommand(codename),
+    );
+
+    const notification = ChallengeNotificationBuilder.startedRoundNotification(
+      updatedChallenge.getProps(),
+    );
+
+    this.server
+      .to(updatedChallenge.codename)
+      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
   }
 
   /**

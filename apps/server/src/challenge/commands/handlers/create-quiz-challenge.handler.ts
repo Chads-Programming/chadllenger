@@ -1,55 +1,47 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { CreateChallengeCommand } from '../impl/create-challenge.comand';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CreateClashChallengeCommand } from '../impl/create-clash-challenge.command';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
-import { QuestChallengeRepository } from '@/database/repositories/quest-challenge.repository';
 import { ChallengeStateBuilder } from '../../models/challenge-state.model';
 import { envs } from '@/config/envs';
 import { CreateChallengeRequestType } from '../../types/challenge-store';
 import { PlayerCacheRepository } from '../../repositories/player-cache.repository';
 import { CustomError } from '@/core/errors/custom-error';
-import { CreatedChallengeEvent } from '../../events/impl/created-challenge.event';
 import { ErrorCodes } from '@/lib/errors';
 import { Status } from '@repo/schemas';
 import { ParticipantModel } from '@/challenge/models/participant.model';
+import { CreateQuizChallengeCommand } from '../impl/create-quiz-challenge.command';
 
-const CODE_CHALLENGES_SIZE = 3;
 const CHALLENGE_EXPIRATION_TIME = Math.ceil(Number(envs.CHALLENGE_TTL) / 2);
 
-@CommandHandler(CreateChallengeCommand)
-export class CreateChallengeHandler
-  implements ICommandHandler<CreateChallengeCommand, ChallengeStateBuilder>
+@CommandHandler(CreateQuizChallengeCommand)
+export class CreateQuizChallengeHandler
+  implements ICommandHandler<CreateClashChallengeCommand, ChallengeStateBuilder>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
-    private readonly codeChallengeRepository: QuestChallengeRepository,
     private readonly playerCacheRepository: PlayerCacheRepository,
-    private readonly eventBus: EventBus,
   ) {}
 
   async execute(
-    command: CreateChallengeCommand,
+    command: CreateClashChallengeCommand,
   ): Promise<ChallengeStateBuilder> {
     const { creatorId, createChallenge } = command;
 
     try {
-      const challenges =
-        await this.codeChallengeRepository.getRandomChallengesByDifficult(
-          createChallenge.type,
-          createChallenge.difficulties,
-          CODE_CHALLENGES_SIZE,
-        );
       const creatorParticpant = new ParticipantModel(
         creatorId,
         createChallenge.creatorName,
       );
+
       const challengeStore: CreateChallengeRequestType = {
         title: createChallenge.title,
         creator: creatorId,
         participants: [creatorParticpant],
-        challenges,
+        challenges: [],
         status: Status.PENDING,
         expiration: CHALLENGE_EXPIRATION_TIME,
-        type: createChallenge.type
+        type: createChallenge.type,
+        difficulties: createChallenge.difficulties,
       };
 
       const challenge =
@@ -59,7 +51,7 @@ export class CreateChallengeHandler
         challenge.codename,
       );
 
-      this.eventBus.publish(new CreatedChallengeEvent(challenge.codename));
+      // TODO: emitir evento respectivo para este caso
 
       return challenge;
     } catch (error) {

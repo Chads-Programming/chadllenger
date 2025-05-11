@@ -27,6 +27,7 @@ export class ChallengeCacheRepository {
       .setExpiration(challenge.expiration)
       .setChallenges(challenge.challenges)
       .setParticipants(challenge.participants)
+      .setDifficulties(challenge.difficulties)
       .setType(challenge.type);
 
     const challengeKey = this.getKey(newChallenge.codename);
@@ -67,7 +68,7 @@ export class ChallengeCacheRepository {
     const key = this.getKey(codename);
     const challenge = await this.cache.get<string>(key);
 
-    return JSON.parse(challenge);
+    return ChallengeStateBuilder.fromProps(JSON.parse(challenge));
   }
 
   private getKey(id: string) {
