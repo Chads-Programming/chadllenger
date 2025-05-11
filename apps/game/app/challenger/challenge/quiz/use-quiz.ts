@@ -65,7 +65,6 @@ import {
   
     // biome-ignore lint/correctness/useExhaustiveDependencies: ignore handleChallengeInfo
     useEffect(() => {
-      console.log({codename})
       challengeApi.getChallengeByCodename(codename).then(handleChallengeInfo)
     }, [codename])
   

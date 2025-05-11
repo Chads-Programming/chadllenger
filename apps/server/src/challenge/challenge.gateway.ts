@@ -8,7 +8,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
 import {
   MessageTypes,
@@ -17,6 +16,8 @@ import {
   JoinChallengeRoom,
   ChallengeType,
   IGeneratedQuizChallenge,
+  NotificationsType,
+  IChallengeState,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
@@ -35,6 +36,7 @@ import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challeng
 import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
 import { WithId } from '@/types/with-id.type';
 import { GetChallengeQuery } from './queries/impl/get-challenge.query';
+import { Server } from 'socket.io';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -48,7 +50,7 @@ import { GetChallengeQuery } from './queries/impl/get-challenge.query';
 export class ChallengeGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  private server: Server;
+  private server: Server
 
   constructor(
     private readonly commandBus: CommandBus,
@@ -89,27 +91,25 @@ export class ChallengeGateway
     };
 
     const creationCommand = challengeCommandStrategy[data.type]();
-
     const challenge = await this.commandBus.execute(creationCommand);
 
     client.join(challenge.codename);
+
     if (challenge.type === ChallengeType.Quiz) return
 
     return this.connectToChallenge(challenge, client);
   }
 
-  connectToChallenge(challenge: ChallengeStateBuilder, client: AuthenticatedSocket) {
+  connectToChallenge(challenge: IChallengeState, client: AuthenticatedSocket) {
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
-        challenge.type,
+        challenge.type
       );
 
     this.server
-      .to(client.auth.userId)
-      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
-
-    this.challengeQueue.finishChallengeToQueue(challenge.codename);
+      .to(client.id)
+      .emit(NotificationsType.CREATED_ROOM, notification);
 
     return notification;
   }
@@ -216,11 +216,12 @@ export class ChallengeGateway
   }
 
   @OnEvent(AI_EVENTS.CHALLENGE_GENERATED)
-  async generatedChallenge(challenge: WithId<IGeneratedQuizChallenge>, client: AuthenticatedSocket) {
-    const challengeState = await this.getChallengeByCodename(challenge.id);
-
-
-    return this.connectToChallenge(challengeState, client);
+  async generatedChallenge(challenge: IChallengeState) {
+    
+    const creator = await this.getSocketByUserId(challenge.creator);
+    // TODO: handle when creator disconnected before challenge is generated
+    if (!creator) return;
+    return this.connectToChallenge(challenge, creator);
   }
   /**
    * Retrieves the number of currently connected sockets to the server.
@@ -231,6 +232,10 @@ export class ChallengeGateway
     return (this.server.sockets as unknown as { size: number }).size;
   }
 
+  private async getSocketByUserId(userId: string) {
+    const sockets = await this.server.fetchSockets() as unknown as AuthenticatedSocket[];
+    return sockets.find(socket => socket.auth.userId === userId);
+  }
   /**
    * Handles the rejoining of a challenge by a client.
    * This method checks if the client is currently associated with a room

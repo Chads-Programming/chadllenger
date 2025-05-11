@@ -1,4 +1,4 @@
-import type { IParticipant } from '@repo/schemas'
+import type { IParticipant, IQuestQuizChallenge } from '@repo/schemas'
 
 export const ACTIONS = {
   LOAD_INITIAL_STATE: 'LOAD_INITIAL_STATE',
@@ -27,6 +27,7 @@ type IChallengeState = {
   participants: IParticipant[]
   currentQuestion: IQuestion
   playedQuestions: IQuestion[]
+  challenges: IQuestQuizChallenge[]
   createdAt: Date
   updatedAt: Date
   creator: string
@@ -44,6 +45,7 @@ export const INITIAL_STATE: IChallengeState = {
   title: '',
   codename: '',
   participants: [],
+  challenges: [],
   currentQuestion: {
     id: '',
     question: '',

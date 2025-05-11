@@ -7,6 +7,7 @@ import {
   IQuestChallengeState,
   Status,
   ChallengeType,
+  IQuestQuizChallenge,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
@@ -15,15 +16,15 @@ import { Difficult } from '@repo/database';
 
 const CODENAME_SIZE = 6;
 
-export class ChallengeStateBuilder {
+export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQuestChallenge, QuestChallengeState extends IQuestChallengeState = IQuestChallengeState> {
   id: string;
   title: string;
   codename: string;
   participants: IParticipant[];
-  challenges: IQuestChallenge[];
+  challenges: QuestChallenge[];
   difficulties: Difficult[];
   currentChallenge: string;
-  playedChallenges: IQuestChallengeState[];
+  playedChallenges: QuestChallengeState[];
   createdAt: Date;
   updatedAt: Date;
   creator: string;
@@ -67,7 +68,7 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  setChallenges(codeChallenges: IQuestChallenge[]) {
+  setChallenges(codeChallenges: QuestChallenge[]) {
     this.challenges = codeChallenges;
     return this;
   }
@@ -77,7 +78,7 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  setPlayedChallenges(playedChallenges: IQuestChallenge[]) {
+  setPlayedChallenges(playedChallenges: QuestChallengeState[]) {
     this.playedChallenges = playedChallenges;
     return this;
   }
@@ -119,7 +120,7 @@ export class ChallengeStateBuilder {
     return this;
   }
 
-  addCodeChallenge(codeChallenge: IQuestChallenge) {
+  addCodeChallenge(codeChallenge: QuestChallenge) {
     this.challenges.push(codeChallenge);
 
     return this;
@@ -215,3 +216,6 @@ export class ChallengeStateBuilder {
     };
   }
 }
+
+
+export type QuizChallengeStateBuilder = ChallengeStateBuilder<IQuestQuizChallenge>;

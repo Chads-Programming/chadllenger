@@ -1,12 +1,13 @@
 import {
   MessageTypes,
+  NotificationsType,
   type ChallengeNotificationType,
   type CreateChallenge,
   type CreatedRoomPayload,
 } from '@repo/schemas'
 import { useModalTrigger } from 'components/modal/modal-trigger'
 import { useToast } from 'hooks/use-toast'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useSocket } from 'socket/use-socket'
 
@@ -26,7 +27,6 @@ export const useCreateChallenge = () => {
     response: ChallengeNotificationType<CreatedRoomPayload>,
   ) => {
     const { codename, type} = response.data
-    console.log({response})
     dismiss(toastIdRef.current as string | number)
     
     toast(ChallengeStrings.create.success, {
@@ -43,6 +43,16 @@ export const useCreateChallenge = () => {
     })
     emitEvent(MessageTypes.CREATE_ROOM, data, onCreateRoomHandler)
   }
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on(NotificationsType.CREATED_ROOM, (data: ChallengeNotificationType<CreatedRoomPayload>) => {
+      onCreateRoomHandler(data)
+    })
+    return () => {
+      socket.off(NotificationsType.CREATED_ROOM)
+    }
+  }, [socket, dismiss, toast])
 
   return {
     socket,

@@ -19,7 +19,7 @@ const PlayerNotificationBox = () => {
 
   const { registryNotification, unRegistryNotification } =
     useChallengeNotifications(NotificationsChannels.CHALLENGE_NOTIFICATIONS)
-
+    
   const popNotifications = useCallback(() => {
     setNotification((prev) => prev.slice(1))
   }, [])

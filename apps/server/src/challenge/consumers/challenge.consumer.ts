@@ -2,18 +2,20 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { AI_EVENTS, CHALLENGE_QUEUE } from '../consts';
 import { ChadLogger } from '@/logger/chad-logger';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FinishChallengeCommand } from '../commands/impl/finish-challenge.command';
-import { IGeneratedQuizChallenge } from '@repo/schemas';
-import { ChallengeGateway } from '../challenge.gateway';
+import { IGeneratedQuizChallenge, IQuestQuizChallenge } from '@repo/schemas';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UpdateQuizzChallengeCommand } from '../commands/impl/update-quizz-challenge.command';
+import { WithId } from '@/types/with-id.type';
+import { GetChallengeQuery } from '../queries/impl/get-challenge.query';
 
 @Processor(CHALLENGE_QUEUE.NAME)
 export class ChallengeConsumer extends WorkerHost {
   constructor(
     private readonly logger: ChadLogger,
     private readonly commandBus: CommandBus,
-    private readonly challengeWs: ChallengeGateway,
+    private readonly queryBus: QueryBus,
     private readonly eventEmitter: EventEmitter2,
   ) {
     super();
@@ -28,9 +30,25 @@ export class ChallengeConsumer extends WorkerHost {
     }
   }
 
-  async processGeneratedChallenge(job: Job<IGeneratedQuizChallenge, void, string>): Promise<void> {
+  async processGeneratedChallenge(job: Job<WithId<IGeneratedQuizChallenge>, void, string>): Promise<void> {
     const { data } = job;
-    this.eventEmitter.emit(AI_EVENTS.CHALLENGE_GENERATED, data);
+    const challenge = await this.queryBus.execute(new GetChallengeQuery(data.id))
+
+    if (!challenge) throw new Error('Challenge not found')
+
+    const challenges: IQuestQuizChallenge[] = data.questions.map((question) => ({
+      id: question.id,
+      createdAt: new Date(),
+      question
+    }))
+
+    const res = await this.commandBus.execute(new UpdateQuizzChallengeCommand({
+      ...challenge,
+      challenges
+    }));
+
+
+    this.eventEmitter.emit(AI_EVENTS.CHALLENGE_GENERATED, res);
   }
 
   async processFinishChallenge(job: Job<string, void, string>): Promise<void> {

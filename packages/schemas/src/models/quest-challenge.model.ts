@@ -15,11 +15,7 @@ export type ChallengeType = (typeof ChallengeType)[keyof typeof ChallengeType]
 
 export interface IQuestChallenge {
   id: string
-  title: string
-  description: string
-  difficult: Difficult
   createdAt: Date
-  updatedAt: Date
 }
 
 export interface IQuestChallengeState {
