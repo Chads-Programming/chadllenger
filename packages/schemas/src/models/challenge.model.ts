@@ -1,5 +1,6 @@
 import type {
   ChallengeType,
+  Difficult,
   IQuestChallenge,
   IQuestChallengeState,
 } from './quest-challenge.model'
@@ -10,6 +11,7 @@ export interface IChallengeState {
   title: string
   codename: string
   participants: IParticipant[]
+  difficulties: Difficult[]
   challenges: IQuestChallenge[]
   currentChallenge: string
   playedChallenges: IQuestChallengeState[]

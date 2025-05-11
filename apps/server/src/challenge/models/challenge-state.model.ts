@@ -11,6 +11,7 @@ import {
 import * as codeGenerator from '@/utils/code-generator';
 
 import { ParticipantModel } from './participant.model';
+import { Difficult } from '@repo/database';
 
 const CODENAME_SIZE = 6;
 
@@ -20,6 +21,7 @@ export class ChallengeStateBuilder {
   codename: string;
   participants: IParticipant[];
   challenges: IQuestChallenge[];
+  difficulties: Difficult[];
   currentChallenge: string;
   playedChallenges: IQuestChallengeState[];
   createdAt: Date;
@@ -28,7 +30,7 @@ export class ChallengeStateBuilder {
   status: ChallengeStatusType;
   expiration: number;
   type: ChallengeType;
-  
+
   constructor() {
     this.id = '';
     this.title = '';
@@ -123,6 +125,11 @@ export class ChallengeStateBuilder {
     return this;
   }
 
+  setDifficulties(difficulties: Difficult[]) {
+    this.difficulties = difficulties;
+    return this;
+  }
+
   static fromProps(props: IChallengeState): ChallengeStateBuilder {
     const challengeState = new ChallengeStateBuilder();
 
@@ -139,11 +146,12 @@ export class ChallengeStateBuilder {
     challengeState.status = props.status;
     challengeState.expiration = props.expiration;
     challengeState.type = props.type;
+    challengeState.difficulties = props.difficulties;
 
     return challengeState;
   }
 
-  getProps() {
+  getProps(): IChallengeState {
     return {
       id: this.id,
       title: this.title,
@@ -157,6 +165,7 @@ export class ChallengeStateBuilder {
       creator: this.creator,
       status: this.status,
       expiration: this.expiration,
+      difficulties: this.difficulties,
       type: this.type,
     };
   }

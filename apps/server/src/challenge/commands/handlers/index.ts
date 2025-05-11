@@ -1,10 +1,10 @@
-import { CreateChallengeHandler } from './create-challenge.handler';
+import { CreateClashChallengeHandler } from './create-clash-challenge.handler';
 import { FinishChallengeHandler } from './finish-challenge.handler';
 import { JoinChallengeHandler } from './join-challenge.handler';
 import { UpdateOnlineCountHandler } from './update-online-count.handler';
 
 export default [
-  CreateChallengeHandler,
+  CreateClashChallengeHandler,
   FinishChallengeHandler,
   UpdateOnlineCountHandler,
   JoinChallengeHandler,
