@@ -1,4 +1,3 @@
-import ChallengeParticipants from '../clash/challenge-participants'
 import type { Route } from './+types/quiz.page'
 import QuizOption from './components/quiz-option'
 import { useQuiz } from './use-quiz'
