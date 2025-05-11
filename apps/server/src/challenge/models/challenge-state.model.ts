@@ -130,6 +130,18 @@ export class ChallengeStateBuilder {
     return this;
   }
 
+  updateParticipant(participant: ParticipantModel) {
+    const index = this.participants.findIndex((p) => p.id === participant.id);
+    if (index !== -1) {
+      this.participants[index] = participant;
+    }
+    return this;
+  }
+
+  findParticipant(participantId: string) {
+    return this.participants.find((p) => p.id === participantId);
+  }
+
   static fromProps(props: IChallengeState): ChallengeStateBuilder {
     const challengeState = new ChallengeStateBuilder();
 
