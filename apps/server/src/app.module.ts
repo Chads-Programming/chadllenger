@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { BullModule } from '@nestjs/bullmq';
 import { envs } from './config/envs';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CqrsModule,
     EventEmitterModule.forRoot(),
     CqrsModule.forRoot(),
+    AiModule,
     BullModule.forRoot({
       connection: {
         host: envs.REDIS_HOST,

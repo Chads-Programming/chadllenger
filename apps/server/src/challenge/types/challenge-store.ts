@@ -14,6 +14,10 @@ export type UpdateChallengeRequestType = Partial<
   Omit<IChallengeState, 'id' | 'createdAt' | 'updatedAt'>
 >;
 
+export type UpdateQuizzChallengeRequestType = Partial<
+  Omit<IChallengeState, 'id' | 'createdAt' | 'updatedAt'>
+>;
+
 export const JoinStatus = {
   ALREADY_JOINED: 'ALREADY_JOINED',
   JOINED: 'JOINED',
@@ -34,6 +38,7 @@ export type JoinChallengeResponseType = {
 };
 
 export type AnswerQuestionRequestType = {
+  participantId: string;
   codename: string;
   answer: string;
   questionId: string;

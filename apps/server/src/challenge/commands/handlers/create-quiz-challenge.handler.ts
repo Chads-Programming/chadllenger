@@ -1,4 +1,4 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CreateClashChallengeCommand } from '../impl/create-clash-challenge.command';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
 import { ChallengeStateBuilder } from '../../models/challenge-state.model';
@@ -10,6 +10,7 @@ import { ErrorCodes } from '@/lib/errors';
 import { Status } from '@repo/schemas';
 import { ParticipantModel } from '@/challenge/models/participant.model';
 import { CreateQuizChallengeCommand } from '../impl/create-quiz-challenge.command';
+import { CreatedQuizChallengeEvent } from '@/challenge/events/impl/created-quiz-challenge.event';
 
 const CHALLENGE_EXPIRATION_TIME = Math.ceil(Number(envs.CHALLENGE_TTL) / 2);
 
@@ -20,6 +21,7 @@ export class CreateQuizChallengeHandler
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
     private readonly playerCacheRepository: PlayerCacheRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(
@@ -52,7 +54,9 @@ export class CreateQuizChallengeHandler
       );
 
       // TODO: emitir evento respectivo para este caso
-
+      const challengeEvent = new CreatedQuizChallengeEvent(challenge.codename);
+      
+      this.eventBus.publish(challengeEvent);
       return challenge;
     } catch (error) {
       throw CustomError.serverError({

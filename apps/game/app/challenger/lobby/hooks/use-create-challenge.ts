@@ -25,9 +25,8 @@ export const useCreateChallenge = () => {
   const onCreateRoomHandler = (
     response: ChallengeNotificationType<CreatedRoomPayload>,
   ) => {
-    console.log({response})
     const { codename, type} = response.data
-    
+    console.log({response})
     dismiss(toastIdRef.current as string | number)
     
     toast(ChallengeStrings.create.success, {

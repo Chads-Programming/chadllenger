@@ -1,18 +1,23 @@
-import { ChallengeCacheRepository } from '@/challenge/repositories/challenge-cache.repository';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+  CommandBus,
+} from '@nestjs/cqrs';
 import { AnswerQuest, IQuestQuizChallenge, QuestResponse } from '@repo/schemas';
 import { AnswerQuestQuizCommand } from '../impl/answer-quest-quiz.command';
 import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query';
 import { CustomError } from '@/core/errors/custom-error';
 import { ErrorCodes } from '@/lib/errors';
+import { UpdateQuizzChallengeCommand } from '../impl/update-quizz-challenge.command';
 
 @CommandHandler(AnswerQuestQuizCommand)
 export class AnswerQuestQuizHandler
   implements ICommandHandler<AnswerQuestQuizCommand, QuestResponse>
 {
   constructor(
-    private readonly challengeRespository: ChallengeCacheRepository,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: AnswerQuestQuizCommand): Promise<QuestResponse> {
@@ -25,11 +30,22 @@ export class AnswerQuestQuizHandler
         (challenge) => challenge.id === command.anwserPayload.questionId,
       );
 
-      // TODO: update challenge with the answer
-      return this.compareAnswers(
+      const response = this.compareAnswers(
         command.anwserPayload,
         quest as IQuestQuizChallenge,
       );
+
+      const participant = challenge.findParticipant(
+        command.anwserPayload.participantId,
+      );
+
+      participant.score += response.score;
+
+      challenge.updateParticipant(participant);
+
+      await this.commandBus.execute(new UpdateQuizzChallengeCommand(challenge));
+
+      return response;
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
@@ -47,8 +63,8 @@ export class AnswerQuestQuizHandler
     answer: AnswerQuest,
     quest: IQuestQuizChallenge,
   ): QuestResponse {
-    const correctOption = quest.questions.options.find(
-      (option) => option.isAnswer === true,
+    const correctOption = quest.question.options.find(
+      (option) => option.isCorrectAnswer === true,
     );
 
     return {
