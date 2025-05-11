@@ -1,28 +1,57 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { Queue } from 'bullmq';
-import { CHALLENGE_QUEUE } from '../consts';
+import { JobsOptions, Queue } from 'bullmq';
+import { AI_QUEUE, CHALLENGE_QUEUE } from '../consts';
 import { envs } from '@/config/envs';
+import { WithId } from '@/types/with-id.type';
+import { IGeneratedQuizChallenge } from '@repo/schemas';
 
 @Injectable()
 export class ChallengeQueueService {
   constructor(
     @InjectQueue(CHALLENGE_QUEUE.NAME) private challengeQueue: Queue,
+    @InjectQueue(AI_QUEUE.NAME) private aiQueue: Queue,
   ) {}
 
   finishChallengeToQueue(challengeId: string) {
     return this.challengeQueue.add(
       CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE,
       challengeId,
+      this.getFinishChallengeOptions(),
+    );
+  }
+
+  generateChallengeToQueue(challengeId: string) {
+    return this.aiQueue.add(
+      AI_QUEUE.JOBS.GENERATE_CHALLENGE,
+      challengeId,
       this.getQueueOptions(),
     );
   }
 
-  private getQueueOptions() {
+  generatedChallengeToQueue(challenge: WithId<IGeneratedQuizChallenge>) {
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.GENERATED_CHALLENGE,
+      challenge,
+      this.getQueueOptions(),
+    );
+  }
+
+  private getQueueOptions(): JobsOptions {
+    return {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 3000,
+      },
+    };
+  }
+
+  private getFinishChallengeOptions() {
     const challengeTTL = Number(envs.CHALLENGE_TTL);
 
     return {
-      attempts: 3,
+      ...this.getQueueOptions(),
       delay: challengeTTL,
       backoff: {
         type: 'fixed',

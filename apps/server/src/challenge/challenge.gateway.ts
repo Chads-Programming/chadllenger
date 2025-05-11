@@ -16,6 +16,7 @@ import {
   NotificationsChannels,
   JoinChallengeRoom,
   ChallengeType,
+  IGeneratedQuizChallenge,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
@@ -24,7 +25,7 @@ import { ChadLogger } from '@/logger/chad-logger';
 import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateBuilder } from './models/challenge-state.model';
-import { CHALLENGE_EVENTS } from './consts';
+import { AI_EVENTS, CHALLENGE_EVENTS } from './consts';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateClashChallengeCommand } from './commands/impl/create-clash-challenge.command';
 import { UpdateOnlineCountCommand } from './commands/impl/update-online-count.command';
@@ -32,6 +33,8 @@ import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
 import { AuthenticatedSocket } from '@/adapters/redis-io.adapter';
 import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challenge.command';
 import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
+import { WithId } from '@/types/with-id.type';
+import { GetChallengeQuery } from './queries/impl/get-challenge.query';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -43,8 +46,7 @@ import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
   },
 })
 export class ChallengeGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server;
 
@@ -53,7 +55,7 @@ export class ChallengeGateway
     private readonly queryBus: QueryBus,
     private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
-  ) {}
+  ) { }
 
   handleConnection(client: AuthenticatedSocket) {
     this.handleGeneralConnection();
@@ -91,7 +93,12 @@ export class ChallengeGateway
     const challenge = await this.commandBus.execute(creationCommand);
 
     client.join(challenge.codename);
+    if (challenge.type === ChallengeType.Quiz) return
 
+    return this.connectToChallenge(challenge, client);
+  }
+
+  connectToChallenge(challenge: ChallengeStateBuilder, client: AuthenticatedSocket) {
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
@@ -105,6 +112,12 @@ export class ChallengeGateway
     this.challengeQueue.finishChallengeToQueue(challenge.codename);
 
     return notification;
+  }
+
+  async getChallengeByCodename(codename: string) {
+    return await this.queryBus.execute(
+      new GetChallengeQuery(codename),
+    );
   }
 
   /**
@@ -202,6 +215,13 @@ export class ChallengeGateway
       );
   }
 
+  @OnEvent(AI_EVENTS.CHALLENGE_GENERATED)
+  async generatedChallenge(challenge: WithId<IGeneratedQuizChallenge>, client: AuthenticatedSocket) {
+    const challengeState = await this.getChallengeByCodename(challenge.id);
+
+
+    return this.connectToChallenge(challengeState, client);
+  }
   /**
    * Retrieves the number of currently connected sockets to the server.
    *
@@ -267,4 +287,5 @@ export class ChallengeGateway
       ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
     );
   }
+
 }
