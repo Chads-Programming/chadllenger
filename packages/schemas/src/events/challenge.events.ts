@@ -37,6 +37,14 @@ export type PlayerJoinedGame = {
   name: string
 }
 
+export type QuestResponse = {
+  isAnwserCorrect: boolean
+  score: number
+  questionId: string
+  yourAnswer: string
+  correctAwnswer: string
+}
+
 export type PlayerLeftGame = {
   id: string
   username: string

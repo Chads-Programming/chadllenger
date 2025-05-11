@@ -16,5 +16,12 @@ export const joinChallengeRoomSchema = z.object({
   username: z.string().min(2),
 })
 
+export const answerQuestSchema = z.object({
+  codename: z.string().min(1),
+  answer: z.string().min(1),
+  questionId: z.string().min(1),
+})
+
 export type CreateChallenge = z.infer<typeof challengeSchema>
 export type JoinChallengeRoom = z.infer<typeof joinChallengeRoomSchema>
+export type AnswerQuest = z.infer<typeof answerQuestSchema>

@@ -32,3 +32,15 @@ export type JoinChallengeResponseType = {
   participant: IParticipant;
   status: JoinStatus;
 };
+
+export type AnswerQuestionRequestType = {
+  codename: string;
+  answer: string;
+  questionId: string;
+};
+
+export type AnswerQuestionResponseType = {
+  codename: string;
+  answer: string;
+  questionId: string;
+};
