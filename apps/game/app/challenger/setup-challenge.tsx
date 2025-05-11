@@ -14,6 +14,7 @@ import ChallengeStrings from './common/strings/challenge'
 import { DIFFICULTIES } from './consts'
 import PlayerCard from './common/components/player-card'
 import { useLobby } from './lobby/providers/lobby.provider'
+import { useEffect } from 'react'
 
 export const SetupChallenge = () => {
   const { username } = useUser()
@@ -36,6 +37,10 @@ export const SetupChallenge = () => {
 
   const selectedDifficulties = watch('difficulties', [])
 
+  useEffect(() => {
+    setValue('type', challengeType || ChallengeType.Clash)
+  }, [challengeType, setValue])
+  
   const onSubmit = (data: CreateChallenge) => {
     handleCreateChallenge(data)
   }
