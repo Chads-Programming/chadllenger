@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import ChallengeParticipants from '../clash/challenge-participants'
 import type { Route } from './+types/quiz.page'
 import QuizOption from './components/quiz-option'
 import { useQuiz } from './use-quiz'
@@ -5,15 +7,16 @@ import { useQuiz } from './use-quiz'
 export default function QuizChallenge({ params }: Route.ComponentProps) {
   const { challengeState } = useQuiz(params.codename)
   const challenge = challengeState.challenges[0]
+  const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
   const sendAnswer = (optionId: string) => {
-    console.log({ optionId })
+    setSelectedOption(optionId)
   }
 
   if (!challenge) return <div>No challenge found</div>
 
   return (
-    <div>
+    <div className="relative min-w-full">
       <div className="max-w-6xl mx-auto relative">
         <div className="grid place-items-center">
           <div className="flex flex-col gap-6">
@@ -24,8 +27,12 @@ export default function QuizChallenge({ params }: Route.ComponentProps) {
                   key={challenge.id}
                   option={option}
                   onClick={sendAnswer}
+                  isSelected={selectedOption === option.id}
                 />
               ))}
+            </div>
+            <div className="space-y-6 lg:absolute top-0 right-0 lg:w-[250px]">
+              <ChallengeParticipants participants={challengeState.participants} />
             </div>
           </div>
         </div>
@@ -33,11 +40,3 @@ export default function QuizChallenge({ params }: Route.ComponentProps) {
     </div>
   )
 }
-
-/* 
-<div className="grid grid-cols-3 gap-6">
-            <div className="space-y-6">
-              <ChallengeParticipants participants={challengeState.participants} />
-            </div>
-          </div>
-*/
