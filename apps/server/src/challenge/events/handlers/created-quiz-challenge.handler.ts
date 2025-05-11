@@ -9,7 +9,6 @@ export class CreatedQuizChallengeEventHandler
   constructor(private readonly challengeQueue: ChallengeQueueService) {}
 
   async handle(event: CreatedQuizChallengeEvent) {
-    console.log('created challenge god')
     await this.challengeQueue.generateChallengeToQueue(event.codename);
     await this.challengeQueue.finishChallengeToQueue(event.codename);
   }

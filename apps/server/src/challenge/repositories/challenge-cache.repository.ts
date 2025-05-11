@@ -67,6 +67,7 @@ export class ChallengeCacheRepository {
   ): Promise<ChallengeStateBuilder> {
     const key = this.getKey(codename);
     const challenge = await this.cache.get<string>(key);
+    if (!challenge) throw ErrorCodes.CHALLENGE_NOT_FOUND;
 
     return ChallengeStateBuilder.fromProps(JSON.parse(challenge));
   }

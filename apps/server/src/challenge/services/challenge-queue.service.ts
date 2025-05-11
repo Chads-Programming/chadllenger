@@ -25,7 +25,10 @@ export class ChallengeQueueService {
     return this.aiQueue.add(
       AI_QUEUE.JOBS.GENERATE_CHALLENGE,
       challengeId,
-      this.getQueueOptions(),
+      {
+        ...this.getQueueOptions(),
+        attempts: 1
+      },
     );
   }
 

@@ -1,0 +1,20 @@
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { ChallengeStateBuilder } from '@/challenge/models/challenge-state.model';
+import { ChallengeCacheRepository } from '@/challenge/repositories/challenge-cache.repository';
+import { GetQuizChallengeQuery } from '../impl/get-quiz-challenge-query.query';
+import { ChallengeType, IQuestQuizChallenge } from '@repo/schemas';
+
+@QueryHandler(GetQuizChallengeQuery)
+export class GetQuizChallengeQueryHandler
+  implements IQueryHandler<GetQuizChallengeQuery, ChallengeStateBuilder>
+{
+  constructor(private readonly challengeRepository: ChallengeCacheRepository) {}
+
+  async execute(query: GetQuizChallengeQuery): Promise<ChallengeStateBuilder<IQuestQuizChallenge>> {
+    const challenge = await this.challengeRepository.findChallengeByCodename(query.codename);
+
+    if (challenge.type !== ChallengeType.Quiz) throw new Error('Challenge is not a quiz');
+
+    return challenge as ChallengeStateBuilder<IQuestQuizChallenge>;
+  }
+}

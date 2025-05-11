@@ -4,6 +4,29 @@ import { GenerateChallengeCommand } from "../impl/generate-challenge.command";
 import { OpenaiService } from "@/ai/services/openai.service";
 import { generatedQuizChallengeSchema, IGeneratedQuizChallenge } from "@repo/schemas";
 
+
+const mockGeneratedChallenge: IGeneratedQuizChallenge = {
+    title: 'Quiz Challenge',
+    description: 'This is a quiz challenge',
+    questions: [
+        {
+            id: '1',
+            question: 'What is the capital of France?',
+            options: [
+                {
+                    id: '1',
+                    text: 'Paris',
+                    isCorrectAnswer: true,
+                },
+                {
+                    id: '2',
+                    text: 'London',
+                    isCorrectAnswer: false,
+                }]
+        }
+    ]
+}
+
 @CommandHandler(GenerateChallengeCommand)
 export class GenerateChallengeHandler implements ICommandHandler<GenerateChallengeCommand, string> {
 
@@ -12,11 +35,12 @@ export class GenerateChallengeHandler implements ICommandHandler<GenerateChallen
     ) { }
 
     async execute(command: GenerateChallengeCommand): Promise<IGeneratedQuizChallenge> {
-        const res = await this.openaiService.generateObject({
+        /* const res = await this.openaiService.generateObject({
             prompt: 'Generate a programming quiz challenge with 5 questions',
             schema: generatedQuizChallengeSchema,
         });
 
-        return res;
+        return res; */
+        return mockGeneratedChallenge;
     }
 }
