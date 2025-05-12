@@ -8,6 +8,7 @@ export type CreateChallengeRequestType = Omit<
   | 'codename'
   | 'currentChallenge'
   | 'playedChallenges'
+  | 'participantsQuestHistory'
 >;
 
 export type UpdateChallengeRequestType = Partial<
@@ -48,4 +49,11 @@ export type AnswerQuestionResponseType = {
   codename: string;
   answer: string;
   questionId: string;
+};
+
+export type RegisterAnswerRequestType = {
+  participantId: string;
+  questionId: string;
+  answer: string;
+  correctAnswer: string;
 };

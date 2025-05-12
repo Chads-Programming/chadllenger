@@ -15,6 +15,7 @@ export interface IChallengeState {
   challenges: IQuestChallenge[]
   currentChallenge: string
   playedChallenges: IQuestChallengeState[]
+  participantsQuestHistory: Record<string, IQuestHistory[]>
   createdAt: Date
   updatedAt: Date
   creator: string
@@ -28,5 +29,13 @@ export const Status = {
   IN_PROGRESS: 'IN_PROGRESS',
   FINISHED: ' FINISHED',
 } as const
+
+export interface IQuestHistory {
+  questionId: string
+  participantId: string
+  participantAnswer: string
+  score: number
+  createdAt: Date
+}
 
 export type ChallengeStatusType = (typeof Status)[keyof typeof Status]
