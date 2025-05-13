@@ -39,7 +39,6 @@ export type PlayerJoinedGame = {
 
 export type QuestResponse = {
   isAnwserCorrect: boolean
-  score: number
   questionId: string
   yourAnswer: string
   correctAwnswer: string

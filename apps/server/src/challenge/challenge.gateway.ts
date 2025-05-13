@@ -15,7 +15,6 @@ import {
   NotificationsChannels,
   JoinChallengeRoom,
   ChallengeType,
-  IGeneratedQuizChallenge,
   NotificationsType,
   IChallengeState,
 } from '@repo/schemas';
@@ -34,7 +33,6 @@ import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
 import { AuthenticatedSocket } from '@/adapters/redis-io.adapter';
 import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challenge.command';
 import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
-import { WithId } from '@/types/with-id.type';
 import { GetChallengeQuery } from './queries/impl/get-challenge.query';
 import { Server } from 'socket.io';
 
@@ -48,16 +46,17 @@ import { Server } from 'socket.io';
   },
 })
 export class ChallengeGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
-  private server: Server
+  private server: Server;
 
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
-  ) { }
+  ) {}
 
   handleConnection(client: AuthenticatedSocket) {
     this.handleGeneralConnection();
@@ -95,7 +94,7 @@ export class ChallengeGateway
 
     client.join(challenge.codename);
 
-    if (challenge.type === ChallengeType.Quiz) return
+    if (challenge.type === ChallengeType.Quiz) return;
 
     return this.connectToChallenge(challenge, client);
   }
@@ -104,7 +103,7 @@ export class ChallengeGateway
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
-        challenge.type
+        challenge.type,
       );
 
     this.server
@@ -115,9 +114,7 @@ export class ChallengeGateway
   }
 
   async getChallengeByCodename(codename: string) {
-    return await this.queryBus.execute(
-      new GetChallengeQuery(codename),
-    );
+    return await this.queryBus.execute(new GetChallengeQuery(codename));
   }
 
   /**
@@ -217,7 +214,6 @@ export class ChallengeGateway
 
   @OnEvent(AI_EVENTS.CHALLENGE_GENERATED)
   async generatedChallenge(challenge: IChallengeState) {
-    
     const creator = await this.getSocketByUserId(challenge.creator);
     // TODO: handle when creator disconnected before challenge is generated
     if (!creator) return;
@@ -233,8 +229,9 @@ export class ChallengeGateway
   }
 
   private async getSocketByUserId(userId: string) {
-    const sockets = await this.server.fetchSockets() as unknown as AuthenticatedSocket[];
-    return sockets.find(socket => socket.auth.userId === userId);
+    const sockets =
+      (await this.server.fetchSockets()) as unknown as AuthenticatedSocket[];
+    return sockets.find((socket) => socket.auth.userId === userId);
   }
   /**
    * Handles the rejoining of a challenge by a client.
@@ -292,5 +289,4 @@ export class ChallengeGateway
       ChallengeNotificationBuilder.buildPlayersNotification(onlineTotal),
     );
   }
-
 }

@@ -30,6 +30,7 @@ export class StartChallengeHandler
       }
 
       currentChallenge.setStatus(currentChallenge.status);
+      currentChallenge.setCurrentChallenge(currentChallenge.challenges[0].id);
 
       await this.challengeRepository.updateChallenge(codename, {
         challenges: currentChallenge.challenges,

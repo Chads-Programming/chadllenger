@@ -8,15 +8,21 @@ import {
   Status,
   ChallengeType,
   IQuestQuizChallenge,
+  IQuestHistory,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
 import { ParticipantModel } from './participant.model';
 import { Difficult } from '@repo/database';
+import { RegisterAnswerRequestType } from '../types/challenge-store';
 
 const CODENAME_SIZE = 6;
+const QUEST_DELTA_SCORE = 1000;
 
-export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQuestChallenge, QuestChallengeState extends IQuestChallengeState = IQuestChallengeState> {
+export class ChallengeStateBuilder<
+  QuestChallenge extends IQuestChallenge = IQuestChallenge,
+  QuestChallengeState extends IQuestChallengeState = IQuestChallengeState,
+> {
   id: string;
   title: string;
   codename: string;
@@ -31,6 +37,7 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
   status: ChallengeStatusType;
   expiration: number;
   type: ChallengeType;
+  participantsQuestHistory: Record<string, IQuestHistory[]>;
 
   constructor() {
     this.id = '';
@@ -40,7 +47,7 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
     this.challenges = [];
     this.currentChallenge = '';
     this.playedChallenges = [];
-    this.createdAt = new Date();
+    this.participantsQuestHistory = {};
     this.updatedAt = new Date();
     this.creator = '';
     this.status = Status.PENDING;
@@ -75,6 +82,14 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
 
   setCurrentChallenge(currentChallenge: string) {
     this.currentChallenge = currentChallenge;
+
+    const newQuestState: IQuestChallengeState = {
+      questionId: currentChallenge,
+      startedAt: new Date(),
+    };
+
+    this.playedChallenges.push(newQuestState as QuestChallengeState);
+
     return this;
   }
 
@@ -180,7 +195,43 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
       expiration: this.expiration,
       difficulties: this.difficulties,
       type: this.type,
+      participantsQuestHistory: this.participantsQuestHistory,
     };
+  }
+
+  registryParticipantAnswer(particpantAnswer: RegisterAnswerRequestType) {
+    const currentHistory =
+      this.participantsQuestHistory[particpantAnswer.questionId] || [];
+
+    const questionStartTime = this.playedChallenges.find(
+      (challenge) => challenge.questionId === particpantAnswer.questionId,
+    )?.startedAt;
+
+    const currentTime = new Date();
+
+    const diffTimes = currentTime.getTime() - questionStartTime.getTime();
+    const score = Math.floor(
+      (diffTimes + QUEST_DELTA_SCORE) / QUEST_DELTA_SCORE,
+    );
+
+    const newHistory: IQuestHistory = {
+      questionId: particpantAnswer.questionId,
+      participantId: particpantAnswer.participantId,
+      participantAnswer: particpantAnswer.answer,
+      score,
+      createdAt: new Date(),
+    };
+    currentHistory.push(newHistory);
+
+    const currentParticipant = this.participants.find(
+      (participant) => participant.id === particpantAnswer.participantId,
+    );
+
+    currentParticipant.score += score;
+
+    this.updateParticipant(currentParticipant);
+
+    return this;
   }
 
   serialize() {
@@ -197,6 +248,7 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
       creator: this.creator,
       status: this.status,
       expiration: this.expiration,
+      participantsQuestHistory: this.participantsQuestHistory,
       type: this.type,
     });
   }
@@ -217,5 +269,5 @@ export class ChallengeStateBuilder<QuestChallenge extends IQuestChallenge = IQue
   }
 }
 
-
-export type QuizChallengeStateBuilder = ChallengeStateBuilder<IQuestQuizChallenge>;
+export type QuizChallengeStateBuilder =
+  ChallengeStateBuilder<IQuestQuizChallenge>;
