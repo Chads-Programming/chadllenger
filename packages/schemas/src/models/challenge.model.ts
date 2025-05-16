@@ -16,6 +16,7 @@ export interface IChallengeState {
   currentChallenge: string
   playedChallenges: IQuestChallengeState[]
   participantsQuestHistory: Record<string, IQuestHistory[]>
+  startedAt?: Date
   createdAt: Date
   updatedAt: Date
   creator: string

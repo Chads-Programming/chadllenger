@@ -22,7 +22,6 @@ import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
 import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
-import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateBuilder } from './models/challenge-state.model';
 import { AI_EVENTS, CHALLENGE_EVENTS } from './consts';
@@ -54,7 +53,6 @@ export class ChallengeGateway
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
   ) {}
 

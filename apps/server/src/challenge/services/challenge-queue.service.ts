@@ -21,15 +21,22 @@ export class ChallengeQueueService {
     );
   }
 
-  generateChallengeToQueue(challengeId: string) {
-    return this.aiQueue.add(
-      AI_QUEUE.JOBS.GENERATE_CHALLENGE,
+  finishQuestToQueue(challengeId: string) {
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.FINISH_QUEST,
       challengeId,
       {
         ...this.getQueueOptions(),
-        attempts: 1
+        attempts: 1,
       },
     );
+  }
+
+  generateChallengeToQueue(challengeId: string) {
+    return this.aiQueue.add(AI_QUEUE.JOBS.GENERATE_CHALLENGE, challengeId, {
+      ...this.getQueueOptions(),
+      attempts: 1,
+    });
   }
 
   generatedChallengeToQueue(challenge: WithId<IGeneratedQuizChallenge>) {
@@ -45,6 +52,19 @@ export class ChallengeQueueService {
       attempts: 3,
       backoff: {
         type: 'exponential',
+        delay: 3000,
+      },
+    };
+  }
+
+  private getQuestOptions(): JobsOptions {
+    const questTTL = Number(envs.QUEST_TTL);
+
+    return {
+      attempts: 3,
+      delay: questTTL,
+      backoff: {
+        type: 'fixed',
         delay: 3000,
       },
     };

@@ -5,7 +5,6 @@ import { envs } from '@/config/envs';
 import { CreateChallengeRequestType } from '../../types/challenge-store';
 import { PlayerCacheRepository } from '../../repositories/player-cache.repository';
 import { CustomError } from '@/core/errors/custom-error';
-import { CreatedChallengeEvent } from '../../events/impl/created-challenge.event';
 import { ErrorCodes } from '@/lib/errors';
 import { Status } from '@repo/schemas';
 import { ParticipantModel } from '@/challenge/models/participant.model';
@@ -61,8 +60,6 @@ export class CreateClashChallengeHandler
         creatorId,
         challenge.codename,
       );
-
-      this.eventBus.publish(new CreatedChallengeEvent(challenge.codename));
 
       return challenge;
     } catch (error) {

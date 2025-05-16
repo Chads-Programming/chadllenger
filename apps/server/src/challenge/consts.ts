@@ -5,6 +5,7 @@ export const CHALLENGE_QUEUE = {
     CREATE_CHALLENGE: 'create-challenge',
     START_CHALLENGE: 'start-challenge',
     GENERATED_CHALLENGE: 'generated-challenge',
+    FINISH_QUEST: 'finish-quest',
   },
 };
 

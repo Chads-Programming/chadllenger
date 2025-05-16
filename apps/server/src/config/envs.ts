@@ -19,6 +19,7 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string(),
   REDIS_PORT: PortSchema,
   CHALLENGE_TTL: NumberSchema,
+  QUEST_TTL: NumberSchema,
   FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS: NumberSchema,
   LOBBY_TTL: z.string(),
   CLIENT_URL: z.string().url(),
@@ -42,6 +43,7 @@ export const envs = {
   REDIS_PORT: envVars.REDIS_PORT,
   REDIS_PASSWORD: envVars.REDIS_PASSWORD,
   CHALLENGE_TTL: envVars.CHALLENGE_TTL,
+  QUEST_TTL: envVars.CHALLENGE_TTL,
   FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS:
     envVars.FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS,
   CLIENT_URL: envVars.CLIENT_URL,

@@ -21,9 +21,9 @@ const SelectorChallengeType = () => {
   return (
     <section className="flex flex-wrap justify-center gap-8 mb-6">
       <LobbyCard
-        title="Quiz Challenge"
+        title="Chad Quest"
         description="Test your knowledge with interactive quizzes"
-        banner="/images/example-300x350.png"
+        banner="/images/chad-quest.png"
       >
         <button
           type="button"
@@ -41,7 +41,7 @@ const SelectorChallengeType = () => {
       <LobbyCard
         title="Clash of Code"
         description="Compete in real-time coding challenges"
-        banner="/images/example-300x350.png"
+        banner="/images/clash-of-code.png"
       >
         <button
           type="button"
