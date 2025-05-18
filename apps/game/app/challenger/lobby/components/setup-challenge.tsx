@@ -9,11 +9,11 @@ import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ModalContainer } from 'components/modal/modal'
-import { useCreateChallenge } from './lobby/hooks/use-create-challenge'
-import ChallengeStrings from './common/strings/challenge'
-import { DIFFICULTIES } from './consts'
-import PlayerCard from './common/components/player-card'
-import { useLobby } from './lobby/providers/lobby.provider'
+import { useCreateChallenge } from '../hooks/use-create-challenge'
+import ChallengeStrings from '../../common/strings/challenge'
+import { DIFFICULTIES } from '../../consts'
+import PlayerCard from '../../common/components/player-card'
+import { useLobby } from '../providers/lobby.provider'
 import { useEffect } from 'react'
 
 export const SetupChallenge = () => {
@@ -40,7 +40,7 @@ export const SetupChallenge = () => {
   useEffect(() => {
     setValue('type', challengeType || ChallengeType.Clash)
   }, [challengeType, setValue])
-  
+
   const onSubmit = (data: CreateChallenge) => {
     handleCreateChallenge(data)
   }
