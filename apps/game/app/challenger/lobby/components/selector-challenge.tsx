@@ -3,7 +3,7 @@ import { useLobby } from '../providers/lobby.provider'
 import { ChallengeType } from '@repo/schemas'
 import { LobbyStrings } from '~/challenger/common/strings/lobby'
 
-export const SelecChallengeType = () => {
+export const SelectChallengeType = () => {
   const { saveLastChallengeType } = useLobby()
 
   return (
