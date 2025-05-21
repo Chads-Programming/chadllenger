@@ -165,10 +165,7 @@ export class ChallengeGateway
   }
 
   @SubscribeMessage(MessageTypes.START_CHALLENGE)
-  async startChallenge(
-    @MessageBody() codename: string,
-    @ConnectedSocket() client: AuthenticatedSocket,
-  ) {
+  async startChallenge(@MessageBody() codename: string) {
     this.logger.log(
       'Start challenge',
       'ChallengeGateway::startChallenge',
@@ -216,6 +213,30 @@ export class ChallengeGateway
     // TODO: handle when creator disconnected before challenge is generated
     if (!creator) return;
     return this.connectToChallenge(challenge, creator);
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
+  async finishQuest(challenge: IChallengeState) {
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.buildFinishQuestNotification(
+          ChallengeStateBuilder.fromProps(challenge),
+        ),
+      );
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
+  async startNextQuest(challenge: IChallengeState) {
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.startedRoundNotification(
+          ChallengeStateBuilder.fromProps(challenge),
+        ),
+      );
   }
   /**
    * Retrieves the number of currently connected sockets to the server.

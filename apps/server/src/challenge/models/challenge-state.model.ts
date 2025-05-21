@@ -123,6 +123,24 @@ export class ChallengeStateBuilder<
     return this;
   }
 
+  finishCurrentQuest() {
+    const currentChallengeIndex = this.playedChallenges.findIndex(
+      (challenge) => challenge.questionId === this.currentChallenge,
+    );
+
+    const currentChallenge = this.playedChallenges[currentChallengeIndex];
+
+    const [bestHistory] = this.participantsQuestHistory[
+      currentChallenge.questionId
+    ].sort((aHistory, bHistory) => {
+      return bHistory.score - aHistory.score;
+    });
+
+    currentChallenge.winner = bestHistory.participantId;
+
+    return this;
+  }
+
   setPlayedChallenges(playedChallenges: QuestChallengeState[]) {
     this.playedChallenges = playedChallenges;
     return this;

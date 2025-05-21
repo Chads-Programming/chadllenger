@@ -1,4 +1,4 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateClashChallengeCommand } from '../impl/create-clash-challenge.command';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
 import { envs } from '@/config/envs';
@@ -22,7 +22,6 @@ export class CreateClashChallengeHandler
     private readonly challengeRepository: ChallengeCacheRepository,
     private readonly playerCacheRepository: PlayerCacheRepository,
     private readonly questChallengeRepository: QuestChallengeRepository,
-    private readonly eventBus: EventBus,
   ) {}
 
   async execute(

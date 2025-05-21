@@ -9,6 +9,9 @@ export class StartedChallengeEventHandler
   constructor(private readonly challengeQueue: ChallengeQueueService) {}
 
   async handle(event: StartedChallengeEvent) {
-    await this.challengeQueue.finishChallengeToQueue(event.codename);
+    await Promise.all([
+      this.challengeQueue.setupAutoQuestToQueue(event.codename),
+      this.challengeQueue.finishChallengeToQueue(event.codename),
+    ]);
   }
 }

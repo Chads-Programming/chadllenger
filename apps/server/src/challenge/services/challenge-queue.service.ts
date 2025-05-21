@@ -13,21 +13,40 @@ export class ChallengeQueueService {
     @InjectQueue(AI_QUEUE.NAME) private aiQueue: Queue,
   ) {}
 
-  finishChallengeToQueue(challengeId: string) {
-    return this.challengeQueue.add(
-      CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE,
-      challengeId,
-      this.getFinishChallengeOptions(),
-    );
-  }
+  setupAutoQuestToQueue(challengeId: string) {
+    const questTTL = Number(envs.QUEST_TTL);
 
-  finishQuestToQueue(challengeId: string) {
     return this.challengeQueue.add(
-      CHALLENGE_QUEUE.JOBS.FINISH_QUEST,
+      CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST,
       challengeId,
       {
         ...this.getQueueOptions(),
-        attempts: 1,
+        delay: questTTL,
+        repeat: {
+          every: questTTL,
+          limit: 1,
+        },
+        backoff: {
+          type: 'fixed',
+          delay: 3000,
+        },
+      },
+    );
+  }
+
+  finishChallengeToQueue(codename: string) {
+    const challengeTTL = Number(envs.CHALLENGE_TTL);
+
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE,
+      codename,
+      {
+        ...this.getQueueOptions(),
+        delay: challengeTTL,
+        backoff: {
+          type: 'fixed',
+          delay: challengeTTL / 10,
+        },
       },
     );
   }
@@ -47,38 +66,23 @@ export class ChallengeQueueService {
     );
   }
 
+  startNextQuestToQueue(codename: string) {
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.START_NEXT_QUEST,
+      codename,
+      {
+        ...this.getQueueOptions(),
+        delay: Number(envs.NEXT_QUEST_TTL),
+      },
+    );
+  }
+
   private getQueueOptions(): JobsOptions {
     return {
       attempts: 3,
       backoff: {
         type: 'exponential',
         delay: 3000,
-      },
-    };
-  }
-
-  private getQuestOptions(): JobsOptions {
-    const questTTL = Number(envs.QUEST_TTL);
-
-    return {
-      attempts: 3,
-      delay: questTTL,
-      backoff: {
-        type: 'fixed',
-        delay: 3000,
-      },
-    };
-  }
-
-  private getFinishChallengeOptions() {
-    const challengeTTL = Number(envs.CHALLENGE_TTL);
-
-    return {
-      ...this.getQueueOptions(),
-      delay: challengeTTL,
-      backoff: {
-        type: 'fixed',
-        delay: challengeTTL / 10,
       },
     };
   }
