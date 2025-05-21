@@ -3,7 +3,7 @@ import { SetupChallenge } from './components/setup-challenge'
 import { LobbyStrings } from '../common/strings/lobby'
 import { AuroraText } from 'components/ui/aurora-text'
 import { JoinChallenge } from './components/join-challenge'
-import { SelecChallengeType } from './components/selector-challenge'
+import { SelectChallengeType } from './components/selector-challenge'
 import { OnlinePlayers } from './components/online-players'
 import { useLobby } from './providers/lobby.provider'
 import { ChallengeTypeOptions } from './components/challenge-options'
@@ -26,7 +26,7 @@ export default function LobbyPage() {
         </div>
         <OnlinePlayers />
       </div>
-      {challengeType ? <ChallengeTypeOptions /> : <SelecChallengeType />}
+      {challengeType ? <ChallengeTypeOptions /> : <SelectChallengeType />}
       <SetupChallenge />
       <JoinChallenge />
     </div>
