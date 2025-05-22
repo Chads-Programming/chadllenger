@@ -91,7 +91,7 @@ export class FinishQuestHandler
       throw CustomError.serverError({
         code: ErrorCodes.DEFAULT_ERROR,
         message: 'Failed to start challenge',
-        origin: 'StartChallengeHandler::execute',
+        origin: 'FinishQuestHandler::execute',
       });
     }
   }
