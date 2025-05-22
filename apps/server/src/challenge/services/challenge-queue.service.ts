@@ -13,14 +13,15 @@ export class ChallengeQueueService {
     @InjectQueue(AI_QUEUE.NAME) private aiQueue: Queue,
   ) {}
 
-  setupAutoQuestToQueue(challengeId: string) {
+  setupAutoQuestToQueue(codename: string) {
     const questTTL = Number(envs.QUEST_TTL);
 
     return this.challengeQueue.add(
       CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST,
-      challengeId,
+      codename,
       {
         ...this.getQueueOptions(),
+        jobId: this.getJobIdAutoSetupQuest(codename),
         delay: questTTL,
         repeat: {
           every: questTTL,
@@ -48,6 +49,12 @@ export class ChallengeQueueService {
           delay: challengeTTL / 10,
         },
       },
+    );
+  }
+
+  stopAutoQuestSetup(codename: string) {
+    return this.challengeQueue.removeJobScheduler(
+      this.getJobIdAutoSetupQuest(codename),
     );
   }
 
@@ -85,5 +92,9 @@ export class ChallengeQueueService {
         delay: 3000,
       },
     };
+  }
+
+  private getJobIdAutoSetupQuest(codename: string): string {
+    return `${codename}:${CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST}`;
   }
 }

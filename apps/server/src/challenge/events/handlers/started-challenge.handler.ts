@@ -11,7 +11,6 @@ export class StartedChallengeEventHandler
   async handle(event: StartedChallengeEvent) {
     await Promise.all([
       this.challengeQueue.setupAutoQuestToQueue(event.codename),
-      this.challengeQueue.finishChallengeToQueue(event.codename),
     ]);
   }
 }

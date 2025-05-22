@@ -87,6 +87,14 @@ export class ChallengeStateBuilder<
     return this;
   }
 
+  isLastQuest() {
+    if (this.playedChallenges.length === this.challenges.length) {
+      return true;
+    }
+
+    return false;
+  }
+
   private setCurrentChallenge(currentChallenge: string) {
     this.currentChallenge = currentChallenge;
 
