@@ -3,7 +3,6 @@ import {
   useContext,
   useState,
   useCallback,
-  useEffect,
   useMemo,
 } from 'react'
 import { ChallengeType } from '@repo/schemas'
@@ -14,7 +13,7 @@ import {
 
 type LobbyContextType = {
   challengeType: ChallengeType | null
-  setChallengeType: (challengeType: ChallengeType | null) => void
+  saveLastChallengeType: (challengeType: ChallengeType | null) => void
   lobbyTexts: ChallengeStrings
 }
 
@@ -23,16 +22,20 @@ export const LobbyContext = createContext<LobbyContextType | undefined>(
 )
 
 export const LobbyProvider = ({ children }: { children: React.ReactNode }) => {
-  const saveLastChallengeType = useCallback((challengeType: ChallengeType) => {
-    localStorage.setItem('lastChallengeType', challengeType)
-  }, [])
+  const saveLastChallengeType = useCallback(
+    (challengeType: ChallengeType | null) => {
+      setChallengeType(challengeType)
+      localStorage.setItem('lastChallengeType', challengeType ?? '')
+    },
+    [],
+  )
 
   const getLastChallengeType = useCallback(() => {
     return localStorage.getItem('lastChallengeType') as ChallengeType | null
   }, [])
 
-  const [challengeType, setChallengeType] = useState<ChallengeType | null>(
-    null //getLastChallengeType(),
+  const [challengeType, setChallengeType] = useState<ChallengeType | null>(() =>
+    getLastChallengeType(),
   )
 
   const lobbyTexts: ChallengeStrings = useMemo(() => {
@@ -41,15 +44,19 @@ export const LobbyProvider = ({ children }: { children: React.ReactNode }) => {
       : LobbyStrings.challengeType[challengeType]
   }, [challengeType])
 
-  useEffect(() => {
-    if (challengeType) {
-      saveLastChallengeType(challengeType)
-    }
-  }, [challengeType, saveLastChallengeType])
+  // useEffect(() => {
+  //   if (challengeType) {
+  //     saveLastChallengeType(challengeType)
+  //   }
+  // }, [challengeType, saveLastChallengeType])
 
   return (
     <LobbyContext.Provider
-      value={{ challengeType, setChallengeType, lobbyTexts }}
+      value={{
+        challengeType,
+        saveLastChallengeType,
+        lobbyTexts,
+      }}
     >
       {children}
     </LobbyContext.Provider>

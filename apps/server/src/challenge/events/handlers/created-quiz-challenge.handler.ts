@@ -10,6 +10,5 @@ export class CreatedQuizChallengeEventHandler
 
   async handle(event: CreatedQuizChallengeEvent) {
     await this.challengeQueue.generateChallengeToQueue(event.codename);
-    await this.challengeQueue.finishChallengeToQueue(event.codename);
   }
 }

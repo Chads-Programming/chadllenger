@@ -5,30 +5,44 @@ import {
   Status,
   type ChallengeNotificationType,
   type IChallengeState,
-  type JoinChallengeRoom,
+  type IQuestQuizChallengeState,
   type PlayerJoinedGame,
 } from '@repo/schemas'
-import { useCallback, useEffect, useReducer } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+} from 'react'
 import challengeApi from 'api/challenge'
 import { useChallengeNotifications } from '../../common/hooks/use-challenge-notifications'
 import { ACTIONS, INITIAL_STATE, reducer } from './quiz-reducer'
-import { useUser } from 'providers/user-provider'
-import { useNavigate } from 'react-router'
-import { useSocket } from 'socket/use-socket'
 import { useToast } from 'hooks/use-toast'
-import ChallengeStrings from '~/challenger/common/strings/challenge'
+import ChallengeStrings from '../../common/strings/challenge'
+import { useSocket } from 'socket/use-socket'
+import { useNavigate } from 'react-router'
+import { useUser } from 'providers/user-provider'
 
-export const useQuiz = (codename: string) => {
+export interface IQuizContext {
+  challengeState: IQuestQuizChallengeState
+  startChallenge: () => void
+}
+
+const QuizContext = createContext<IQuizContext | undefined>(undefined)
+
+interface Props {
+  codename: string
+  children: React.ReactNode
+}
+
+export const QuizProvider = ({ codename, children }: Props) => {
+  const { username } = useUser()
   const [challengeState, dispatch] = useReducer(reducer, INITIAL_STATE)
   const { emitEvent } = useSocket()
-  const { username } = useUser()
 
-  const navigate = useNavigate()
   const { toast } = useToast()
-
-  const joinChallengeRoom = (data: JoinChallengeRoom) => {
-    emitEvent(MessageTypes.JOIN_CHALLENGE_ROOM, data)
-  }
+  const navigate = useNavigate()
 
   const { registryNotification, unRegistryNotification } =
     useChallengeNotifications(NotificationsChannels.CHALLENGE_NOTIFICATIONS)
@@ -40,7 +54,11 @@ export const useQuiz = (codename: string) => {
       return
     }
 
-    joinChallengeRoom({ type: 'Clash', codename, username })
+    emitEvent(MessageTypes.JOIN_CHALLENGE_ROOM, {
+      type: 'Clash',
+      codename,
+      username,
+    })
 
     dispatch({ type: ACTIONS.LOAD_INITIAL_STATE, payload: challenge })
   }
@@ -86,8 +104,19 @@ export const useQuiz = (codename: string) => {
     }
   }, [registryNotification, unRegistryNotification])
 
-  return {
-    challengeState,
-    startChallenge,
+  return (
+    <QuizContext.Provider value={{ challengeState, startChallenge }}>
+      {children}
+    </QuizContext.Provider>
+  )
+}
+
+export const useQuiz = () => {
+  const context = useContext(QuizContext)
+
+  if (!context) {
+    throw new Error('useQuiz must be used within a QuizProvider')
   }
+
+  return context
 }

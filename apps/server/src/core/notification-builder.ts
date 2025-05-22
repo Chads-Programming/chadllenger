@@ -81,4 +81,14 @@ export const ChallengeNotificationBuilder = {
       createdAt: new Date(),
     };
   },
+
+  buildFinishQuestNotification(challengeState: ChallengeStateBuilder) {
+    return {
+      id: generateUniqueId(),
+      type: NotificationsType.FINISH_QUEST,
+      messageType: 'system',
+      data: challengeState.toSummary(),
+      createdAt: new Date(),
+    };
+  },
 };
