@@ -14,10 +14,12 @@ export default [
       `challenge/${ChallengeType.Clash}/:codename`,
       './challenger/challenge/clash/clash.page.tsx',
     ),
-    route(
-      `challenge/${ChallengeType.Quiz}/:codename`,
-      './challenger/challenge/quiz/quiz.page.tsx',
-    ),
+    layout('./challenger/challenge/quiz/quiz.layout.tsx', [
+      route(
+        `challenge/${ChallengeType.Quiz}/:codename`,
+        './challenger/challenge/quiz/quiz.page.tsx',
+      ),
+    ]),
     route('challenge/not-found', './challenger/challenge/not-found.page.tsx'),
   ]),
 ] satisfies RouteConfig

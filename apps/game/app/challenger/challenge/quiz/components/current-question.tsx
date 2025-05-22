@@ -1,20 +1,8 @@
-import { useMemo, useReducer, useState } from 'react'
-import { INITIAL_STATE, reducer } from '../quiz-reducer'
 import QuizOption from './quiz-option'
+import { useQuizQuest } from '../use-quiz-quest'
 
 export const CurrentQuestion = () => {
-  const [challengeState] = useReducer(reducer, INITIAL_STATE)
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
-
-  const sendAnswer = (optionId: string) => {
-    setSelectedOption(optionId)
-  }
-
-  const currentChallenge = useMemo(() => {
-    return challengeState.challenges.find(
-      (challenge) => challenge.id === challengeState.currentQuestion.question,
-    )
-  }, [challengeState])
+  const { currentChallenge, sendAnswer, selectedOption } = useQuizQuest()
 
   if (!currentChallenge) return <div>No challenge found</div>
 

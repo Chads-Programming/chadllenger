@@ -5,6 +5,7 @@ import type {
   IQuestChallengeState,
 } from './quest-challenge.model'
 import type { IParticipant } from './participant.model'
+import type { IQuestQuizChallenge } from './quiz-challenge.model'
 
 export interface IChallengeState {
   id: string
@@ -23,6 +24,10 @@ export interface IChallengeState {
   status: ChallengeStatusType
   expiration: number
   type: ChallengeType
+}
+
+export interface IQuestQuizChallengeState extends IChallengeState {
+  challenges: IQuestQuizChallenge[]
 }
 
 export const Status = {

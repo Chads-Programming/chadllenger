@@ -1,4 +1,4 @@
-import type { IParticipant, IQuestQuizChallenge } from '@repo/schemas'
+import type { IParticipant, IQuestQuizChallengeState } from '@repo/schemas'
 
 export const ACTIONS = {
   LOAD_INITIAL_STATE: 'LOAD_INITIAL_STATE',
@@ -20,43 +20,27 @@ type IQuestion = {
   correctAnswerId?: string
 }
 
-type IChallengeState = {
-  id: string
-  title: string
-  codename: string
-  participants: IParticipant[]
-  currentQuestion: IQuestion
-  playedQuestions: IQuestion[]
-  challenges: IQuestQuizChallenge[]
-  createdAt: Date
-  updatedAt: Date
-  creator: string
-  status: string
-  expiration: number
-}
-
 export type ActionHandler = <TPayload>(
-  state: IChallengeState,
+  state: IQuestQuizChallengeState,
   action: Action<TPayload>,
-) => IChallengeState
+) => IQuestQuizChallengeState
 
-export const INITIAL_STATE: IChallengeState = {
+export const INITIAL_STATE: IQuestQuizChallengeState = {
   id: '',
   title: '',
   codename: '',
   participants: [],
   challenges: [],
-  currentQuestion: {
-    id: '',
-    question: '',
-    options: [],
-  },
-  playedQuestions: [],
+  currentChallenge: '',
+  playedChallenges: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   creator: '',
   status: 'PENDING',
   expiration: 0,
+  difficulties: [],
+  participantsQuestHistory: {},
+  type: 'Clash',
 }
 
 /**
@@ -71,7 +55,7 @@ export const INITIAL_STATE: IChallengeState = {
  * @returns The updated state of the challenge.
  */
 export const reducer = <TPayload>(
-  state: IChallengeState,
+  state: IQuestQuizChallengeState,
   action: Action<TPayload>,
 ) => {
   const actionManager = {
@@ -96,8 +80,8 @@ export const reducer = <TPayload>(
  * @returns A new state object that combines the action payload and the current state.
  */
 const loadInitialState = (
-  _: IChallengeState,
-  action: Action<IChallengeState>,
+  _: IQuestQuizChallengeState,
+  action: Action<IQuestQuizChallengeState>,
 ) => {
   return {
     ...action.payload,
@@ -119,7 +103,7 @@ const loadInitialState = (
  *          if the participant already exists.
  */
 const joinParticipant = (
-  state: IChallengeState,
+  state: IQuestQuizChallengeState,
   action: Action<IParticipant>,
 ) => {
   const updatedState = structuredClone(state)
