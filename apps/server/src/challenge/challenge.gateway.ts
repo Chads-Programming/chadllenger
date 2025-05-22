@@ -227,7 +227,7 @@ export class ChallengeGateway
       );
   }
 
-  @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
+  @OnEvent(CHALLENGE_EVENTS.NEW_QUEST_STARTED)
   async startNextQuest(challenge: IChallengeState) {
     this.server
       .to(challenge.codename)
