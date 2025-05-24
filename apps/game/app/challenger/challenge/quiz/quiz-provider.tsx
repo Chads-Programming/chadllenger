@@ -5,7 +5,7 @@ import {
   Status,
   type ChallengeNotificationType,
   type IChallengeState,
-  type IQuestQuizChallengeState,
+  type IQuizChallengeState,
   type PlayerJoinedGame,
 } from '@repo/schemas'
 import {
@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router'
 import { useUser } from 'providers/user-provider'
 
 export interface IQuizContext {
-  challengeState: IQuestQuizChallengeState
+  challengeState: IQuizChallengeState
   startChallenge: () => void
 }
 

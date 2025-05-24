@@ -63,6 +63,17 @@ export const useQuiz = (codename: string) => {
     )
   }
 
+  const handleStartedRound = (
+    notification: ChallengeNotificationType<IChallengeState>,
+  ) => {
+    dispatch({
+      type: ACTIONS.STARTED_ROUND,
+      payload: notification.data,
+    })
+
+    toast(ChallengeStrings.challenge.startedQuest)
+  }
+
   const startChallenge = useCallback(() => {
     emitEvent(MessageTypes.START_CHALLENGE, {
       codename,
@@ -76,13 +87,16 @@ export const useQuiz = (codename: string) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: ignore handleJoinParticipant
   useEffect(() => {
-    registryNotification<PlayerJoinedGame>(
+    registryNotification(
       NotificationsType.PLAYER_JOINED_GAME,
       handleJoinParticipant,
     )
 
+    registryNotification(NotificationsType.STARTED_ROUND, handleStartedRound)
+
     return () => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
+      unRegistryNotification(NotificationsType.STARTED_ROUND)
     }
   }, [registryNotification, unRegistryNotification])
 

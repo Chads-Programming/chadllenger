@@ -177,7 +177,7 @@ export class ChallengeGateway
     );
 
     const notification = ChallengeNotificationBuilder.startedRoundNotification(
-      updatedChallenge.getProps(),
+      updatedChallenge.withOnlyCurrentQuest(),
     );
 
     this.server
@@ -234,7 +234,7 @@ export class ChallengeGateway
       .emit(
         NotificationsChannels.CHALLENGE_NOTIFICATIONS,
         ChallengeNotificationBuilder.startedRoundNotification(
-          ChallengeStateBuilder.fromProps(challenge),
+          ChallengeStateBuilder.fromProps(challenge).withOnlyCurrentQuest(),
         ),
       );
   }

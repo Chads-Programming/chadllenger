@@ -1,7 +1,7 @@
 import QuizOption from './quiz-option'
 import { useQuizQuest } from '../use-quiz-quest'
 
-export const CurrentQuestion = () => {
+const CurrentQuestion = () => {
   const { currentChallenge, sendAnswer, selectedOption } = useQuizQuest()
 
   if (!currentChallenge) return <div>No challenge found</div>
@@ -20,3 +20,5 @@ export const CurrentQuestion = () => {
     </div>
   )
 }
+
+export default CurrentQuestion

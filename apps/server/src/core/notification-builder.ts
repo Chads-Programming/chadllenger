@@ -8,7 +8,7 @@ import {
   ChallengeSummary,
   PlayerJoinedGame,
   ChallengeType,
-  IChallengeState,
+  IChallengeStateWithCurrentQuest,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -59,8 +59,8 @@ export const ChallengeNotificationBuilder = {
   },
 
   startedRoundNotification(
-    challenge: IChallengeState,
-  ): ChallengeNotificationType<IChallengeState> {
+    challenge: IChallengeStateWithCurrentQuest,
+  ): ChallengeNotificationType<IChallengeStateWithCurrentQuest> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.STARTED_ROUND,

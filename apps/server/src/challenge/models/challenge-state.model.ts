@@ -9,6 +9,7 @@ import {
   ChallengeType,
   IQuestQuizChallenge,
   IQuestHistory,
+  IChallengeStateWithCurrentQuest,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
@@ -131,6 +132,12 @@ export class ChallengeStateBuilder<
     return this;
   }
 
+  getCurrentQuest() {
+    return this.challenges.find(
+      (challenge) => challenge.id === this.currentChallenge,
+    );
+  }
+
   finishCurrentQuest() {
     const currentChallengeIndex = this.playedChallenges.findIndex(
       (challenge) => challenge.questionId === this.currentChallenge,
@@ -145,6 +152,9 @@ export class ChallengeStateBuilder<
     });
 
     currentChallenge.winner = bestHistory.participantId;
+
+    this.playedChallenges[currentChallengeIndex] = currentChallenge;
+    this.status = Status.AWAITING_NEXT_QUEST;
 
     return this;
   }
@@ -322,6 +332,16 @@ export class ChallengeStateBuilder<
       codename: this.codename,
       leaderboard,
       type: this.type,
+    };
+  }
+
+  withOnlyCurrentQuest(): IChallengeStateWithCurrentQuest {
+    const challenge = this.getProps();
+    Reflect.deleteProperty(challenge, 'challenges');
+
+    return {
+      ...challenge,
+      currentQuest: this.getCurrentQuest(),
     };
   }
 }

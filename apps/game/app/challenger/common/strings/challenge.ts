@@ -41,6 +41,7 @@ const ChallengeStrings = {
     iconEmote: '👤',
   },
   challenge: {
+    startedQuest: '¡El quest ha comenzado! 🦊🚬',
     participants: {
       title: 'Participantes',
       empty: 'No hay participantes aún',

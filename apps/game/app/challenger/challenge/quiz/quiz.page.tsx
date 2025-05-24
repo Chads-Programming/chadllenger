@@ -1,7 +1,8 @@
 import type { Route } from './+types/quiz.page'
 import { useQuiz } from './use-quiz'
-import { CurrentQuestion } from './components/current-question'
-import ChallengeParticipants from '../clash/challenge-participants'
+import CurrentQuestion from './components/current-question'
+import ChallengeParticipants from '../../common/components/challenge-participants'
+import QuestCountdown from './components/quest-countdown'
 
 export default function QuizChallenge({ params }: Route.ComponentProps) {
   const { challengeState } = useQuiz(params.codename)
@@ -9,6 +10,7 @@ export default function QuizChallenge({ params }: Route.ComponentProps) {
   return (
     <div className="relative min-w-full">
       <div className="max-w-6xl mx-auto relative">
+        <QuestCountdown />
         <div className="grid place-items-center">
           <div className="flex flex-col gap-6">
             <CurrentQuestion />
