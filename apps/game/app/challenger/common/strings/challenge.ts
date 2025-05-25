@@ -42,6 +42,15 @@ const ChallengeStrings = {
   },
   challenge: {
     startedQuest: '¡El quest ha comenzado! 🦊🚬',
+    welcome: {
+      goat: 'G.O.A.T',
+      guest: 'Invitado',
+      title: 'Bienvenido al desafío',
+      alert: 'Esperando a que el anfitrion comienze el desafío',
+      description:
+        'El G.O.A.T se prepara para empezar la partida. ¡Prepárense para una emocionante experiencia multijugador!',
+    },
+    start: 'Comenzar!',
     participants: {
       title: 'Participantes',
       empty: 'No hay participantes aún',

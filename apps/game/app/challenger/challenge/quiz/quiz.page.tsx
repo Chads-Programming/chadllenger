@@ -3,6 +3,8 @@ import { useQuiz } from './use-quiz'
 import CurrentQuestion from './components/current-question'
 import ChallengeParticipants from '../../common/components/challenge-participants'
 import QuestCountdown from './components/quest-countdown'
+import ChallengeWelcome from './components/challenge-welcome'
+import { Status } from '@repo/schemas'
 
 export default function QuizChallenge({ params }: Route.ComponentProps) {
   const { challengeState } = useQuiz(params.codename)
@@ -13,7 +15,11 @@ export default function QuizChallenge({ params }: Route.ComponentProps) {
         <QuestCountdown />
         <div className="grid place-items-center">
           <div className="flex flex-col gap-6">
-            <CurrentQuestion />
+            {challengeState.status === Status.PENDING ? (
+              <ChallengeWelcome />
+            ) : (
+              <CurrentQuestion />
+            )}
             <div className="space-y-6 lg:absolute top-0 right-0 lg:w-[250px]">
               <ChallengeParticipants
                 participants={challengeState.participants}
