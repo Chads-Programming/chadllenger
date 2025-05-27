@@ -1,30 +1,27 @@
-import type { Route } from './+types/quiz.page'
-import { useQuiz } from './use-quiz'
 import CurrentQuestion from './components/current-question'
 import ChallengeParticipants from '../../common/components/challenge-participants'
 import QuestCountdown from './components/quest-countdown'
 import ChallengeWelcome from './components/challenge-welcome'
 import { Status } from '@repo/schemas'
+import { useQuiz } from './quiz-provider'
 
-export default function QuizChallenge({ params }: Route.ComponentProps) {
-  const { challengeState } = useQuiz(params.codename)
+export default function QuizChallenge() {
+  const { challengeState } = useQuiz()
 
   return (
     <div className="relative min-w-full">
       <div className="max-w-6xl mx-auto relative">
         <QuestCountdown />
-        <div className="grid place-items-center">
-          <div className="flex flex-col gap-6">
+        {challengeState.status === Status.PENDING && (
+          <ChallengeParticipants participants={challengeState.participants} />
+        )}
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col gap-6 mt-5">
             {challengeState.status === Status.PENDING ? (
               <ChallengeWelcome />
             ) : (
               <CurrentQuestion />
             )}
-            <div className="space-y-6 lg:absolute top-0 right-0 lg:w-[250px]">
-              <ChallengeParticipants
-                participants={challengeState.participants}
-              />
-            </div>
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ export default function LobbyPage() {
   const { challengeType } = useLobby()
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto relative">
       <div className="max-w-4xl mx-auto relative flex flex-col items-center justify-start gap-4 mb-12">
         <div className="flex items-center justify-center gap-3">
           <Code2 className="w-10 h-10 text-indigo-500" />
@@ -24,11 +24,11 @@ export default function LobbyPage() {
             {LobbyStrings.title}
           </AuroraText>
         </div>
-        <OnlinePlayers />
       </div>
+      <OnlinePlayers />
       {challengeType ? <ChallengeTypeOptions /> : <SelectChallengeType />}
       <SetupChallenge />
-      <JoinChallenge />
+      {challengeType && <JoinChallenge type={challengeType} />}
     </div>
   )
 }

@@ -19,11 +19,19 @@ const QuestCountdown = () => {
       return 0
     }
 
+    const startedAt = new Date(currentQuest.startedAt)
+
     const diffTime =
       new Date().getTime() / MILISECONDS_TO_SECONDS -
-      currentQuest.startedAt.getTime() / MILISECONDS_TO_SECONDS
+      startedAt.getTime() / MILISECONDS_TO_SECONDS
 
-    return SECONDS_TO_SHOW - diffTime
+    const time = SECONDS_TO_SHOW - diffTime
+
+    if (time >= 0) {
+      return Math.ceil(time)
+    }
+
+    return 0
   }, [challengeState])
 
   useEffect(() => {

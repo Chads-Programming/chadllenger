@@ -14,7 +14,7 @@ import { StartedChallengeEvent } from '@/challenge/events/impl/started-challenge
 
 @CommandHandler(StartChallengeCommand)
 export class StartChallengeHandler
-  implements ICommandHandler<string, IChallengeState>
+  implements ICommandHandler<StartChallengeCommand, IChallengeState>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
@@ -22,34 +22,27 @@ export class StartChallengeHandler
     private readonly queryBus: QueryBus,
   ) {}
 
-  async execute(codename: string): Promise<IChallengeState> {
+  async execute(commnand: StartChallengeCommand) {
     try {
       const currentChallenge = await this.queryBus.execute(
-        new GetChallengeQuery(codename),
+        new GetChallengeQuery(commnand.codename),
       );
-
-      if (!currentChallenge) {
-        throw CustomError.notFound({
-          code: ErrorCodes.CHALLENGE_NOT_FOUND,
-          message: 'Challenge not found',
-          origin: 'ChallengeGateway::startChallenge',
-        });
-      }
 
       currentChallenge
         .setStatus(Status.IN_PROGRESS)
         .nextChallenge()
         .markAsStarted();
 
-      await this.challengeRepository.updateChallenge(codename, {
-        challenges: currentChallenge.challenges,
-      });
+      await this.challengeRepository.updateChallenge(
+        commnand.codename,
+        currentChallenge,
+      );
 
       this.eventBus.publish(
         new StartedChallengeEvent(currentChallenge.codename),
       );
 
-      return this.queryBus.execute(new GetChallengeQuery(codename));
+      return this.queryBus.execute(new GetChallengeQuery(commnand.codename));
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
@@ -57,7 +50,7 @@ export class StartChallengeHandler
 
       throw CustomError.serverError({
         code: ErrorCodes.DEFAULT_ERROR,
-        message: 'Failed to start challenge',
+        message: error.toString(),
         origin: 'StartChallengeHandler::execute',
       });
     }

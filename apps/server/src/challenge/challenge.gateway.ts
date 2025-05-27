@@ -176,6 +176,11 @@ export class ChallengeGateway
       new StartChallengeCommand(codename),
     );
 
+    this.logger.log(
+      'Start challenge OK, sending notification',
+      'ChallengeGateway::startChallenge',
+      codename,
+    );
     const notification = ChallengeNotificationBuilder.startedRoundNotification(
       updatedChallenge.withOnlyCurrentQuest(),
     );

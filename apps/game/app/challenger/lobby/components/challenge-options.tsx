@@ -26,18 +26,9 @@ export const ChallengeTypeOptions = () => {
 
   return (
     <section className="flex flex-col items-center gap-4">
-      <button
-        type="button"
-        onClick={onBack}
-        className="btn btn-ghost self-start"
-      >
-        <ArrowLeft size={20} className="mr-2" />
-        {LobbyStrings.backToMainMenu}
-      </button>
-
       <div
         className={cn(
-          'p-8 rounded-xl bg-gradient-to-br shadow-lg mb-8 relative overflow-hidden w-full border border-base-300 dark:border-base-700',
+          'p-8 pt-16 rounded-xl bg-gradient-to-br shadow-lg mb-8 relative overflow-hidden w-full border border-base-300 dark:border-base-700',
         )}
         style={{
           backgroundImage: `url(${bgImage})`,
@@ -45,6 +36,14 @@ export const ChallengeTypeOptions = () => {
           backgroundPosition: 'center',
         }}
       >
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute top-4 left-4 btn btn-ghost self-start text-white z-10"
+        >
+          <ArrowLeft size={20} className="mr-2" />
+          {LobbyStrings.backToMainMenu}
+        </button>
         <div className={`absolute inset-0 bg-gradient-to-br ${bgColor}`} />
 
         <div className="relative z-10">

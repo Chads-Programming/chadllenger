@@ -1,5 +1,9 @@
 import { useForm } from 'react-hook-form'
-import { type JoinChallengeRoom, joinChallengeRoomSchema } from '@repo/schemas'
+import {
+  type ChallengeType,
+  type JoinChallengeRoom,
+  joinChallengeRoomSchema,
+} from '@repo/schemas'
 import { useUser } from 'providers/user-provider'
 import { Trophy } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,9 +17,10 @@ export const JOIN_REF_MODAL_ID = 'join-challenge-modal'
 
 export interface JoinChallengeProps {
   codename?: string
+  type: ChallengeType
 }
 
-export const JoinChallenge = ({ codename }: JoinChallengeProps) => {
+export const JoinChallenge = ({ codename, type }: JoinChallengeProps) => {
   const { username } = useUser()
   const navigate = useNavigate()
 
@@ -28,6 +33,7 @@ export const JoinChallenge = ({ codename }: JoinChallengeProps) => {
     setValue,
   } = useForm<JoinChallengeRoom>({
     defaultValues: {
+      type,
       codename: codename || '',
       username: username || '',
     },
@@ -35,15 +41,15 @@ export const JoinChallenge = ({ codename }: JoinChallengeProps) => {
   })
 
   const onSubmit = (data: JoinChallengeRoom) => {
-    handleCreateChallenge(data)
+    handleJoinChallenge(data)
   }
 
   const onUsernameChange = (username: string) => {
     setValue('username', username)
   }
 
-  const handleCreateChallenge = (data: JoinChallengeRoom) => {
-    navigate(`/challenge/${data.codename}`)
+  const handleJoinChallenge = (data: JoinChallengeRoom) => {
+    navigate(`/challenge/${type.toLocaleLowerCase()}/${data.codename}`)
     closeModal(JOIN_REF_MODAL_ID)
   }
 

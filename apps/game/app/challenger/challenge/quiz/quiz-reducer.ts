@@ -141,6 +141,7 @@ const startedRound = (
       ...state.challenges,
       action.payload.currentQuest as IQuestQuizChallenge,
     ],
+    playedChallenges: action.payload.playedChallenges,
     startedAt: action.payload.startedAt,
     currentChallenge: action.payload.currentChallenge,
   }

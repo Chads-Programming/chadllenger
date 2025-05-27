@@ -81,10 +81,19 @@ export const QuizProvider = ({ codename, children }: Props) => {
     )
   }
 
-  const startChallenge = useCallback(() => {
-    emitEvent(MessageTypes.START_CHALLENGE, {
-      codename,
+  const handleStartedRound = (
+    notification: ChallengeNotificationType<IChallengeState>,
+  ) => {
+    dispatch({
+      type: ACTIONS.STARTED_ROUND,
+      payload: notification.data,
     })
+
+    toast(ChallengeStrings.challenge.startedQuest)
+  }
+
+  const startChallenge = useCallback(() => {
+    emitEvent(MessageTypes.START_CHALLENGE, codename)
   }, [emitEvent, codename])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: ignore handleChallengeInfo
@@ -99,8 +108,11 @@ export const QuizProvider = ({ codename, children }: Props) => {
       handleJoinParticipant,
     )
 
+    registryNotification(NotificationsType.STARTED_ROUND, handleStartedRound)
+
     return () => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
+      unRegistryNotification(NotificationsType.STARTED_ROUND)
     }
   }, [registryNotification, unRegistryNotification])
 

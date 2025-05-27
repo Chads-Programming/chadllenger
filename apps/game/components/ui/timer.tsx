@@ -68,11 +68,11 @@ const InternalTimer = (
     return () => {
       intervalRef.current && clearInterval(intervalRef.current)
     }
-  }, [])
+  }, [isRunning])
 
   return (
     <div className="inline-flex items-center gap-2 rounded-3xl bg-muted px-4 py-2 border border-neutral">
-      {totalSeconds}
+      {totalSeconds >= 0 ? totalSeconds : 0}
     </div>
   )
 }
