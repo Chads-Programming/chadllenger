@@ -10,9 +10,9 @@ interface Props {
 
 const ChallengeParticipants = memo(({ participants }: Props) => {
   return (
-    <div className="bg-base-200/80 rounded-lg shadow-sm">
+    <div className="bg-base-200/25 backdrop-blur-sm rounded-md border border-base-300">
       <div className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center">
           <h3 className="text-lg font-medium flex items-center gap-2">
             <Users className="h-5 w-5" />
             <span>{ChallengeStrings.challenge.participants.title}</span>
@@ -24,10 +24,12 @@ const ChallengeParticipants = memo(({ participants }: Props) => {
           {participants.map((participant) => (
             <li
               key={participant.id}
-              className="inline-flex gap-1 justify-start items-center text-sm text-pretty"
+              className="flex flex-col gap-2 items-center justify-center  text-sm text-pretty"
             >
               <Avatar id={participant.id} name={participant.name} />
-              <span className="font-semibold">{participant.name}</span>
+              <span className="font-semibold w-full p-2 bg-secondary shadow rounded-lg min-w-24 text-center">
+                {participant.name}
+              </span>
             </li>
           ))}
         </ul>

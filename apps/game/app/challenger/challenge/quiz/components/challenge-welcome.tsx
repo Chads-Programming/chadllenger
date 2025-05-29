@@ -10,7 +10,7 @@ const ChallengeWelcome = () => {
   const isHost = userID === challengeState.creator
 
   return (
-    <div className="card lg:card-side bg-base-100 shadow-sm border border-base-300 lg:max-w-4xl">
+    <div className="card lg:card-side bg-base-100 shadow-sm border border-base-300 lg:max-w-4xl self-center">
       <figure className="max-w-64">
         <img src="/images/awaiting.png" alt="welcome challenge" />
       </figure>

@@ -1,4 +1,5 @@
 import {
+  ChallengeType,
   MessageTypes,
   NotificationsChannels,
   NotificationsType,
@@ -47,61 +48,64 @@ export const QuizProvider = ({ codename, children }: Props) => {
   const { registryNotification, unRegistryNotification } =
     useChallengeNotifications(NotificationsChannels.CHALLENGE_NOTIFICATIONS)
 
-  const handleChallengeInfo = (challenge: IChallengeState) => {
-    if (!challenge || challenge?.status === Status.FINISHED) {
-      navigate('/challenge/not-found')
+  const handleChallengeInfo = useCallback(
+    (challenge: IChallengeState) => {
+      if (!challenge || challenge?.status === Status.FINISHED) {
+        navigate('/challenge/not-found')
 
-      return
-    }
+        return
+      }
 
-    emitEvent(MessageTypes.JOIN_CHALLENGE_ROOM, {
-      type: 'Clash',
-      codename,
-      username,
-    })
+      emitEvent(MessageTypes.JOIN_CHALLENGE_ROOM, {
+        type: ChallengeType.Quiz.toLowerCase(),
+        codename,
+        username,
+      })
 
-    dispatch({ type: ACTIONS.LOAD_INITIAL_STATE, payload: challenge })
-  }
+      dispatch({ type: ACTIONS.LOAD_INITIAL_STATE, payload: challenge })
+    },
+    [emitEvent, navigate, username, codename],
+  )
 
-  const handleJoinParticipant = (
-    notification: ChallengeNotificationType<PlayerJoinedGame>,
-  ) => {
-    const participant = notification.data
+  const handleJoinParticipant = useCallback(
+    (notification: ChallengeNotificationType<PlayerJoinedGame>) => {
+      const participant = notification.data
 
-    dispatch({
-      type: ACTIONS.JOIN_PLAYER,
-      payload: participant,
-    })
+      dispatch({
+        type: ACTIONS.JOIN_PLAYER,
+        payload: participant,
+      })
 
-    toast(
-      ChallengeStrings.playerNotifications.playerJoined.replace(
-        '$1',
-        participant.name,
-      ),
-    )
-  }
+      toast(
+        ChallengeStrings.playerNotifications.playerJoined.replace(
+          '$1',
+          participant.name,
+        ),
+      )
+    },
+    [toast],
+  )
 
-  const handleStartedRound = (
-    notification: ChallengeNotificationType<IChallengeState>,
-  ) => {
-    dispatch({
-      type: ACTIONS.STARTED_ROUND,
-      payload: notification.data,
-    })
+  const handleStartedRound = useCallback(
+    (notification: ChallengeNotificationType<IChallengeState>) => {
+      dispatch({
+        type: ACTIONS.STARTED_ROUND,
+        payload: notification.data,
+      })
 
-    toast(ChallengeStrings.challenge.startedQuest)
-  }
+      toast(ChallengeStrings.challenge.startedQuest)
+    },
+    [toast],
+  )
 
   const startChallenge = useCallback(() => {
     emitEvent(MessageTypes.START_CHALLENGE, codename)
   }, [emitEvent, codename])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ignore handleChallengeInfo
   useEffect(() => {
     challengeApi.getChallengeByCodename(codename).then(handleChallengeInfo)
-  }, [codename])
+  }, [codename, handleChallengeInfo])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ignore handleJoinParticipant
   useEffect(() => {
     registryNotification<PlayerJoinedGame>(
       NotificationsType.PLAYER_JOINED_GAME,
@@ -114,7 +118,12 @@ export const QuizProvider = ({ codename, children }: Props) => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
       unRegistryNotification(NotificationsType.STARTED_ROUND)
     }
-  }, [registryNotification, unRegistryNotification])
+  }, [
+    registryNotification,
+    unRegistryNotification,
+    handleJoinParticipant,
+    handleStartedRound,
+  ])
 
   return (
     <QuizContext.Provider value={{ challengeState, startChallenge }}>
