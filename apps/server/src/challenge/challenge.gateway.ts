@@ -22,7 +22,6 @@ import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
 import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
-import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateBuilder } from './models/challenge-state.model';
 import { AI_EVENTS, CHALLENGE_EVENTS } from './consts';
@@ -54,7 +53,6 @@ export class ChallengeGateway
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
   ) {}
 
@@ -167,10 +165,7 @@ export class ChallengeGateway
   }
 
   @SubscribeMessage(MessageTypes.START_CHALLENGE)
-  async startChallenge(
-    @MessageBody() codename: string,
-    @ConnectedSocket() client: AuthenticatedSocket,
-  ) {
+  async startChallenge(@MessageBody() codename: string) {
     this.logger.log(
       'Start challenge',
       'ChallengeGateway::startChallenge',
@@ -181,8 +176,13 @@ export class ChallengeGateway
       new StartChallengeCommand(codename),
     );
 
+    this.logger.log(
+      'Start challenge OK, sending notification',
+      'ChallengeGateway::startChallenge',
+      codename,
+    );
     const notification = ChallengeNotificationBuilder.startedRoundNotification(
-      updatedChallenge.getProps(),
+      updatedChallenge.withOnlyCurrentQuest(),
     );
 
     this.server
@@ -218,6 +218,30 @@ export class ChallengeGateway
     // TODO: handle when creator disconnected before challenge is generated
     if (!creator) return;
     return this.connectToChallenge(challenge, creator);
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
+  async finishQuest(challenge: IChallengeState) {
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.buildFinishQuestNotification(
+          ChallengeStateBuilder.fromProps(challenge),
+        ),
+      );
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.NEW_QUEST_STARTED)
+  async startNextQuest(challenge: IChallengeState) {
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.startedRoundNotification(
+          ChallengeStateBuilder.fromProps(challenge).withOnlyCurrentQuest(),
+        ),
+      );
   }
   /**
    * Retrieves the number of currently connected sockets to the server.

@@ -1,8 +1,14 @@
-import type { IParticipant, IQuestQuizChallenge } from '@repo/schemas'
+import type {
+  IChallengeStateWithCurrentQuest,
+  IParticipant,
+  IQuestQuizChallenge,
+  IQuizChallengeState,
+} from '@repo/schemas'
 
 export const ACTIONS = {
   LOAD_INITIAL_STATE: 'LOAD_INITIAL_STATE',
   JOIN_PLAYER: 'JOIN_PLAYER',
+  STARTED_ROUND: 'STARTED_ROUND',
 }
 
 type ChallengeActionType = (typeof ACTIONS)[keyof typeof ACTIONS]
@@ -12,51 +18,27 @@ export type Action<TPayload = unknown> = {
   type: ChallengeActionType
 }
 
-type IQuestion = {
-  id: string
-  question: string
-  options: string[]
-  chosenAnswerId?: string
-  correctAnswerId?: string
-}
-
-type IChallengeState = {
-  id: string
-  title: string
-  codename: string
-  participants: IParticipant[]
-  currentQuestion: IQuestion
-  playedQuestions: IQuestion[]
-  challenges: IQuestQuizChallenge[]
-  createdAt: Date
-  updatedAt: Date
-  creator: string
-  status: string
-  expiration: number
-}
-
 export type ActionHandler = <TPayload>(
-  state: IChallengeState,
+  state: IQuizChallengeState,
   action: Action<TPayload>,
-) => IChallengeState
+) => IQuizChallengeState
 
-export const INITIAL_STATE: IChallengeState = {
+export const INITIAL_STATE: IQuizChallengeState = {
   id: '',
   title: '',
   codename: '',
   participants: [],
   challenges: [],
-  currentQuestion: {
-    id: '',
-    question: '',
-    options: [],
-  },
-  playedQuestions: [],
+  currentChallenge: '',
+  playedChallenges: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   creator: '',
   status: 'PENDING',
   expiration: 0,
+  difficulties: [],
+  participantsQuestHistory: {},
+  type: 'Quiz',
 }
 
 /**
@@ -71,12 +53,13 @@ export const INITIAL_STATE: IChallengeState = {
  * @returns The updated state of the challenge.
  */
 export const reducer = <TPayload>(
-  state: IChallengeState,
+  state: IQuizChallengeState,
   action: Action<TPayload>,
 ) => {
   const actionManager = {
     [ACTIONS.LOAD_INITIAL_STATE]: loadInitialState,
     [ACTIONS.JOIN_PLAYER]: joinParticipant,
+    [ACTIONS.STARTED_ROUND]: startedRound,
   }
 
   const actionHandler = actionManager[action.type] as ActionHandler
@@ -96,8 +79,8 @@ export const reducer = <TPayload>(
  * @returns A new state object that combines the action payload and the current state.
  */
 const loadInitialState = (
-  _: IChallengeState,
-  action: Action<IChallengeState>,
+  _: IQuizChallengeState,
+  action: Action<IQuizChallengeState>,
 ) => {
   return {
     ...action.payload,
@@ -119,7 +102,7 @@ const loadInitialState = (
  *          if the participant already exists.
  */
 const joinParticipant = (
-  state: IChallengeState,
+  state: IQuizChallengeState,
   action: Action<IParticipant>,
 ) => {
   const updatedState = structuredClone(state)
@@ -134,4 +117,32 @@ const joinParticipant = (
   updatedState.participants.push(partipant)
 
   return updatedState
+}
+
+/**
+ * Updates the state when a new round has started in the challenge.
+ *
+ * This function takes the current state and an action containing the updated challenge state.
+ * It returns a new state object that preserves all existing state properties but updates
+ * the currentChallenge property with the one from the action payload.
+ *
+ * @param state - The current state of the quiz challenge
+ * @param action - An action containing the updated challenge state
+ * @returns A new state object with the updated currentChallenge
+ */
+const startedRound = (
+  state: IQuizChallengeState,
+  action: Action<IChallengeStateWithCurrentQuest>,
+): IQuizChallengeState => {
+  return {
+    ...state,
+    status: action.payload.status,
+    challenges: [
+      ...state.challenges,
+      action.payload.currentQuest as IQuestQuizChallenge,
+    ],
+    playedChallenges: action.payload.playedChallenges,
+    startedAt: action.payload.startedAt,
+    currentChallenge: action.payload.currentChallenge,
+  }
 }

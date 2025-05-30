@@ -26,9 +26,9 @@ export const useCreateChallenge = () => {
   const onCreateRoomHandler = (
     response: ChallengeNotificationType<CreatedRoomPayload>,
   ) => {
-    const { codename, type} = response.data
+    const { codename, type } = response.data
     dismiss(toastIdRef.current as string | number)
-    
+
     toast(ChallengeStrings.create.success, {
       type: 'info',
       dissmissAction: true,
@@ -44,11 +44,15 @@ export const useCreateChallenge = () => {
     emitEvent(MessageTypes.CREATE_ROOM, data, onCreateRoomHandler)
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: onCreateRoomHandler
   useEffect(() => {
-    if (!socket) return;
-    socket.on(NotificationsType.CREATED_ROOM, (data: ChallengeNotificationType<CreatedRoomPayload>) => {
-      onCreateRoomHandler(data)
-    })
+    if (!socket) return
+    socket.on(
+      NotificationsType.CREATED_ROOM,
+      (data: ChallengeNotificationType<CreatedRoomPayload>) => {
+        onCreateRoomHandler(data)
+      },
+    )
     return () => {
       socket.off(NotificationsType.CREATED_ROOM)
     }

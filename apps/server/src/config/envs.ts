@@ -19,10 +19,12 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string(),
   REDIS_PORT: PortSchema,
   CHALLENGE_TTL: NumberSchema,
+  QUEST_TTL: NumberSchema,
+  NEXT_QUEST_TTL: NumberSchema,
   FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS: NumberSchema,
   LOBBY_TTL: z.string(),
   CLIENT_URL: z.string().url(),
-  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().min(10),
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
 });
 
@@ -42,10 +44,12 @@ export const envs = {
   REDIS_PORT: envVars.REDIS_PORT,
   REDIS_PASSWORD: envVars.REDIS_PASSWORD,
   CHALLENGE_TTL: envVars.CHALLENGE_TTL,
+  QUEST_TTL: envVars.QUEST_TTL,
   FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS:
     envVars.FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS,
   CLIENT_URL: envVars.CLIENT_URL,
   LOBBY_TTL: envVars.LOBBY_TTL,
   OPENAI_MODEL: envVars.OPENAI_MODEL,
   OPENAI_API_KEY: envVars.OPENAI_API_KEY,
+  NEXT_QUEST_TTL: envVars.NEXT_QUEST_TTL,
 } as EnvVars;

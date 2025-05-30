@@ -1,39 +1,35 @@
-import { useState } from 'react'
-import ChallengeParticipants from '../clash/challenge-participants'
-import type { Route } from './+types/quiz.page'
-import QuizOption from './components/quiz-option'
-import { useQuiz } from './use-quiz'
+import CurrentQuestion from './components/current-question'
+import QuestCountdown from './components/quest-countdown'
+import ChallengeWelcome from './components/challenge-welcome'
+import ChallengeBanner from '~/challenger/common/components/challenge-banner'
+import ChallengeParticipants from '~/challenger/common/components/challenge-participants'
+import { useQuiz } from './quiz-provider'
+import { Status } from '@repo/schemas'
 
-export default function QuizChallenge({ params }: Route.ComponentProps) {
-  const { challengeState } = useQuiz(params.codename)
-  const challenge = challengeState.challenges[0]
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
-
-  const sendAnswer = (optionId: string) => {
-    setSelectedOption(optionId)
-  }
-
-  if (!challenge) return <div>No challenge found</div>
+export default function QuizChallenge() {
+  const { challengeState } = useQuiz()
 
   return (
     <div className="relative min-w-full">
-      <div className="max-w-6xl mx-auto relative">
-        <div className="grid place-items-center">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-6">
-              <h2>{challenge.question.question}</h2>
-              {challenge.question.options.map((option) => (
-                <QuizOption
-                  key={challenge.id}
-                  option={option}
-                  onClick={sendAnswer}
-                  isSelected={selectedOption === option.id}
-                />
-              ))}
-            </div>
-            <div className="space-y-6 lg:absolute top-0 right-0 lg:w-[250px]">
-              <ChallengeParticipants participants={challengeState.participants} />
-            </div>
+      <div className="max-w-6xl mx-auto relative flex flex-col gap-8">
+        <ChallengeBanner
+          title={challengeState.title}
+          codename={challengeState.codename}
+          type={challengeState.type}
+          status={challengeState.status}
+          renderOnStart={<QuestCountdown />}
+        />
+        {challengeState.status === Status.PENDING && (
+          <section className="flex flex-col gap-8">
+            <ChallengeWelcome />
+            <ChallengeParticipants participants={challengeState.participants} />
+          </section>
+        )}
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col gap-6 mt-5">
+            {challengeState.status === Status.IN_PROGRESS && (
+              <CurrentQuestion />
+            )}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import {
   ChallengeType,
   IQuestQuizChallenge,
   IQuestHistory,
+  IChallengeStateWithCurrentQuest,
 } from '@repo/schemas';
 import * as codeGenerator from '@/utils/code-generator';
 
@@ -31,6 +32,7 @@ export class ChallengeStateBuilder<
   difficulties: Difficult[];
   currentChallenge: string;
   playedChallenges: QuestChallengeState[];
+  startedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   creator: string;
@@ -60,6 +62,12 @@ export class ChallengeStateBuilder<
     return this;
   }
 
+  markAsStarted() {
+    this.startedAt = new Date();
+    this.status = Status.IN_PROGRESS;
+    return this;
+  }
+
   setTitle(title: string) {
     this.title = title;
     return this;
@@ -80,7 +88,15 @@ export class ChallengeStateBuilder<
     return this;
   }
 
-  setCurrentChallenge(currentChallenge: string) {
+  isLastQuest() {
+    if (this.playedChallenges.length === this.challenges.length) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private setCurrentChallenge(currentChallenge: string) {
     this.currentChallenge = currentChallenge;
 
     const newQuestState: IQuestChallengeState = {
@@ -89,6 +105,58 @@ export class ChallengeStateBuilder<
     };
 
     this.playedChallenges.push(newQuestState as QuestChallengeState);
+
+    return this;
+  }
+
+  nextChallenge() {
+    if (!this.currentChallenge) {
+      const firstChallenge = [...this.challenges].shift();
+
+      this.setCurrentChallenge(firstChallenge.id);
+
+      return this;
+    }
+
+    const currentChallengeIndex = this.challenges.findIndex(
+      (challenge) => challenge.id === this.currentChallenge,
+    );
+    const nextChallenge = this.challenges[currentChallengeIndex + 1];
+
+    if (!nextChallenge) {
+      return this;
+    }
+
+    this.setCurrentChallenge(nextChallenge.id);
+
+    return this;
+  }
+
+  getCurrentQuest() {
+    return this.challenges.find(
+      (challenge) => challenge.id === this.currentChallenge,
+    );
+  }
+
+  finishCurrentQuest() {
+    const currentChallengeIndex = this.playedChallenges.findIndex(
+      (challenge) => challenge.questionId === this.currentChallenge,
+    );
+    const currentChallenge = this.playedChallenges[currentChallengeIndex];
+
+    const questHistory =
+      this.participantsQuestHistory[currentChallenge.questionId];
+
+    if (questHistory) {
+      const [bestHistory] = questHistory.sort((aHistory, bHistory) => {
+        return bHistory.score - aHistory.score;
+      });
+
+      currentChallenge.winner = bestHistory.participantId;
+    }
+
+    this.playedChallenges[currentChallengeIndex] = currentChallenge;
+    this.status = Status.AWAITING_NEXT_QUEST;
 
     return this;
   }
@@ -175,6 +243,7 @@ export class ChallengeStateBuilder<
     challengeState.expiration = props.expiration;
     challengeState.type = props.type;
     challengeState.difficulties = props.difficulties;
+    challengeState.startedAt = props.startedAt;
 
     return challengeState;
   }
@@ -265,6 +334,16 @@ export class ChallengeStateBuilder<
       codename: this.codename,
       leaderboard,
       type: this.type,
+    };
+  }
+
+  withOnlyCurrentQuest(): IChallengeStateWithCurrentQuest {
+    const challenge = this.getProps();
+    Reflect.deleteProperty(challenge, 'challenges');
+
+    return {
+      ...challenge,
+      currentQuest: this.getCurrentQuest(),
     };
   }
 }

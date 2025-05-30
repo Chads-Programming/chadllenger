@@ -8,11 +8,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { generateUsername } from '../utils/username-generator'
 
 interface UserContextType {
   userID: string
   username: string
   changeUsername: (username: string) => void
+  generateRandomUsername: () => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -40,21 +42,33 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     localStorage.setItem('username', username)
   }, [])
 
+  const generateRandomUsername = useCallback(() => {
+    const newUsername = generateUsername()
+    changeUsername(newUsername)
+  }, [changeUsername])
+
   useEffect(() => {
     const storedSessionId = localStorage.getItem('sessionId')
+    const storedUsername = localStorage.getItem('username')
+
+    if (!storedUsername) {
+      generateRandomUsername()
+    }
+
     if (storedSessionId) {
       setUserId(storedSessionId)
-
       return
     }
 
     auth.createSession().then(({ sessionId }) => {
       changeUserID(sessionId)
     })
-  }, [changeUserID])
+  }, [changeUserID, generateRandomUsername])
 
   return (
-    <UserContext.Provider value={{ userID, username, changeUsername }}>
+    <UserContext.Provider
+      value={{ userID, username, changeUsername, generateRandomUsername }}
+    >
       {children}
     </UserContext.Provider>
   )

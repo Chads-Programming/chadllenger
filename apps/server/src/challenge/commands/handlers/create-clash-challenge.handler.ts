@@ -1,11 +1,10 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateClashChallengeCommand } from '../impl/create-clash-challenge.command';
 import { ChallengeCacheRepository } from '../../repositories/challenge-cache.repository';
 import { envs } from '@/config/envs';
 import { CreateChallengeRequestType } from '../../types/challenge-store';
 import { PlayerCacheRepository } from '../../repositories/player-cache.repository';
 import { CustomError } from '@/core/errors/custom-error';
-import { CreatedChallengeEvent } from '../../events/impl/created-challenge.event';
 import { ErrorCodes } from '@/lib/errors';
 import { Status } from '@repo/schemas';
 import { ParticipantModel } from '@/challenge/models/participant.model';
@@ -23,7 +22,6 @@ export class CreateClashChallengeHandler
     private readonly challengeRepository: ChallengeCacheRepository,
     private readonly playerCacheRepository: PlayerCacheRepository,
     private readonly questChallengeRepository: QuestChallengeRepository,
-    private readonly eventBus: EventBus,
   ) {}
 
   async execute(
@@ -61,8 +59,6 @@ export class CreateClashChallengeHandler
         creatorId,
         challenge.codename,
       );
-
-      this.eventBus.publish(new CreatedChallengeEvent(challenge.codename));
 
       return challenge;
     } catch (error) {

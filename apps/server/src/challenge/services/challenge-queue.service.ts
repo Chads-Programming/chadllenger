@@ -5,31 +5,72 @@ import { AI_QUEUE, CHALLENGE_QUEUE } from '../consts';
 import { envs } from '@/config/envs';
 import { WithId } from '@/types/with-id.type';
 import { IGeneratedQuizChallenge } from '@repo/schemas';
+import { ChadLogger } from '@/logger/chad-logger';
 
 @Injectable()
 export class ChallengeQueueService {
   constructor(
     @InjectQueue(CHALLENGE_QUEUE.NAME) private challengeQueue: Queue,
     @InjectQueue(AI_QUEUE.NAME) private aiQueue: Queue,
+    private readonly logger: ChadLogger,
   ) {}
 
-  finishChallengeToQueue(challengeId: string) {
+  setupAutoQuestToQueue(codename: string) {
+    const questTTL = Number(envs.QUEST_TTL);
+
+    this.logger.log(
+      'Setting up auto quest to queue',
+      'ChallengeQueueService::setupAutoQuestToQueue',
+      { codename, delay: questTTL },
+    );
+
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST,
+      codename,
+      {
+        ...this.getQueueOptions(),
+        jobId: this.getJobIdAutoSetupQuest(codename),
+        delay: questTTL,
+        repeat: {
+          every: questTTL,
+          limit: 1,
+        },
+        backoff: {
+          type: 'fixed',
+          delay: 3000,
+        },
+      },
+    );
+  }
+
+  finishChallengeToQueue(codename: string) {
+    const challengeTTL = Number(envs.CHALLENGE_TTL);
+
     return this.challengeQueue.add(
       CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE,
-      challengeId,
-      this.getFinishChallengeOptions(),
+      codename,
+      {
+        ...this.getQueueOptions(),
+        delay: challengeTTL,
+        backoff: {
+          type: 'fixed',
+          delay: challengeTTL / 10,
+        },
+      },
+    );
+  }
+
+  stopAutoQuestSetup(codename: string) {
+    return this.challengeQueue.removeJobScheduler(
+      this.getJobIdAutoSetupQuest(codename),
     );
   }
 
   generateChallengeToQueue(challengeId: string) {
-    return this.aiQueue.add(
-      AI_QUEUE.JOBS.GENERATE_CHALLENGE,
-      challengeId,
-      {
-        ...this.getQueueOptions(),
-        attempts: 1
-      },
-    );
+    return this.aiQueue.add(AI_QUEUE.JOBS.GENERATE_CHALLENGE, challengeId, {
+      ...this.getQueueOptions(),
+      attempts: 1,
+    });
   }
 
   generatedChallengeToQueue(challenge: WithId<IGeneratedQuizChallenge>) {
@@ -37,6 +78,17 @@ export class ChallengeQueueService {
       CHALLENGE_QUEUE.JOBS.GENERATED_CHALLENGE,
       challenge,
       this.getQueueOptions(),
+    );
+  }
+
+  startNextQuestToQueue(codename: string) {
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.START_NEXT_QUEST,
+      codename,
+      {
+        ...this.getQueueOptions(),
+        delay: Number(envs.NEXT_QUEST_TTL),
+      },
     );
   }
 
@@ -50,16 +102,7 @@ export class ChallengeQueueService {
     };
   }
 
-  private getFinishChallengeOptions() {
-    const challengeTTL = Number(envs.CHALLENGE_TTL);
-
-    return {
-      ...this.getQueueOptions(),
-      delay: challengeTTL,
-      backoff: {
-        type: 'fixed',
-        delay: challengeTTL / 10,
-      },
-    };
+  private getJobIdAutoSetupQuest(codename: string): string {
+    return `${codename}:${CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST}`;
   }
 }

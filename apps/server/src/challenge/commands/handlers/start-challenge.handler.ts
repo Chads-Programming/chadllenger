@@ -1,42 +1,48 @@
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
-import { IChallengeState } from '@repo/schemas';
+import {
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
+import { IChallengeState, Status } from '@repo/schemas';
 import { ChallengeCacheRepository } from '@/challenge/repositories/challenge-cache.repository';
 import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query';
 import { StartChallengeCommand } from '../impl/start-challenge.comman';
 import { ErrorCodes } from '@/lib/errors';
 import { CustomError } from '@/core/errors/custom-error';
+import { StartedChallengeEvent } from '@/challenge/events/impl/started-challenge.event';
 
 @CommandHandler(StartChallengeCommand)
 export class StartChallengeHandler
-  implements ICommandHandler<string, IChallengeState>
+  implements ICommandHandler<StartChallengeCommand, IChallengeState>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
+    private readonly eventBus: EventBus,
     private readonly queryBus: QueryBus,
   ) {}
 
-  async execute(codename: string): Promise<IChallengeState> {
+  async execute(commnand: StartChallengeCommand) {
     try {
       const currentChallenge = await this.queryBus.execute(
-        new GetChallengeQuery(codename),
+        new GetChallengeQuery(commnand.codename),
       );
 
-      if (!currentChallenge) {
-        throw CustomError.notFound({
-          code: ErrorCodes.CHALLENGE_NOT_FOUND,
-          message: 'Challenge not found',
-          origin: 'ChallengeGateway::startChallenge',
-        });
-      }
+      currentChallenge
+        .setStatus(Status.IN_PROGRESS)
+        .nextChallenge()
+        .markAsStarted();
 
-      currentChallenge.setStatus(currentChallenge.status);
-      currentChallenge.setCurrentChallenge(currentChallenge.challenges[0].id);
+      await this.challengeRepository.updateChallenge(
+        commnand.codename,
+        currentChallenge,
+      );
 
-      await this.challengeRepository.updateChallenge(codename, {
-        challenges: currentChallenge.challenges,
-      });
+      this.eventBus.publish(
+        new StartedChallengeEvent(currentChallenge.codename),
+      );
 
-      return this.queryBus.execute(new GetChallengeQuery(codename));
+      return this.queryBus.execute(new GetChallengeQuery(commnand.codename));
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
@@ -44,7 +50,7 @@ export class StartChallengeHandler
 
       throw CustomError.serverError({
         code: ErrorCodes.DEFAULT_ERROR,
-        message: 'Failed to start challenge',
+        message: error.toString(),
         origin: 'StartChallengeHandler::execute',
       });
     }

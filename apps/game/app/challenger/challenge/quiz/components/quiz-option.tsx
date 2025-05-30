@@ -1,5 +1,5 @@
 import type { IQuestionOptionWithoutAnswer } from '@repo/schemas'
-import { Confetti, ConfettiButton } from 'components/ui/confetti-button'
+import { ConfettiButton } from 'components/ui/confetti-button'
 import { cn } from 'lib/utils'
 
 interface QuizOptionProps {

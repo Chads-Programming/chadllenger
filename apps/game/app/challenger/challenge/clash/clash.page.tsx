@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Editor } from '@monaco-editor/react'
 import { Play } from 'lucide-react'
 import { useClash } from './use-clash'
-import ChallengeParticipants from './challenge-participants'
+import ChallengeParticipants from '../../common/components/challenge-participants'
 import type { Route } from './+types/clash.page'
 
 export function meta() {

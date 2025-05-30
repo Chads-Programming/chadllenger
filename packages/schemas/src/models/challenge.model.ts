@@ -5,6 +5,7 @@ import type {
   IQuestChallengeState,
 } from './quest-challenge.model'
 import type { IParticipant } from './participant.model'
+import type { IQuestQuizChallenge } from './quiz-challenge.model'
 
 export interface IChallengeState {
   id: string
@@ -16,6 +17,7 @@ export interface IChallengeState {
   currentChallenge: string
   playedChallenges: IQuestChallengeState[]
   participantsQuestHistory: Record<string, IQuestHistory[]>
+  startedAt?: Date
   createdAt: Date
   updatedAt: Date
   creator: string
@@ -24,10 +26,22 @@ export interface IChallengeState {
   type: ChallengeType
 }
 
+export type IChallengeStateWithCurrentQuest = Omit<
+  IChallengeState,
+  'challenges'
+> & {
+  currentQuest: IQuestChallenge
+}
+
+export interface IQuizChallengeState extends IChallengeState {
+  challenges: IQuestQuizChallenge[]
+}
+
 export const Status = {
   PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',
   FINISHED: ' FINISHED',
+  AWAITING_NEXT_QUEST: ' AWAITING_NEXT_QUEST',
 } as const
 
 export interface IQuestHistory {

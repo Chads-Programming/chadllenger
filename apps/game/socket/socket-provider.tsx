@@ -74,7 +74,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('connected...')
       setIsConnected(true)
     })
-    
+
     socketRef.current?.on('disconnect', () => {
       console.log('disconnected...')
       setIsConnected(false)
