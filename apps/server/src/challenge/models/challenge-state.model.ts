@@ -142,16 +142,18 @@ export class ChallengeStateBuilder<
     const currentChallengeIndex = this.playedChallenges.findIndex(
       (challenge) => challenge.questionId === this.currentChallenge,
     );
-
     const currentChallenge = this.playedChallenges[currentChallengeIndex];
 
-    const [bestHistory] = this.participantsQuestHistory[
-      currentChallenge.questionId
-    ].sort((aHistory, bHistory) => {
-      return bHistory.score - aHistory.score;
-    });
+    const questHistory =
+      this.participantsQuestHistory[currentChallenge.questionId];
 
-    currentChallenge.winner = bestHistory.participantId;
+    if (questHistory) {
+      const [bestHistory] = questHistory.sort((aHistory, bHistory) => {
+        return bHistory.score - aHistory.score;
+      });
+
+      currentChallenge.winner = bestHistory.participantId;
+    }
 
     this.playedChallenges[currentChallengeIndex] = currentChallenge;
     this.status = Status.AWAITING_NEXT_QUEST;

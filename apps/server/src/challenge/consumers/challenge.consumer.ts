@@ -24,6 +24,8 @@ export class ChallengeConsumer extends WorkerHost {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async process(job: Job<any, void, string>): Promise<void> {
+    this.logger.log('Processing job', 'ChallengeConsumer::process', job.name);
+
     if (job.name === CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE) {
       return this.processFinishChallenge(job);
     }
@@ -87,6 +89,12 @@ export class ChallengeConsumer extends WorkerHost {
     const challengeCodename = job.data;
 
     try {
+      this.logger.log(
+        'Finishing quest',
+        'ChallengeConsumer::processSetupAutoQuest',
+        challengeCodename,
+      );
+
       await this.commandBus.execute(new FinishQuestCommand(challengeCodename));
     } catch (error) {
       this.logger.error(

@@ -2,6 +2,7 @@ import { useUser } from 'providers/user-provider'
 import ChallengeStrings from '~/challenger/common/strings/challenge'
 import { useQuiz } from '../quiz-provider'
 import { ArrowRightIcon, Users } from 'lucide-react'
+import { ShineBorder } from 'components/ui/shine-border'
 
 const ChallengeWelcome = () => {
   const { userID } = useUser()
@@ -11,7 +12,8 @@ const ChallengeWelcome = () => {
 
   return (
     <div className="card lg:card-side bg-base-100 shadow-sm border border-base-300 lg:max-w-4xl self-center">
-      <figure className="max-w-64">
+      <ShineBorder shineColor="oklch(62% 0.194 149.214)" />
+      <figure className="max-w-64 overflow-hidden">
         <img src="/images/awaiting.png" alt="welcome challenge" />
       </figure>
       <div className="card-body">

@@ -88,10 +88,13 @@ export class FinishQuestHandler
         throw error;
       }
 
+      this.logger.error(error, null, 'FinishQuestHandler::execute', error);
+
       throw CustomError.serverError({
         code: ErrorCodes.DEFAULT_ERROR,
         message: 'Failed to start challenge',
         origin: 'FinishQuestHandler::execute',
+        data: error,
       });
     }
   }

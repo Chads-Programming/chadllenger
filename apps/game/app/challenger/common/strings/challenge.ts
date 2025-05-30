@@ -51,6 +51,11 @@ const ChallengeStrings = {
         'El G.O.A.T se prepara para empezar la partida. ¡Prepárense para una emocionante experiencia multijugador!',
     },
     start: 'Comenzar!',
+    banner: {
+      timeRemaining: 'Tiempo restante:',
+      clipboard: 'Código copiado al portapapeles',
+      linkClipboard: 'Enlace del desafío copiado al portapapeles',
+    },
     participants: {
       title: 'Participantes',
       empty: 'No hay participantes aún',

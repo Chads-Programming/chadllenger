@@ -5,16 +5,24 @@ import { AI_QUEUE, CHALLENGE_QUEUE } from '../consts';
 import { envs } from '@/config/envs';
 import { WithId } from '@/types/with-id.type';
 import { IGeneratedQuizChallenge } from '@repo/schemas';
+import { ChadLogger } from '@/logger/chad-logger';
 
 @Injectable()
 export class ChallengeQueueService {
   constructor(
     @InjectQueue(CHALLENGE_QUEUE.NAME) private challengeQueue: Queue,
     @InjectQueue(AI_QUEUE.NAME) private aiQueue: Queue,
+    private readonly logger: ChadLogger,
   ) {}
 
   setupAutoQuestToQueue(codename: string) {
     const questTTL = Number(envs.QUEST_TTL);
+
+    this.logger.log(
+      'Setting up auto quest to queue',
+      'ChallengeQueueService::setupAutoQuestToQueue',
+      { codename, delay: questTTL },
+    );
 
     return this.challengeQueue.add(
       CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST,
