@@ -42,6 +42,9 @@ const ChallengeStrings = {
   },
   challenge: {
     startedQuest: '¡El quest ha comenzado! 🦊🚬',
+    questResults: {
+      title: 'Resultados del Quest',
+    },
     welcome: {
       goat: 'G.O.A.T',
       guest: 'Invitado',
