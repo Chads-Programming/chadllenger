@@ -21,5 +21,6 @@ export interface IQuestChallenge {
 export interface IQuestChallengeState {
   questionId: string
   startedAt?: Date
+  finishedAt?: Date
   winner?: string
 }

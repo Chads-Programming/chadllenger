@@ -4,8 +4,10 @@ import {
   NotificationsChannels,
   NotificationsType,
   Status,
+  type AnswerQuest,
   type ChallengeNotificationType,
   type IChallengeState,
+  type IQuestHistory,
   type IQuizChallengeState,
   type PlayerJoinedGame,
 } from '@repo/schemas'
@@ -28,6 +30,7 @@ import { useUser } from 'providers/user-provider'
 export interface IQuizContext {
   challengeState: IQuizChallengeState
   startChallenge: () => void
+  sendAnswer: (optionId: string) => void
 }
 
 const QuizContext = createContext<IQuizContext | undefined>(undefined)
@@ -98,9 +101,45 @@ export const QuizProvider = ({ codename, children }: Props) => {
     [toast],
   )
 
+  const handleFinishQuest = useCallback(
+    (
+      notification: ChallengeNotificationType<
+        IChallengeState['participantsQuestHistory']
+      >,
+    ) => {
+      dispatch({
+        type: ACTIONS.FINISH_QUEST,
+        payload: notification.data,
+      })
+    },
+    [],
+  )
+
   const startChallenge = useCallback(() => {
     emitEvent(MessageTypes.START_CHALLENGE, codename)
   }, [emitEvent, codename])
+
+  const sendAnswer = useCallback(
+    (optionId: string) => {
+      const answer: AnswerQuest = {
+        answer: optionId,
+        questionId: challengeState.currentChallenge,
+        codename,
+      }
+
+      emitEvent(
+        MessageTypes.QUIZ_SEND_ANSWER,
+        answer,
+        (participantQuestHistory: IQuestHistory) => {
+          dispatch({
+            type: ACTIONS.MARK_QUEST_ANSWERED,
+            payload: participantQuestHistory,
+          })
+        },
+      )
+    },
+    [emitEvent, challengeState, codename],
+  )
 
   useEffect(() => {
     challengeApi.getChallengeByCodename(codename).then(handleChallengeInfo)
@@ -113,20 +152,25 @@ export const QuizProvider = ({ codename, children }: Props) => {
     )
 
     registryNotification(NotificationsType.STARTED_ROUND, handleStartedRound)
+    registryNotification(NotificationsType.FINISH_QUEST, handleFinishQuest)
 
     return () => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
       unRegistryNotification(NotificationsType.STARTED_ROUND)
+      unRegistryNotification(NotificationsType.FINISH_QUEST)
     }
   }, [
     registryNotification,
     unRegistryNotification,
     handleJoinParticipant,
     handleStartedRound,
+    handleFinishQuest,
   ])
 
   return (
-    <QuizContext.Provider value={{ challengeState, startChallenge }}>
+    <QuizContext.Provider
+      value={{ challengeState, startChallenge, sendAnswer }}
+    >
       {children}
     </QuizContext.Provider>
   )

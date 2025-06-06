@@ -1,3 +1,6 @@
+import { match, P } from 'ts-pattern'
+import { Status } from '@repo/schemas'
+
 import CurrentQuestion from './components/current-question'
 import QuestCountdown from './components/quest-countdown'
 import ChallengeWelcome from './components/challenge-welcome'
@@ -5,12 +8,13 @@ import ChallengeBanner from '~/challenger/common/components/challenge-banner'
 import ChallengeParticipants from '~/challenger/common/components/challenge-participants'
 import QuizQuestResults from './components/quiz-quest-results'
 import { useQuiz } from './quiz-provider'
-import { Status, type IQuestQuizChallenge } from '@repo/schemas'
-import { useQuizQuest } from './use-quiz-quest'
+import { useCurrentQuest } from './use-current-quest'
+import { useCurrentQuestAnswer } from './use-current-answer'
 
 export default function QuizChallenge() {
-  const { challengeState } = useQuiz()
-  const { currentChallenge } = useQuizQuest()
+  const { challengeState, sendAnswer } = useQuiz()
+  const currentQuest = useCurrentQuest()
+  const currentQuestAnswer = useCurrentQuestAnswer()
 
   return (
     <div className="relative min-w-full">
@@ -22,30 +26,42 @@ export default function QuizChallenge() {
           status={challengeState.status}
           renderOnStart={<QuestCountdown />}
         />
-        {challengeState.status === Status.PENDING && (
-          <section className="flex flex-col gap-8">
-            <ChallengeWelcome />
-            <ChallengeParticipants participants={challengeState.participants} />
-          </section>
-        )}
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex flex-col gap-6 mt-5">
-            {challengeState.status === Status.IN_PROGRESS && (
-              <CurrentQuestion />
-            )}
-            {challengeState.status === Status.AWAITING_NEXT_QUEST && (
-              <QuizQuestResults
-                results={
-                  challengeState.participantsQuestHistory[
-                    challengeState.currentChallenge
-                  ]
-                }
-                options={
-                  (currentChallenge as IQuestQuizChallenge).question.options
-                }
-              />
-            )}
-          </div>
+        <div className="flex flex-col gap-8">
+          {match({ status: challengeState.status, quest: currentQuest })
+            .with({ status: Status.PENDING }, () => (
+              <>
+                <ChallengeWelcome />
+                <ChallengeParticipants
+                  participants={challengeState.participants}
+                />
+              </>
+            ))
+            .with(
+              { status: Status.IN_PROGRESS, quest: P.not(P.nullish) },
+              ({ quest }) => (
+                <CurrentQuestion
+                  quest={quest}
+                  onAnswer={sendAnswer}
+                  selectedAnswer={currentQuestAnswer?.participantAnswer ?? null}
+                />
+              ),
+            )
+            .with(
+              { status: Status.AWAITING_NEXT_QUEST, quest: P.not(P.nullish) },
+              ({ quest }) => (
+                <QuizQuestResults
+                  results={
+                    challengeState.participantsQuestHistory[
+                      challengeState.currentChallenge
+                    ]
+                  }
+                  options={quest.question.options}
+                />
+              ),
+            )
+            .otherwise(() => (
+              <div>No status</div>
+            ))}
         </div>
       </div>
     </div>

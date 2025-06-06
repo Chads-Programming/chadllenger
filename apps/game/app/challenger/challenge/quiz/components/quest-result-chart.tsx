@@ -9,6 +9,8 @@ interface Props {
 
 const QuestResultChart = ({ results }: Props) => {
   const data = useMemo(() => {
+    if (!results) return []
+
     const resultsPerAnswer = results.reduce(
       (acc: Record<string, { name: string; amt: number }>, result, index) => {
         const questOption = acc[result.participantAnswer]

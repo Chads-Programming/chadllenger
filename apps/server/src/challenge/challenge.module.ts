@@ -13,8 +13,6 @@ import { PlayerCacheRepository } from './repositories/player-cache.repository';
 import CommandHandlers from './commands/handlers';
 import QueryHandlers from './queries/handlers';
 import EventHandlers from './events/handlers';
-import { ChallengeClashGateway } from './challenge-clash.gateway';
-import { ChallengeQuizGateway } from './challenge-quiz.gateway';
 
 @Module({
   imports: [
@@ -27,8 +25,6 @@ import { ChallengeQuizGateway } from './challenge-quiz.gateway';
   ],
   providers: [
     ChallengeGateway,
-    ChallengeClashGateway,
-    ChallengeQuizGateway,
     ChallengeCacheRepository,
     PlayerCacheRepository,
     LobbyCacheRepository,

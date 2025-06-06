@@ -153,6 +153,7 @@ export class ChallengeStateBuilder<
       });
 
       currentChallenge.winner = bestHistory.participantId;
+      currentChallenge.finishedAt = new Date();
     }
 
     this.playedChallenges[currentChallengeIndex] = currentChallenge;
@@ -301,6 +302,17 @@ export class ChallengeStateBuilder<
     this.updateParticipant(currentParticipant);
 
     return this;
+  }
+
+  findParticipantQuest(
+    questionId: string,
+    participantId: string,
+  ): IQuestHistory | null {
+    const questHistory = this.participantsQuestHistory[questionId].find(
+      (quest) => quest.participantId === participantId,
+    );
+
+    return questHistory ?? null;
   }
 
   serialize() {

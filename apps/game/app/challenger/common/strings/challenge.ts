@@ -42,6 +42,7 @@ const ChallengeStrings = {
   },
   challenge: {
     startedQuest: '¡El quest ha comenzado! 🦊🚬',
+    finishedQuest: '¡El quest ha terminado! 🦊🚬',
     questResults: {
       title: 'Resultados del Quest',
     },

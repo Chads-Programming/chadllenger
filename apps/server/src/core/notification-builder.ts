@@ -5,10 +5,11 @@ import {
   PlayerConnectedPayload,
   NotificationsType,
   CreatedRoomPayload,
-  ChallengeSummary,
   PlayerJoinedGame,
   ChallengeType,
   IChallengeStateWithCurrentQuest,
+  SummaryWithState,
+  IChallengeState,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -72,22 +73,27 @@ export const ChallengeNotificationBuilder = {
 
   buildFinishChallengeNotification(
     challengeState: ChallengeStateBuilder,
-  ): ChallengeNotificationType<ChallengeSummary> {
+  ): ChallengeNotificationType<IChallengeState['participantsQuestHistory']> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.FINISH_CHALLENGE,
       messageType: 'system',
-      data: challengeState.toSummary(),
+      data: challengeState.participantsQuestHistory,
       createdAt: new Date(),
     };
   },
 
-  buildFinishQuestNotification(challengeState: ChallengeStateBuilder) {
+  buildFinishQuestNotification(
+    challengeState: ChallengeStateBuilder,
+  ): ChallengeNotificationType<SummaryWithState> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.FINISH_QUEST,
       messageType: 'system',
-      data: challengeState.toSummary(),
+      data: {
+        summary: challengeState.toSummary(),
+        challengeState: challengeState.getProps(),
+      },
       createdAt: new Date(),
     };
   },
