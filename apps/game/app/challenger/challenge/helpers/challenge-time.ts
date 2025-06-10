@@ -1,15 +1,16 @@
-import type { IQuestChallengeState, IQuizChallengeState } from '@repo/schemas'
-import { match } from 'ts-pattern'
+import { Status, type IQuizChallengeState } from '@repo/schemas'
+import { match, P } from 'ts-pattern'
 
 const MILISECONDS_TO_SECONDS = 1000
-const SECONDS_TO_SHOW = 30
+const SECONDS_TO_SHOW_QUEST = 30
+const SECONDS_TO_SHOW_STARTING_CHALLENGE = 5
 
-const calculateTime = (
-  dateDiscriminator: 'finishedAt' | 'startedAt',
-  questState?: IQuestChallengeState,
-) => {
-  const rawDate = questState?.[dateDiscriminator]
+type OnlyQuestState = Pick<
+  IQuizChallengeState,
+  'playedChallenges' | 'currentChallenge' | 'startedAt' | 'status'
+>
 
+const calculateTime = (durationTime: number, rawDate?: string | Date) => {
   if (!rawDate) {
     return 0
   }
@@ -20,7 +21,7 @@ const calculateTime = (
     new Date().getTime() / MILISECONDS_TO_SECONDS -
     formatedDate.getTime() / MILISECONDS_TO_SECONDS
 
-  const time = SECONDS_TO_SHOW - diffTime
+  const time = durationTime - diffTime
 
   if (time >= 0) {
     return Math.ceil(time)
@@ -29,29 +30,37 @@ const calculateTime = (
   return 0
 }
 
-const findQuestState = (challengeState: IQuizChallengeState) => {
+const findQuestState = (challengeState: OnlyQuestState) => {
   return challengeState.playedChallenges.find(
     (challenge) => challenge.questionId === challengeState.currentChallenge,
   )
 }
 
-const calculateQuestTime = (challengeState: IQuizChallengeState) => {
+const calculateQuestTime = (challengeState: OnlyQuestState) => {
   const currentQuest = findQuestState(challengeState)
 
-  return calculateTime('finishedAt', currentQuest)
+  return calculateTime(SECONDS_TO_SHOW_QUEST, currentQuest?.startedAt)
 }
-const calculateNextQuestTime = (challengeState: IQuizChallengeState) => {
+const calculateNextQuestTime = (challengeState: OnlyQuestState) => {
   const currentQuest = findQuestState(challengeState)
 
-  return calculateTime('finishedAt', currentQuest)
+  return calculateTime(SECONDS_TO_SHOW_QUEST, currentQuest?.finishedAt)
 }
 
-export const getRemainingTime = (
-  challengeState: IQuizChallengeState,
-  type: 'quest' | 'nextQuest',
-) => {
-  return match(type)
-    .with('quest', () => calculateQuestTime(challengeState))
-    .with('nextQuest', () => calculateNextQuestTime(challengeState))
+const calculateStartingChallengeTime = (challengeState: OnlyQuestState) => {
+  return calculateTime(
+    SECONDS_TO_SHOW_STARTING_CHALLENGE,
+    challengeState.startedAt,
+  )
+}
+
+export const getRemainingTime = (challengeState: OnlyQuestState) => {
+  return match(challengeState.status)
+    .with(Status.STARTING, () => calculateStartingChallengeTime(challengeState))
+    .with(Status.QUEST_IN_PROGRESS, () => calculateQuestTime(challengeState))
+    .with(Status.AWAITING_NEXT_QUEST, () =>
+      calculateNextQuestTime(challengeState),
+    )
+    .with(P.union(Status.PENDING, Status.FINISHED), () => 0)
     .exhaustive()
 }

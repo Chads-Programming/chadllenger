@@ -10,6 +10,7 @@ import { UpdateQuizzChallengeCommand } from '../commands/impl/update-quizz-chall
 import { WithId } from '@/types/with-id.type';
 import { GetChallengeQuery } from '../queries/impl/get-challenge.query';
 import { FinishQuestCommand } from '../commands/impl/finish-quest.command';
+import { ConfirmStartChallengeCommand } from '../commands/impl/confirm-start-challenge.command';
 
 @Processor(CHALLENGE_QUEUE.NAME)
 export class ChallengeConsumer extends WorkerHost {
@@ -31,6 +32,9 @@ export class ChallengeConsumer extends WorkerHost {
     }
     if (job.name === CHALLENGE_QUEUE.JOBS.GENERATED_CHALLENGE) {
       return this.processGeneratedChallenge(job);
+    }
+    if (job.name === CHALLENGE_QUEUE.JOBS.PREPARE_START_CHALLENGE) {
+      return this.processConfirmStartChallenge(job);
     }
     if (job.name === CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST) {
       return this.processSetupAutoQuest(job);
@@ -80,6 +84,31 @@ export class ChallengeConsumer extends WorkerHost {
         error,
         null,
         'ChallengeConsumer::processFinishChallenge',
+      );
+      throw error;
+    }
+  }
+
+  async processConfirmStartChallenge(
+    job: Job<string, void, string>,
+  ): Promise<void> {
+    const challengeCodename = job.data;
+
+    try {
+      this.logger.log(
+        'Finishing quest',
+        'ChallengeConsumer::processConfirmStartChallenge',
+        challengeCodename,
+      );
+
+      await this.commandBus.execute(
+        new ConfirmStartChallengeCommand(challengeCodename),
+      );
+    } catch (error) {
+      this.logger.error(
+        error,
+        null,
+        'ChallengeConsumer::processConfirmStartChallenge',
       );
       throw error;
     }

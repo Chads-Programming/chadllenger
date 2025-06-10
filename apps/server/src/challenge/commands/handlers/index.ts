@@ -1,4 +1,5 @@
 import { AnswerQuestQuizHandler } from './answer-quest-quiz.handler';
+import { ConfirmStartChallengeHandler } from './confirm-start-challenge.handler';
 import { CreateClashChallengeHandler } from './create-clash-challenge.handler';
 import { CreateQuizChallengeHandler } from './create-quiz-challenge.handler';
 import { FinishChallengeHandler } from './finish-challenge.handler';
@@ -17,6 +18,7 @@ export default [
   CreateClashChallengeHandler,
   CreateQuizChallengeHandler,
   StartChallengeHandler,
+  ConfirmStartChallengeHandler,
   CreateQuizChallengeHandler,
   CreateClashChallengeHandler,
   AnswerQuestQuizHandler,

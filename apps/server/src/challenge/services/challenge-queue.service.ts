@@ -15,6 +15,27 @@ export class ChallengeQueueService {
     private readonly logger: ChadLogger,
   ) {}
 
+  prepareAutoQuestToQueue(codename: string) {
+    this.logger.log(
+      'Preparing auto quest to queue',
+      'ChallengeQueueService::prepareAutoQuestToQueue',
+      { codename, delay: envs.QUEST_TTL },
+    );
+    return this.challengeQueue.add(
+      CHALLENGE_QUEUE.JOBS.PREPARE_START_CHALLENGE,
+      codename,
+      {
+        ...this.getQueueOptions(),
+        jobId: this.getJobIdPreparingAutoSetupQuest(codename),
+        delay: Number(envs.QUEST_TTL),
+        backoff: {
+          type: 'fixed',
+          delay: 3000,
+        },
+      },
+    );
+  }
+
   setupAutoQuestToQueue(codename: string) {
     const questTTL = Number(envs.QUEST_TTL);
 
@@ -104,5 +125,9 @@ export class ChallengeQueueService {
 
   private getJobIdAutoSetupQuest(codename: string): string {
     return `${codename}:${CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST}`;
+  }
+
+  private getJobIdPreparingAutoSetupQuest(codename: string): string {
+    return `preparing:${codename}`;
   }
 }

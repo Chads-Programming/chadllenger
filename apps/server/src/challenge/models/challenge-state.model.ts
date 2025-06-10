@@ -16,6 +16,7 @@ import * as codeGenerator from '@/utils/code-generator';
 import { ParticipantModel } from './participant.model';
 import { Difficult } from '@repo/database';
 import { RegisterAnswerRequestType } from '../types/challenge-store';
+import { ErrorCodes } from '@/lib/errors';
 
 const CODENAME_SIZE = 6;
 const QUEST_DELTA_SCORE = 1000;
@@ -62,9 +63,21 @@ export class ChallengeStateBuilder<
     return this;
   }
 
-  markAsStarted() {
+  prepareToStart() {
+    if (this.status !== Status.STARTING) {
+      throw ErrorCodes.QUEST_IS_NOT_PENDING;
+    }
+
     this.startedAt = new Date();
-    this.status = Status.IN_PROGRESS;
+    this.status = Status.STARTING;
+    return this;
+  }
+
+  confirmStart() {
+    if (this.status !== Status.STARTING) {
+      throw ErrorCodes.QUEST_IS_NOT_STARTING;
+    }
+    this.status = Status.QUEST_IN_PROGRESS;
     return this;
   }
 
@@ -109,7 +122,7 @@ export class ChallengeStateBuilder<
     return this;
   }
 
-  nextChallenge() {
+  nextQuest() {
     if (!this.currentChallenge) {
       const firstChallenge = [...this.challenges].shift();
 

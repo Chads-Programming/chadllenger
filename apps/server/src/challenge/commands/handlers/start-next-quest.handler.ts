@@ -36,7 +36,7 @@ export class StartNextQuestHandler
         new GetChallengeQuery(codename),
       );
 
-      challenge.nextChallenge();
+      challenge.nextQuest();
 
       const updatedChallenge = await this.commandBus.execute(
         new UpdateQuizzChallengeCommand(challenge.getProps()),

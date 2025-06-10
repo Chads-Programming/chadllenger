@@ -1,3 +1,4 @@
+import { ConfirmStartChallengeCommand } from './../impl/confirm-start-challenge.command';
 import {
   CommandHandler,
   EventBus,
@@ -10,11 +11,11 @@ import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query'
 import { StartChallengeCommand } from '../impl/start-challenge.comman';
 import { ErrorCodes } from '@/lib/errors';
 import { CustomError } from '@/core/errors/custom-error';
-import { StartingChallengeEvent } from '@/challenge/events/impl/starting-challenge.event';
+import { StartedChallengeEvent } from '@/challenge/events/impl/started-challenge.event';
 
-@CommandHandler(StartChallengeCommand)
-export class StartChallengeHandler
-  implements ICommandHandler<StartChallengeCommand, IChallengeState>
+@CommandHandler(ConfirmStartChallengeCommand)
+export class ConfirmStartChallengeHandler
+  implements ICommandHandler<ConfirmStartChallengeCommand, IChallengeState>
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
@@ -28,7 +29,7 @@ export class StartChallengeHandler
         new GetChallengeQuery(commnand.codename),
       );
 
-      currentChallenge.prepareToStart();
+      currentChallenge.confirmStart().nextQuest();
 
       await this.challengeRepository.updateChallenge(
         commnand.codename,
@@ -36,7 +37,7 @@ export class StartChallengeHandler
       );
 
       this.eventBus.publish(
-        new StartingChallengeEvent(currentChallenge.codename),
+        new StartedChallengeEvent(currentChallenge.codename),
       );
 
       return this.queryBus.execute(new GetChallengeQuery(commnand.codename));

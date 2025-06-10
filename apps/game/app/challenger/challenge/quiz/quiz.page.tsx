@@ -10,6 +10,7 @@ import QuizQuestResults from './components/quiz-quest-results'
 import { useQuiz } from './quiz-provider'
 import { useCurrentQuest } from './use-current-quest'
 import { useCurrentQuestAnswer } from './use-current-answer'
+import { Starting } from '~/challenger/common/components/starting'
 
 export default function QuizChallenge() {
   const { challengeState, sendAnswer } = useQuiz()
@@ -36,8 +37,9 @@ export default function QuizChallenge() {
                 />
               </>
             ))
+            .with({ status: Status.STARTING }, () => <Starting />)
             .with(
-              { status: Status.IN_PROGRESS, quest: P.not(P.nullish) },
+              { status: Status.QUEST_IN_PROGRESS, quest: P.not(P.nullish) },
               ({ quest }) => (
                 <CurrentQuestion
                   quest={quest}
@@ -59,8 +61,11 @@ export default function QuizChallenge() {
                 />
               ),
             )
+            .with({ status: Status.FINISHED }, () => (
+              <div>Challenge Finished</div>
+            ))
             .otherwise(() => (
-              <div>No status</div>
+              <div>Unknown State</div>
             ))}
         </div>
       </div>

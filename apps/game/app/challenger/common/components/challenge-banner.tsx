@@ -61,14 +61,21 @@ const ChallengeBanner = ({
               </button>
             </div>
           ))
-          .with(P.union(Status.IN_PROGRESS, Status.AWAITING_NEXT_QUEST), () => (
-            <div className="inline-flex items-center justify-center h-full">
-              <h3 className="text-3xl font-bold mr-4">
-                {ChallengeStrings.challenge.banner.timeRemaining}
-              </h3>
-              {renderOnStart}
-            </div>
-          ))
+          .with(
+            P.union(
+              Status.STARTING,
+              Status.QUEST_IN_PROGRESS,
+              Status.AWAITING_NEXT_QUEST,
+            ),
+            () => (
+              <div className="inline-flex items-center justify-center h-full">
+                <h3 className="text-3xl font-bold mr-4">
+                  {ChallengeStrings.challenge.banner.timeRemaining}
+                </h3>
+                {renderOnStart}
+              </div>
+            ),
+          )
           .with(Status.FINISHED, () => (
             <h3 className="text-3xl font-bold">
               {ChallengeStrings.challenge.finishedQuest}
