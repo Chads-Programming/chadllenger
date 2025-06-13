@@ -87,7 +87,6 @@ const InternalTimer = (
           {seconds}
         </span>
       </span>
-      sec
     </div>
   )
 }

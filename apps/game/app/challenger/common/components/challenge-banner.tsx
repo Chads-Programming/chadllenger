@@ -3,6 +3,7 @@ import {
   type ChallengeStatusType,
   Status,
 } from '@repo/schemas'
+import QuestCountdown from '~/challenger/challenge/quiz/components/quest-countdown'
 import { AuroraText } from 'components/ui/aurora-text'
 import { useToast } from 'hooks/use-toast'
 import { Link } from 'lucide-react'
@@ -14,16 +15,9 @@ interface Props {
   codename: string
   type: ChallengeType
   status: ChallengeStatusType
-  renderOnStart: React.ReactNode
 }
 
-const ChallengeBanner = ({
-  title,
-  codename,
-  type,
-  status,
-  renderOnStart,
-}: Props) => {
+const ChallengeBanner = ({ title, codename, type, status }: Props) => {
   const { toast } = useToast()
   const copyCodenameToClipboard = () => {
     navigator.clipboard.writeText(codename)
@@ -72,7 +66,7 @@ const ChallengeBanner = ({
                 <h3 className="text-3xl font-bold mr-4">
                   {ChallengeStrings.challenge.banner.timeRemaining}
                 </h3>
-                {renderOnStart}
+                <QuestCountdown />
               </div>
             ),
           )

@@ -8,6 +8,7 @@ import {
 } from '@repo/schemas'
 
 export const ACTIONS = {
+  STARTING_CHALLENGE: 'STARTING_CHALLENGE',
   LOAD_INITIAL_STATE: 'LOAD_INITIAL_STATE',
   JOIN_PLAYER: 'JOIN_PLAYER',
   STARTED_ROUND: 'STARTED_ROUND',
@@ -66,6 +67,7 @@ export const reducer = <TPayload>(
     [ACTIONS.STARTED_ROUND]: startedRound,
     [ACTIONS.MARK_QUEST_ANSWERED]: markQuestAnswered,
     [ACTIONS.FINISH_QUEST]: finishQuest,
+    [ACTIONS.STARTING_CHALLENGE]: startChallenge,
   }
 
   const actionHandler = actionManager[action.type] as ActionHandler
@@ -217,5 +219,27 @@ const finishQuest = (
     ...state,
     participantsQuestHistory: action.payload,
     status: Status.AWAITING_NEXT_QUEST,
+  }
+}
+
+/**
+ * Handles the logic to start a quiz challenge.
+ *
+ * Updates the quiz challenge state to indicate that the challenge is starting,
+ * and sets the `startedAt` timestamp from the provided action payload.
+ *
+ * @param state - The current state of the quiz challenge.
+ * @param action - The action containing the payload with the challenge state and the current quest.
+ * @returns A new state object with updated status and startedAt properties.
+ */
+const startChallenge = (
+  state: IQuizChallengeState,
+  action: Action<IChallengeStateWithCurrentQuest>,
+) => {
+  return {
+    ...state,
+    status: Status.STARTING,
+    challenges: [],
+    startedAt: action.payload.startedAt,
   }
 }

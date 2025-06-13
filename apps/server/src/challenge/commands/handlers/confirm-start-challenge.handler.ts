@@ -1,7 +1,7 @@
 import { ConfirmStartChallengeCommand } from './../impl/confirm-start-challenge.command';
 import {
+  CommandBus,
   CommandHandler,
-  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -11,7 +11,7 @@ import { GetChallengeQuery } from '@/challenge/queries/impl/get-challenge.query'
 import { StartChallengeCommand } from '../impl/start-challenge.comman';
 import { ErrorCodes } from '@/lib/errors';
 import { CustomError } from '@/core/errors/custom-error';
-import { StartedChallengeEvent } from '@/challenge/events/impl/started-challenge.event';
+import { StartNextQuestCommand } from '../impl/start-next-quest.command';
 
 @CommandHandler(ConfirmStartChallengeCommand)
 export class ConfirmStartChallengeHandler
@@ -19,7 +19,7 @@ export class ConfirmStartChallengeHandler
 {
   constructor(
     private readonly challengeRepository: ChallengeCacheRepository,
-    private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -29,18 +29,18 @@ export class ConfirmStartChallengeHandler
         new GetChallengeQuery(commnand.codename),
       );
 
-      currentChallenge.confirmStart().nextQuest();
+      currentChallenge.confirmStart();
 
       await this.challengeRepository.updateChallenge(
         commnand.codename,
         currentChallenge,
       );
 
-      this.eventBus.publish(
-        new StartedChallengeEvent(currentChallenge.codename),
+      await this.commandBus.execute(
+        new StartNextQuestCommand(currentChallenge.codename),
       );
 
-      return this.queryBus.execute(new GetChallengeQuery(commnand.codename));
+      return currentChallenge;
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;

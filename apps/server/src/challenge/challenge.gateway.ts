@@ -226,9 +226,10 @@ export class ChallengeGateway
       'ChallengeGateway::startChallenge',
       codename,
     );
-    const notification = ChallengeNotificationBuilder.startedRoundNotification(
-      updatedChallenge.withOnlyCurrentQuest(),
-    );
+    const notification =
+      ChallengeNotificationBuilder.startingChallengeNotification(
+        updatedChallenge.withNotQuests(),
+      );
 
     this.server
       .to(updatedChallenge.codename)
@@ -279,6 +280,12 @@ export class ChallengeGateway
 
   @OnEvent(CHALLENGE_EVENTS.NEW_QUEST_STARTED)
   async startNextQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting started quest to participants',
+      'ChallengeGateway::startNextQuest',
+      challenge.codename,
+    );
+
     this.server
       .to(challenge.codename)
       .emit(

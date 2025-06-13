@@ -15,11 +15,11 @@ export class ChallengeQueueService {
     private readonly logger: ChadLogger,
   ) {}
 
-  prepareAutoQuestToQueue(codename: string) {
+  preparingToStartToQueue(codename: string) {
     this.logger.log(
-      'Preparing auto quest to queue',
-      'ChallengeQueueService::prepareAutoQuestToQueue',
-      { codename, delay: envs.QUEST_TTL },
+      'Preparing to start challenge',
+      'ChallengeQueueService::preparingToStartToQueue',
+      { codename, delay: envs.PREPARING_CHALLENGE_TTL },
     );
     return this.challengeQueue.add(
       CHALLENGE_QUEUE.JOBS.PREPARE_START_CHALLENGE,
@@ -27,7 +27,7 @@ export class ChallengeQueueService {
       {
         ...this.getQueueOptions(),
         jobId: this.getJobIdPreparingAutoSetupQuest(codename),
-        delay: Number(envs.QUEST_TTL),
+        delay: Number(envs.PREPARING_CHALLENGE_TTL),
         backoff: {
           type: 'fixed',
           delay: 3000,
@@ -36,7 +36,7 @@ export class ChallengeQueueService {
     );
   }
 
-  setupAutoQuestToQueue(codename: string) {
+  addFinishQuestToQueue(codename: string) {
     const questTTL = Number(envs.QUEST_TTL);
 
     this.logger.log(
@@ -46,16 +46,12 @@ export class ChallengeQueueService {
     );
 
     return this.challengeQueue.add(
-      CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST,
+      CHALLENGE_QUEUE.JOBS.FINISH_QUEST,
       codename,
       {
         ...this.getQueueOptions(),
         jobId: this.getJobIdAutoSetupQuest(codename),
         delay: questTTL,
-        repeat: {
-          every: questTTL,
-          limit: 1,
-        },
         backoff: {
           type: 'fixed',
           delay: 3000,

@@ -40,9 +40,9 @@ export interface IQuizChallengeState extends IChallengeState {
 export const Status = {
   PENDING: 'PENDING',
   QUEST_IN_PROGRESS: 'QUEST_IN_PROGRESS',
-  FINISHED: ' FINISHED',
-  STARTING: ' STARTING',
-  AWAITING_NEXT_QUEST: ' AWAITING_NEXT_QUEST',
+  FINISHED: 'FINISHED',
+  STARTING: 'STARTING',
+  AWAITING_NEXT_QUEST: 'AWAITING_NEXT_QUEST',
 } as const
 
 export interface IQuestHistory {

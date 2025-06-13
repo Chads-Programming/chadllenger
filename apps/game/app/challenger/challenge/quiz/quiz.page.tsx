@@ -2,7 +2,6 @@ import { match, P } from 'ts-pattern'
 import { Status } from '@repo/schemas'
 
 import CurrentQuestion from './components/current-question'
-import QuestCountdown from './components/quest-countdown'
 import ChallengeWelcome from './components/challenge-welcome'
 import ChallengeBanner from '~/challenger/common/components/challenge-banner'
 import ChallengeParticipants from '~/challenger/common/components/challenge-participants'
@@ -17,6 +16,10 @@ export default function QuizChallenge() {
   const currentQuest = useCurrentQuest()
   const currentQuestAnswer = useCurrentQuestAnswer()
 
+  console.log('QuizChallenge', {
+    challengeState,
+  })
+
   return (
     <div className="relative min-w-full">
       <div className="max-w-6xl mx-auto relative flex flex-col gap-8">
@@ -25,7 +28,6 @@ export default function QuizChallenge() {
           codename={challengeState.codename}
           type={challengeState.type}
           status={challengeState.status}
-          renderOnStart={<QuestCountdown />}
         />
         <div className="flex flex-col gap-8">
           {match({ status: challengeState.status, quest: currentQuest })

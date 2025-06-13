@@ -1,5 +1,4 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { StartedChallengeEvent } from '../impl/started-challenge.event';
 import { ChallengeQueueService } from '@/challenge/services/challenge-queue.service';
 import { ChadLogger } from '@/logger/chad-logger';
 import { StartingChallengeEvent } from '../impl/starting-challenge.event';
@@ -13,13 +12,13 @@ export class StartingChallengeEventHandler
     private readonly logger: ChadLogger,
   ) {}
 
-  async handle(event: StartedChallengeEvent) {
+  async handle(event: StartingChallengeEvent) {
     this.logger.log(
       'Preparing starting challenge to queue',
       'StartingChallengeEventHandler::handle',
       event.codename,
     );
 
-    await this.challengeQueue.prepareAutoQuestToQueue(event.codename);
+    await this.challengeQueue.preparingToStartToQueue(event.codename);
   }
 }

@@ -59,6 +59,18 @@ export const ChallengeNotificationBuilder = {
     };
   },
 
+  startingChallengeNotification(
+    challenge: IChallengeState,
+  ): ChallengeNotificationType<IChallengeState> {
+    return {
+      id: generateUniqueId(),
+      type: NotificationsType.STARTING_CHALLENGE,
+      messageType: 'system',
+      data: challenge,
+      createdAt: new Date(),
+    };
+  },
+
   startedRoundNotification(
     challenge: IChallengeStateWithCurrentQuest,
   ): ChallengeNotificationType<IChallengeStateWithCurrentQuest> {

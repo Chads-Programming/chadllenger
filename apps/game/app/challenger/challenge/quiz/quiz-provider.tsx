@@ -89,6 +89,16 @@ export const QuizProvider = ({ codename, children }: Props) => {
     [toast],
   )
 
+  const handleStartingGame = useCallback(
+    (notification: ChallengeNotificationType<IChallengeState>) => {
+      dispatch({
+        type: ACTIONS.STARTING_CHALLENGE,
+        payload: notification.data,
+      })
+    },
+    [],
+  )
+
   const handleStartedRound = useCallback(
     (notification: ChallengeNotificationType<IChallengeState>) => {
       dispatch({
@@ -150,7 +160,10 @@ export const QuizProvider = ({ codename, children }: Props) => {
       NotificationsType.PLAYER_JOINED_GAME,
       handleJoinParticipant,
     )
-
+    registryNotification(
+      NotificationsType.STARTING_CHALLENGE,
+      handleStartingGame,
+    )
     registryNotification(NotificationsType.STARTED_ROUND, handleStartedRound)
     registryNotification(NotificationsType.FINISH_QUEST, handleFinishQuest)
 
@@ -158,6 +171,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
       unRegistryNotification(NotificationsType.STARTED_ROUND)
       unRegistryNotification(NotificationsType.FINISH_QUEST)
+      unRegistryNotification(NotificationsType.STARTING_CHALLENGE)
     }
   }, [
     registryNotification,
@@ -165,6 +179,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
     handleJoinParticipant,
     handleStartedRound,
     handleFinishQuest,
+    handleStartingGame,
   ])
 
   return (

@@ -51,11 +51,17 @@ export class ChallengeStateBuilder<
     this.currentChallenge = '';
     this.playedChallenges = [];
     this.participantsQuestHistory = {};
+    this.createdAt = new Date();
     this.updatedAt = new Date();
     this.creator = '';
     this.status = Status.PENDING;
     this.expiration = 0;
     this.type = ChallengeType.Clash;
+  }
+
+  private updateTimestamps() {
+    this.createdAt = this.createdAt || new Date();
+    this.updatedAt = new Date();
   }
 
   setId(id: string) {
@@ -64,12 +70,13 @@ export class ChallengeStateBuilder<
   }
 
   prepareToStart() {
-    if (this.status !== Status.STARTING) {
+    if (this.status !== Status.PENDING) {
       throw ErrorCodes.QUEST_IS_NOT_PENDING;
     }
 
     this.startedAt = new Date();
     this.status = Status.STARTING;
+    this.updateTimestamps();
     return this;
   }
 
@@ -78,32 +85,43 @@ export class ChallengeStateBuilder<
       throw ErrorCodes.QUEST_IS_NOT_STARTING;
     }
     this.status = Status.QUEST_IN_PROGRESS;
+    this.updateTimestamps();
     return this;
   }
 
   setTitle(title: string) {
     this.title = title;
+    this.updateTimestamps();
     return this;
   }
 
   setCodename(codename: string) {
     this.codename = codename;
+    this.updateTimestamps();
     return this;
   }
 
   setParticipants(participants: ParticipantModel[]) {
     this.participants = participants;
+    this.updateTimestamps();
     return this;
   }
 
   setChallenges(codeChallenges: QuestChallenge[]) {
     this.challenges = codeChallenges;
+    this.updateTimestamps();
     return this;
   }
 
-  isLastQuest() {
-    if (this.playedChallenges.length === this.challenges.length) {
-      return true;
+  hasCompleteAllQuest() {
+    const lastQuesReached =
+      this.playedChallenges.length === this.challenges.length;
+
+    if (lastQuesReached) {
+      const lastQuestPlayed = this.playedChallenges.find(
+        ({ questionId }) => questionId === this.currentChallenge,
+      );
+      return Boolean(lastQuestPlayed?.finishedAt);
     }
 
     return false;
@@ -118,7 +136,7 @@ export class ChallengeStateBuilder<
     };
 
     this.playedChallenges.push(newQuestState as QuestChallengeState);
-
+    this.updateTimestamps();
     return this;
   }
 
@@ -128,6 +146,10 @@ export class ChallengeStateBuilder<
 
       this.setCurrentChallenge(firstChallenge.id);
 
+      return this;
+    }
+
+    if (this.hasCompleteAllQuest()) {
       return this;
     }
 
@@ -141,7 +163,7 @@ export class ChallengeStateBuilder<
     }
 
     this.setCurrentChallenge(nextChallenge.id);
-
+    this.updateTimestamps();
     return this;
   }
 
@@ -172,54 +194,50 @@ export class ChallengeStateBuilder<
     this.playedChallenges[currentChallengeIndex] = currentChallenge;
     this.status = Status.AWAITING_NEXT_QUEST;
 
+    this.updateTimestamps();
     return this;
   }
 
   setPlayedChallenges(playedChallenges: QuestChallengeState[]) {
     this.playedChallenges = playedChallenges;
+    this.updateTimestamps();
     return this;
   }
 
   setType(type: ChallengeType) {
     this.type = type;
-    return this;
-  }
-
-  setCreatedAt(createdAt: Date) {
-    this.createdAt = createdAt;
-    return this;
-  }
-
-  setUpdatedAt(updatedAt: Date) {
-    this.updatedAt = updatedAt;
+    this.updateTimestamps();
     return this;
   }
 
   setCreator(creator: string) {
     this.creator = creator;
+    this.updateTimestamps();
     return this;
   }
 
   setExpiration(expiration: number) {
     this.expiration = expiration;
+    this.updateTimestamps();
     return this;
   }
 
   setStatus(status: ChallengeStatusType) {
     this.status = status;
-
+    this.updateTimestamps();
     return this;
   }
 
   addParticipant(participant: ParticipantModel) {
     this.participants.push(participant);
-
+    this.updateTimestamps();
     return this;
   }
 
   addCodeChallenge(codeChallenge: QuestChallenge) {
     this.challenges.push(codeChallenge);
 
+    this.updateTimestamps();
     return this;
   }
 
@@ -233,6 +251,7 @@ export class ChallengeStateBuilder<
     if (index !== -1) {
       this.participants[index] = participant;
     }
+    this.updateTimestamps();
     return this;
   }
 
@@ -271,6 +290,7 @@ export class ChallengeStateBuilder<
       challenges: this.challenges,
       currentChallenge: this.currentChallenge,
       playedChallenges: this.playedChallenges,
+      startedAt: this.startedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       creator: this.creator,
@@ -313,6 +333,7 @@ export class ChallengeStateBuilder<
     currentParticipant.score += score;
 
     this.updateParticipant(currentParticipant);
+    this.updateTimestamps();
 
     return this;
   }
@@ -338,6 +359,8 @@ export class ChallengeStateBuilder<
       currentChallenge: this.currentChallenge,
       playedChallenges: this.playedChallenges,
       createdAt: this.createdAt,
+      startedAt: this.startedAt,
+      difficulties: this.difficulties,
       updatedAt: this.updatedAt,
       creator: this.creator,
       status: this.status,
@@ -370,6 +393,15 @@ export class ChallengeStateBuilder<
       ...challenge,
       currentQuest: this.getCurrentQuest(),
     };
+  }
+
+  withNotQuests(): IChallengeState {
+    const challenge = this.getProps();
+    Reflect.deleteProperty(challenge, 'challenges');
+
+    console.log('withNotQuests', challenge);
+
+    return challenge;
   }
 }
 

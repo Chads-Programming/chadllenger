@@ -20,7 +20,6 @@ import { ErrorCodes } from '@/lib/errors';
 import { CHALLENGE_EVENTS } from '@/challenge/consts';
 import { FinishedQuesEvent } from '@/challenge/events/impl/finished-quest.event';
 import { UpdateQuizzChallengeCommand } from '../impl/update-quizz-challenge.command';
-import { FinishChallengeCommand } from '../impl/finish-challenge.command';
 
 @CommandHandler(FinishQuestCommand)
 export class FinishQuestHandler
@@ -61,21 +60,8 @@ export class FinishQuestHandler
         new UpdateQuizzChallengeCommand(currentChallenge.getProps()),
       );
 
-      if (currentChallenge.isLastQuest()) {
-        this.logger.log(
-          `Last quest reached: calling FinishChallengeCommand - ${codename}`,
-          'FinishQuestHandler::execute',
-        );
-        this.eventBus.publish(
-          new FinishChallengeCommand(currentChallenge.codename),
-        );
-      } else {
-        this.eventEmitter.emit(
-          CHALLENGE_EVENTS.QUEST_FINISHED,
-          updatedChallenge,
-        );
-        this.eventBus.publish(new FinishedQuesEvent(currentChallenge.codename));
-      }
+      this.eventEmitter.emit(CHALLENGE_EVENTS.QUEST_FINISHED, updatedChallenge);
+      this.eventBus.publish(new FinishedQuesEvent(currentChallenge.codename));
 
       this.logger.log(
         `Finished quest command - ${codename}`,
