@@ -45,17 +45,22 @@ export const QuizProvider = ({ codename, children }: Props) => {
   const [challengeState, dispatch] = useReducer(reducer, INITIAL_STATE)
   const { emitEvent } = useSocket()
 
+  const isChallengeLoaded = Boolean(challengeState.id)
+
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const { registryNotification, unRegistryNotification } =
     useChallengeNotifications(NotificationsChannels.CHALLENGE_NOTIFICATIONS)
 
+  const navigateToNotFound = useCallback(() => {
+    navigate('/challenge/not-found')
+  }, [navigate])
+
   const handleChallengeInfo = useCallback(
     (challenge: IChallengeState) => {
       if (!challenge || challenge?.status === Status.FINISHED) {
-        navigate('/challenge/not-found')
-
+        navigateToNotFound()
         return
       }
 
@@ -67,7 +72,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
 
       dispatch({ type: ACTIONS.LOAD_INITIAL_STATE, payload: challenge })
     },
-    [emitEvent, navigate, username, codename],
+    [emitEvent, username, codename, navigateToNotFound],
   )
 
   const handleJoinParticipant = useCallback(
@@ -152,8 +157,11 @@ export const QuizProvider = ({ codename, children }: Props) => {
   )
 
   useEffect(() => {
-    challengeApi.getChallengeByCodename(codename).then(handleChallengeInfo)
-  }, [codename, handleChallengeInfo])
+    challengeApi
+      .getChallengeByCodename(codename)
+      .then(handleChallengeInfo)
+      .catch(navigateToNotFound)
+  }, [codename, handleChallengeInfo, navigateToNotFound])
 
   useEffect(() => {
     registryNotification<PlayerJoinedGame>(
@@ -186,7 +194,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
     <QuizContext.Provider
       value={{ challengeState, startChallenge, sendAnswer }}
     >
-      {children}
+      {isChallengeLoaded ? children : null}
     </QuizContext.Provider>
   )
 }
