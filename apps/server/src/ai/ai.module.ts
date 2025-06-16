@@ -16,7 +16,13 @@ import { OpenaiService } from './services/openai.service';
       name: CHALLENGE_QUEUE.NAME,
     }),
   ],
-  providers: [GenerateChallengeHandler, AIConsumer, OpenaiService, GeneratedChallengeEventHandler, ChallengeQueueService],
-  exports: []
+  providers: [
+    GenerateChallengeHandler,
+    AIConsumer,
+    OpenaiService,
+    GeneratedChallengeEventHandler,
+    ChallengeQueueService,
+  ],
+  exports: [],
 })
-export class AiModule { }
+export class AiModule {}

@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from 'react-router'
 import { Toaster } from 'sonner'
 
@@ -12,6 +13,7 @@ import type { Route } from './+types/root'
 import './app.css'
 import Navbar from 'components/navigation/navbar'
 import { ChallengeBackground } from 'components/ui/background'
+import { useEffect } from 'react'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -52,16 +54,27 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isRouteErrorResponse(error)) {
+      return
+    }
+
+    if (error.status === 404) {
+      navigate('/not-found', { replace: true })
+
+      return
+    }
+  }, [error, navigate])
+
   let message = 'Oops!'
   let details = 'An unexpected error occurred.'
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error'
-    details =
-      error.status === 404
-        ? 'The requested page could not be found.'
-        : error.statusText || details
+    message = 'Error'
+    details = error.statusText || details
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message
     stack = error.stack
