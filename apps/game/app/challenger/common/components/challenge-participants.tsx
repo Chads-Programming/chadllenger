@@ -10,10 +10,10 @@ interface Props {
 
 const ChallengeParticipants = memo(({ participants }: Props) => {
   return (
-    <div className="bg-base-200/25 backdrop-blur-sm rounded-md border border-base-300">
+    <div className="backdrop-blur-sm rounded-md border border-base-300 bg-gradient-to-r from-primary/10 to-primary/5">
       <div className="p-4">
         <div className="flex items-center justify-center">
-          <h3 className="text-lg font-medium flex items-center gap-2">
+          <h3 className="text-lg font-medium flex items-center gap-2 text-primary">
             <Users className="h-5 w-5" />
             <span>{ChallengeStrings.challenge.participants.title}</span>
           </h3>

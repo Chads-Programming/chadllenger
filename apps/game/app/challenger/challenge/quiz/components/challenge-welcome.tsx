@@ -3,6 +3,7 @@ import ChallengeStrings from '~/challenger/common/strings/challenge'
 import { useQuiz } from '../quiz-provider'
 import { ArrowRightIcon, Users } from 'lucide-react'
 import { ShineBorder } from 'components/ui/shine-border'
+import LetterGlitch from 'components/ui/letter-glitch'
 
 const ChallengeWelcome = () => {
   const { userID } = useUser()
@@ -11,24 +12,28 @@ const ChallengeWelcome = () => {
   const isHost = userID === challengeState.creator
 
   return (
-    <div className="card lg:card-side bg-base-100 shadow-sm border border-base-300 lg:max-w-4xl self-center">
+    <div className="card lg:card-side backdrop-blur-2xl bg-gradient-to-r from-primary/10 to-primary/5 shadow-sm border border-base-300 lg:max-w-4xl self-center">
       <ShineBorder shineColor="oklch(62% 0.194 149.214)" />
-      <figure className="max-w-64 overflow-hidden">
-        <img src="/images/awaiting.png" alt="welcome challenge" />
-      </figure>
-      <div className="card-body">
-        <div className="flex items-center gap-2 mb-2">
-          <Users className="h-6 w-6 text-primary" />
-          <span className="text-sm font-medium text-primary">
-            {isHost
-              ? ChallengeStrings.challenge.welcome.goat
-              : ChallengeStrings.challenge.welcome.guest}
-          </span>
-        </div>
-        <h2 className="card-title">
-          {ChallengeStrings.challenge.welcome.title}
+
+      <div className="card-body relative">
+        <LetterGlitch
+          glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+          glitchSpeed={50}
+          centerVignette={true}
+          outerVignette={false}
+          smooth={true}
+        />
+        <figure className="overflow-hidden absolute w-[19rem] inline-flex justify-center  top-8 left-[30%] right-[30%]">
+          <img
+            src="/images/chad-horse.png"
+            draggable="false"
+            alt="welcome challenge"
+          />
+        </figure>
+        <h2 className="card-title text-primary inline-flex items-center mt-2">
+          <Users /> {ChallengeStrings.challenge.welcome.title}
         </h2>
-        <p>{ChallengeStrings.challenge.welcome.description}</p>
+        <p className="mb-2">{ChallengeStrings.challenge.welcome.description}</p>
         <div className="card-actions justify-end">
           {isHost ? (
             <button

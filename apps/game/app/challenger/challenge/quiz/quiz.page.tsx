@@ -29,7 +29,7 @@ export default function QuizChallenge() {
           type={challengeState.type}
           status={challengeState.status}
         />
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 mt-9">
           {match({ status: challengeState.status, quest: currentQuest })
             .with({ status: Status.PENDING }, () => (
               <>
