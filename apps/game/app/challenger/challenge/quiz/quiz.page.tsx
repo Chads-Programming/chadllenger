@@ -16,13 +16,9 @@ export default function QuizChallenge() {
   const currentQuest = useCurrentQuest()
   const currentQuestAnswer = useCurrentQuestAnswer()
 
-  console.log('QuizChallenge', {
-    challengeState,
-  })
-
   return (
-    <div className="relative min-w-full">
-      <div className="max-w-6xl mx-auto relative flex flex-col gap-8">
+    <main className="relative min-w-full">
+      <div className="flex flex-col w-full gap-8">
         <ChallengeBanner
           title={challengeState.title}
           codename={challengeState.codename}
@@ -32,12 +28,13 @@ export default function QuizChallenge() {
         <div className="flex flex-col gap-8 mt-9">
           {match({ status: challengeState.status, quest: currentQuest })
             .with({ status: Status.PENDING }, () => (
-              <>
+              <div className="flex flex-col items-center gap-24 w-full">
                 <ChallengeWelcome />
                 <ChallengeParticipants
+                  challengeHost={challengeState.creator}
                   participants={challengeState.participants}
                 />
-              </>
+              </div>
             ))
             .with({ status: Status.STARTING }, () => <Starting />)
             .with(
@@ -71,6 +68,6 @@ export default function QuizChallenge() {
             ))}
         </div>
       </div>
-    </div>
+    </main>
   )
 }

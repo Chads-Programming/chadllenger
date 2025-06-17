@@ -22,7 +22,7 @@ export const INITIAL_STATE: IChallengeState = {
   title: '',
   codename: '',
   participants: [],
-  codeChallenges: [],
+  challenges: [],
   currentChallenge: '',
   playedChallenges: [],
   createdAt: new Date(),
@@ -30,6 +30,9 @@ export const INITIAL_STATE: IChallengeState = {
   creator: '',
   status: 'PENDING',
   expiration: 0,
+  difficulties: [],
+  participantsQuestHistory: {},
+  type: 'Clash',
 }
 
 /**
