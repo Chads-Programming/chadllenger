@@ -188,8 +188,9 @@ export class ChallengeStateBuilder<
       });
 
       currentChallenge.winner = bestHistory.participantId;
-      currentChallenge.finishedAt = new Date();
     }
+
+    currentChallenge.finishedAt = new Date();
 
     this.playedChallenges[currentChallengeIndex] = currentChallenge;
     this.status = Status.AWAITING_NEXT_QUEST;
@@ -277,6 +278,7 @@ export class ChallengeStateBuilder<
     challengeState.type = props.type;
     challengeState.difficulties = props.difficulties;
     challengeState.startedAt = props.startedAt;
+    challengeState.participantsQuestHistory = props.participantsQuestHistory;
 
     return challengeState;
   }
@@ -306,13 +308,15 @@ export class ChallengeStateBuilder<
     const currentHistory =
       this.participantsQuestHistory[particpantAnswer.questionId] || [];
 
-    const questionStartTime = this.playedChallenges.find(
+    const questionStartTimeRaw = this.playedChallenges.find(
       (challenge) => challenge.questionId === particpantAnswer.questionId,
     )?.startedAt;
 
     const currentTime = new Date();
+    const questionStartTime = new Date(questionStartTimeRaw || currentTime);
 
     const diffTimes = currentTime.getTime() - questionStartTime.getTime();
+
     const score = Math.floor(
       (diffTimes + QUEST_DELTA_SCORE) / QUEST_DELTA_SCORE,
     );
@@ -331,6 +335,7 @@ export class ChallengeStateBuilder<
     );
 
     currentParticipant.score += score;
+    this.participantsQuestHistory[particpantAnswer.questionId] = currentHistory;
 
     this.updateParticipant(currentParticipant);
     this.updateTimestamps();
@@ -398,8 +403,6 @@ export class ChallengeStateBuilder<
   withNotQuests(): IChallengeState {
     const challenge = this.getProps();
     Reflect.deleteProperty(challenge, 'challenges');
-
-    console.log('withNotQuests', challenge);
 
     return challenge;
   }

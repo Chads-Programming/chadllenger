@@ -12,6 +12,7 @@ import {
 import { IQuestQuizChallenge } from '@repo/schemas';
 import { AnswerQuestQuizCommand } from '../impl/answer-quest-quiz.command';
 import { UpdateQuizzChallengeCommand } from '../impl/update-quizz-challenge.command';
+import { ChadLogger } from '@/logger/chad-logger';
 
 @CommandHandler(AnswerQuestQuizCommand)
 export class AnswerQuestQuizHandler
@@ -20,6 +21,7 @@ export class AnswerQuestQuizHandler
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly logger: ChadLogger,
   ) {}
 
   async execute(
@@ -56,12 +58,27 @@ export class AnswerQuestQuizHandler
         correctAnswer: correctOption.text,
       };
 
+      this.logger.log(
+        `Registering answer for participant ${command.anwserPayload.participantId} on question ${command.anwserPayload.questionId}`,
+      );
+
       challenge.registryParticipantAnswer(answerResponse);
 
       await this.commandBus.execute(new UpdateQuizzChallengeCommand(challenge));
 
+      this.logger.log(
+        `Answer registered successfully for participant ${command.anwserPayload.participantId} on question ${command.anwserPayload.questionId}`,
+      );
+
       return challenge;
     } catch (error) {
+      this.logger.error(
+        '`Error in AnswerQuestQuizHandler',
+        null,
+        'AnswerQuestQuizHandler::execute',
+        error,
+      );
+
       if (error instanceof CustomError) {
         throw error;
       }

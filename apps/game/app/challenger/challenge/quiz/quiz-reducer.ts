@@ -90,6 +90,7 @@ const loadInitialState = (
   _: IQuizChallengeState,
   action: Action<IQuizChallengeState>,
 ) => {
+  console.log(action.payload)
   return {
     ...action.payload,
   }
@@ -173,7 +174,7 @@ const markQuestAnswered = (
   const payload = action.payload
   const updatedState = structuredClone(state)
   const participantQuestHistory =
-    updatedState.participantsQuestHistory[payload.questionId]
+    updatedState.participantsQuestHistory[payload.questionId] || []
 
   const questHistory = {
     participantId: payload.participantId,
@@ -188,12 +189,13 @@ const markQuestAnswered = (
   )
 
   if (participantQuestIndex === -1) {
-    updatedState.participantsQuestHistory[payload.questionId].push(questHistory)
+    participantQuestHistory.push(questHistory)
   } else {
-    updatedState.participantsQuestHistory[payload.questionId][
-      participantQuestIndex
-    ] = questHistory
+    participantQuestHistory[participantQuestIndex] = questHistory
   }
+
+  updatedState.participantsQuestHistory[payload.questionId] =
+    participantQuestHistory
 
   return {
     ...state,

@@ -22,7 +22,7 @@ const ChallengeParticipants = memo(({ participants, challengeHost }: Props) => {
         </span>
       </div>
       <div className="space-y-4 px-4 inline-flex flex-wrap gap-2">
-        <ul className="space-y-2">
+        <ul className="space-y-2 flex gap-2 flex-wrap">
           {participants.map((participant) => (
             <li
               key={participant.id}

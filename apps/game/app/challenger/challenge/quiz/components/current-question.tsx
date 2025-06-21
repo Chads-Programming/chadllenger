@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import QuizOption from './quiz-option'
 import type { IQuestQuizChallenge } from '@repo/schemas'
+import { getEmojiById } from 'utils/emoji'
+import { cn } from 'lib/utils'
 
 interface Props {
   quest: IQuestQuizChallenge
@@ -8,13 +9,14 @@ interface Props {
   selectedAnswer: string | null
 }
 
-const CurrentQuestion = ({ quest, selectedAnswer }: Props) => {
+const CurrentQuestion = ({ quest, selectedAnswer, onAnswer }: Props) => {
   const [isAnswered, setIsAnswered] = useState(false)
   const [selectedOption, setSelectedOption] = useState<string | null>(
     selectedAnswer,
   )
 
   const handleAnswer = (optionId: string) => {
+    onAnswer(optionId)
     setSelectedOption(optionId)
     setIsAnswered(true)
   }
@@ -26,14 +28,19 @@ const CurrentQuestion = ({ quest, selectedAnswer }: Props) => {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {quest.question.options.map((option, index) => (
-          <QuizOption
-            key={quest.id}
-            identifier={index + 1}
-            option={option}
-            onClick={handleAnswer}
+          <button
+            key={option.id}
+            type="button"
             disabled={isAnswered}
-            isSelected={selectedOption === option.id}
-          />
+            onClick={() => handleAnswer(option.id)}
+            className={cn(
+              'inline-flex justify-start gap-4 btn btn-active bg-gray-700 hover:bg-secondary cursor-pointer text-white px-4 py-2 rounded-md',
+              selectedOption === option.id && 'bg-secondary',
+            )}
+          >
+            <span className="text-sm">{getEmojiById(index)}</span>
+            {option.text}
+          </button>
         ))}
       </div>
     </div>

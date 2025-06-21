@@ -201,7 +201,7 @@ export class ChallengeGateway
     );
 
     this.logger.log(
-      'Quest answered',
+      'Current participant quest',
       'ChallengeQuizGateway::handleAnswerQuest',
       participantQuest,
     );

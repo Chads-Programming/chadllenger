@@ -17,7 +17,7 @@ export default function QuizChallenge() {
   const currentQuestAnswer = useCurrentQuestAnswer()
 
   return (
-    <main className="relative min-w-full">
+    <main className="relative min-w-full lg:px-16">
       <div className="flex flex-col w-full gap-8">
         <ChallengeBanner
           title={challengeState.title}

@@ -26,10 +26,9 @@ export interface IChallengeState {
   type: ChallengeType
 }
 
-export type IChallengeStateWithCurrentQuest = Omit<
-  IChallengeState,
-  'challenges'
-> & {
+export type IChallengeStateWithCurrentQuest<
+  TChallenge extends IChallengeState = IChallengeState,
+> = Omit<TChallenge, 'challenges'> & {
   currentQuest: IQuestChallenge
 }
 

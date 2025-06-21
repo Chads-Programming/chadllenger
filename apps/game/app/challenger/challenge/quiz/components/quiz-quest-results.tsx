@@ -2,7 +2,7 @@ import type { IQuestHistory, IQuestionQuiz } from '@repo/schemas'
 import QuestResultChart from './quest-result-chart'
 import * as emoji from 'utils/emoji'
 import { cn } from 'lib/utils'
-import { Check } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import ChallengeStrings from '~/challenger/common/strings/challenge'
 
 type Props = {
@@ -24,14 +24,20 @@ const QuizQuestResults = ({ results, options }: Props) => {
           {options.map((option, index) => (
             <li
               className={cn(
-                'flex items-center gap-2 justify-center bg-active',
-                option.isCorrectAnswer && 'bg-success',
+                'flex items-center gap-2 justify-center bg-active rounded-md p-2 border border-base-300',
+                {
+                  'bg-gradient-to-r from-primary/60 to-primary/20':
+                    option.isCorrectAnswer,
+                  'bg-secondary': !option.isCorrectAnswer,
+                },
               )}
               key={option.id}
             >
               <span>{emoji.getEmojiById(index)}</span>
               <span>{option.text}</span>
-              {option.isCorrectAnswer && <Check className="w-4 h-4" />}
+              {option.isCorrectAnswer && (
+                <CheckCircle className="w-6 h-6 text-primary" />
+              )}
             </li>
           ))}
         </ul>

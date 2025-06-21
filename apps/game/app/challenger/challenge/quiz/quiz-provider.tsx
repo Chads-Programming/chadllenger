@@ -146,6 +146,8 @@ export const QuizProvider = ({ codename, children }: Props) => {
         MessageTypes.QUIZ_SEND_ANSWER,
         answer,
         (participantQuestHistory: IQuestHistory) => {
+          console.log('participantQuestHistory', participantQuestHistory)
+
           dispatch({
             type: ACTIONS.MARK_QUEST_ANSWERED,
             payload: participantQuestHistory,
