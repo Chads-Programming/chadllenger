@@ -39,14 +39,6 @@ export class JoinChallengeHandler
       });
     }
 
-    if (challenge.status !== Status.PENDING) {
-      throw CustomError.badArguments({
-        origin: 'JoinChallengeHandler',
-        code: ErrorCodes.CHALLENGE_IS_NOT_PENDING,
-        message: 'Challenge is not in pending status',
-      });
-    }
-
     const existinParticipant = await this.findParticipantById(
       command.joinRequest.challengeCodename,
       command.joinRequest.participantId,
@@ -57,6 +49,14 @@ export class JoinChallengeHandler
         status: JoinStatus.ALREADY_JOINED,
         participant: existinParticipant,
       };
+    }
+
+    if (challenge.status !== Status.PENDING) {
+      throw CustomError.badArguments({
+        origin: 'JoinChallengeHandler',
+        code: ErrorCodes.CHALLENGE_IS_NOT_PENDING,
+        message: 'Challenge is not in pending status',
+      });
     }
 
     const participant = new ParticipantModel(

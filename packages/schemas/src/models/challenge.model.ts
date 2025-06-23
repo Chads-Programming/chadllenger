@@ -26,10 +26,9 @@ export interface IChallengeState {
   type: ChallengeType
 }
 
-export type IChallengeStateWithCurrentQuest = Omit<
-  IChallengeState,
-  'challenges'
-> & {
+export type IChallengeStateWithCurrentQuest<
+  TChallenge extends IChallengeState = IChallengeState,
+> = Omit<TChallenge, 'challenges'> & {
   currentQuest: IQuestChallenge
 }
 
@@ -39,9 +38,10 @@ export interface IQuizChallengeState extends IChallengeState {
 
 export const Status = {
   PENDING: 'PENDING',
-  IN_PROGRESS: 'IN_PROGRESS',
-  FINISHED: ' FINISHED',
-  AWAITING_NEXT_QUEST: ' AWAITING_NEXT_QUEST',
+  QUEST_IN_PROGRESS: 'QUEST_IN_PROGRESS',
+  FINISHED: 'FINISHED',
+  STARTING: 'STARTING',
+  AWAITING_NEXT_QUEST: 'AWAITING_NEXT_QUEST',
 } as const
 
 export interface IQuestHistory {

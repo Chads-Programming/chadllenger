@@ -4,10 +4,13 @@ import {
   NotificationsChannels,
   NotificationsType,
   Status,
+  type AnswerQuest,
   type ChallengeNotificationType,
   type IChallengeState,
+  type IQuestHistory,
   type IQuizChallengeState,
   type PlayerJoinedGame,
+  type QuestResult,
 } from '@repo/schemas'
 import {
   createContext,
@@ -28,6 +31,7 @@ import { useUser } from 'providers/user-provider'
 export interface IQuizContext {
   challengeState: IQuizChallengeState
   startChallenge: () => void
+  sendAnswer: (optionId: string) => void
 }
 
 const QuizContext = createContext<IQuizContext | undefined>(undefined)
@@ -42,17 +46,22 @@ export const QuizProvider = ({ codename, children }: Props) => {
   const [challengeState, dispatch] = useReducer(reducer, INITIAL_STATE)
   const { emitEvent } = useSocket()
 
+  const isChallengeLoaded = Boolean(challengeState.id)
+
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const { registryNotification, unRegistryNotification } =
     useChallengeNotifications(NotificationsChannels.CHALLENGE_NOTIFICATIONS)
 
+  const navigateToNotFound = useCallback(() => {
+    navigate('/challenge/not-found')
+  }, [navigate])
+
   const handleChallengeInfo = useCallback(
     (challenge: IChallengeState) => {
       if (!challenge || challenge?.status === Status.FINISHED) {
-        navigate('/challenge/not-found')
-
+        navigateToNotFound()
         return
       }
 
@@ -64,7 +73,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
 
       dispatch({ type: ACTIONS.LOAD_INITIAL_STATE, payload: challenge })
     },
-    [emitEvent, navigate, username, codename],
+    [emitEvent, username, codename, navigateToNotFound],
   )
 
   const handleJoinParticipant = useCallback(
@@ -86,6 +95,16 @@ export const QuizProvider = ({ codename, children }: Props) => {
     [toast],
   )
 
+  const handleStartingGame = useCallback(
+    (notification: ChallengeNotificationType<IChallengeState>) => {
+      dispatch({
+        type: ACTIONS.STARTING_CHALLENGE,
+        payload: notification.data,
+      })
+    },
+    [],
+  )
+
   const handleStartedRound = useCallback(
     (notification: ChallengeNotificationType<IChallengeState>) => {
       dispatch({
@@ -98,36 +117,81 @@ export const QuizProvider = ({ codename, children }: Props) => {
     [toast],
   )
 
+  const handleFinishQuest = useCallback(
+    (notification: ChallengeNotificationType<QuestResult>) => {
+      dispatch({
+        type: ACTIONS.FINISH_QUEST,
+        payload: notification.data,
+      })
+    },
+    [],
+  )
+
   const startChallenge = useCallback(() => {
     emitEvent(MessageTypes.START_CHALLENGE, codename)
   }, [emitEvent, codename])
 
+  const sendAnswer = useCallback(
+    (optionId: string) => {
+      const answer: AnswerQuest = {
+        answer: optionId,
+        questionId: challengeState.currentChallenge,
+        codename,
+      }
+
+      emitEvent(
+        MessageTypes.QUIZ_SEND_ANSWER,
+        answer,
+        (participantQuestHistory: IQuestHistory) => {
+          dispatch({
+            type: ACTIONS.MARK_QUEST_ANSWERED,
+            payload: participantQuestHistory,
+          })
+        },
+      )
+    },
+    [emitEvent, challengeState, codename],
+  )
+
   useEffect(() => {
-    challengeApi.getChallengeByCodename(codename).then(handleChallengeInfo)
-  }, [codename, handleChallengeInfo])
+    challengeApi
+      .getChallengeByCodename(codename)
+      .then(handleChallengeInfo)
+      .catch(navigateToNotFound)
+  }, [codename, handleChallengeInfo, navigateToNotFound])
 
   useEffect(() => {
     registryNotification<PlayerJoinedGame>(
       NotificationsType.PLAYER_JOINED_GAME,
       handleJoinParticipant,
     )
-
+    registryNotification(
+      NotificationsType.STARTING_CHALLENGE,
+      handleStartingGame,
+    )
     registryNotification(NotificationsType.STARTED_ROUND, handleStartedRound)
+    registryNotification(NotificationsType.FINISH_QUEST, handleFinishQuest)
 
     return () => {
       unRegistryNotification(NotificationsType.PLAYER_JOINED_GAME)
       unRegistryNotification(NotificationsType.STARTED_ROUND)
+      unRegistryNotification(NotificationsType.FINISH_QUEST)
+      unRegistryNotification(NotificationsType.STARTING_CHALLENGE)
     }
   }, [
     registryNotification,
     unRegistryNotification,
     handleJoinParticipant,
     handleStartedRound,
+    handleFinishQuest,
+    handleStartingGame,
   ])
 
   return (
-    <QuizContext.Provider value={{ challengeState, startChallenge }}>
-      {children}
+    <QuizContext.Provider
+      value={{ challengeState, startChallenge, sendAnswer }}
+    >
+      {isChallengeLoaded ? children : null}
     </QuizContext.Provider>
   )
 }

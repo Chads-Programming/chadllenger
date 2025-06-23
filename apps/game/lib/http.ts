@@ -26,19 +26,27 @@ const create = ({ baseURL, headers = {} }: Options) => {
 
     const signal = options.controller.signal
 
-    const res = await fetch(`${baseURL}${path}?${queryString.toString()}`, {
-      method: 'GET',
-      headers: {
-        ...headers,
-        ...methodHeaders,
-      },
-      signal,
-      credentials: 'include',
-    })
+    try {
+      const res = await fetch(`${baseURL}${path}?${queryString.toString()}`, {
+        method: 'GET',
+        headers: {
+          ...headers,
+          ...methodHeaders,
+        },
+        signal,
+        credentials: 'include',
+      })
 
-    const data = await res.json()
+      if (!res.ok) {
+        throw await res.json()
+      }
 
-    return { data }
+      const data = await res.json()
+      return { data }
+    } catch (error) {
+      console.error('Error in getMethod:', error)
+      throw error
+    }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>

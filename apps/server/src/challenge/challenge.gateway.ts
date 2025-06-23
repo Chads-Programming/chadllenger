@@ -17,6 +17,7 @@ import {
   ChallengeType,
   NotificationsType,
   IChallengeState,
+  AnswerQuest,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
@@ -34,6 +35,7 @@ import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challeng
 import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
 import { GetChallengeQuery } from './queries/impl/get-challenge.query';
 import { Server } from 'socket.io';
+import { AnswerQuestQuizCommand } from './commands/impl/answer-quest-quiz.command';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -104,6 +106,15 @@ export class ChallengeGateway
         challenge.type,
       );
 
+    this.logger.log(
+      'Client connected to challenge room',
+      'ChallengeGateway::connectToChallenge',
+      {
+        codename: challenge.codename,
+        type: challenge.type,
+      },
+    );
+
     this.server
       .to(client.id)
       .emit(NotificationsType.CREATED_ROOM, notification);
@@ -164,6 +175,40 @@ export class ChallengeGateway
     return notification;
   }
 
+  @SubscribeMessage(MessageTypes.QUIZ_SEND_ANSWER)
+  async handleAnswerQuest(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: AnswerQuest,
+  ) {
+    this.logger.log(
+      'Start answering quest',
+      'ChallengeQuizGateway::handleAnswerQuest',
+      data,
+    );
+
+    const challenge = await this.commandBus.execute(
+      new AnswerQuestQuizCommand({
+        participantId: client.auth.userId,
+        answer: data.answer,
+        codename: data.codename,
+        questionId: data.questionId,
+      }),
+    );
+
+    const participantQuest = challenge.findParticipantQuest(
+      data.questionId,
+      client.auth.userId,
+    );
+
+    this.logger.log(
+      'Current participant quest',
+      'ChallengeQuizGateway::handleAnswerQuest',
+      participantQuest,
+    );
+
+    return participantQuest;
+  }
+
   @SubscribeMessage(MessageTypes.START_CHALLENGE)
   async startChallenge(@MessageBody() codename: string) {
     this.logger.log(
@@ -181,9 +226,10 @@ export class ChallengeGateway
       'ChallengeGateway::startChallenge',
       codename,
     );
-    const notification = ChallengeNotificationBuilder.startedRoundNotification(
-      updatedChallenge.withOnlyCurrentQuest(),
-    );
+    const notification =
+      ChallengeNotificationBuilder.startingChallengeNotification(
+        updatedChallenge.withNotQuests(),
+      );
 
     this.server
       .to(updatedChallenge.codename)
@@ -222,6 +268,11 @@ export class ChallengeGateway
 
   @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
   async finishQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting finished quest to participants',
+      'ChallengeGateway::finishQuest',
+      challenge.codename,
+    );
     this.server
       .to(challenge.codename)
       .emit(
@@ -234,6 +285,12 @@ export class ChallengeGateway
 
   @OnEvent(CHALLENGE_EVENTS.NEW_QUEST_STARTED)
   async startNextQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting started quest to participants',
+      'ChallengeGateway::startNextQuest',
+      challenge.codename,
+    );
+
     this.server
       .to(challenge.codename)
       .emit(

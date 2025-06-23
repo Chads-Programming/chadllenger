@@ -90,7 +90,10 @@ export default function ClashChallenge({
         </div>
 
         <div className="space-y-6">
-          <ChallengeParticipants participants={challengeState.participants} />
+          <ChallengeParticipants
+            challengeHost={challengeState.creator}
+            participants={challengeState.participants}
+          />
 
           <div className="bg-white rounded-lg shadow-sm">
             <div className="border-b border-gray-200 p-4">

@@ -1,14 +1,20 @@
-import type {
-  IChallengeStateWithCurrentQuest,
-  IParticipant,
-  IQuestQuizChallenge,
-  IQuizChallengeState,
+import {
+  Status,
+  type IChallengeStateWithCurrentQuest,
+  type IParticipant,
+  type IQuestHistory,
+  type IQuestQuizChallenge,
+  type IQuizChallengeState,
+  type QuestResult,
 } from '@repo/schemas'
 
 export const ACTIONS = {
+  STARTING_CHALLENGE: 'STARTING_CHALLENGE',
   LOAD_INITIAL_STATE: 'LOAD_INITIAL_STATE',
   JOIN_PLAYER: 'JOIN_PLAYER',
   STARTED_ROUND: 'STARTED_ROUND',
+  MARK_QUEST_ANSWERED: 'MARK_QUEST_ANSWERED',
+  FINISH_QUEST: 'FINISH_QUEST',
 }
 
 type ChallengeActionType = (typeof ACTIONS)[keyof typeof ACTIONS]
@@ -60,6 +66,9 @@ export const reducer = <TPayload>(
     [ACTIONS.LOAD_INITIAL_STATE]: loadInitialState,
     [ACTIONS.JOIN_PLAYER]: joinParticipant,
     [ACTIONS.STARTED_ROUND]: startedRound,
+    [ACTIONS.MARK_QUEST_ANSWERED]: markQuestAnswered,
+    [ACTIONS.FINISH_QUEST]: finishQuest,
+    [ACTIONS.STARTING_CHALLENGE]: startChallenge,
   }
 
   const actionHandler = actionManager[action.type] as ActionHandler
@@ -144,5 +153,108 @@ const startedRound = (
     playedChallenges: action.payload.playedChallenges,
     startedAt: action.payload.startedAt,
     currentChallenge: action.payload.currentChallenge,
+  }
+}
+
+/**
+ * Updates the state to mark a quest as answered by a participant.
+ *
+ * This function takes the current state and an action containing the quest history details.
+ * It updates the participantsQuestHistory by either adding a new entry or updating an existing one
+ * for the given participant and question.
+ *
+ * @param state - The current state of the quiz challenge
+ * @param action - An action containing the quest history details (participant answer, score etc)
+ * @returns A new state object with the updated participantsQuestHistory
+ */
+const markQuestAnswered = (
+  state: IQuizChallengeState,
+  action: Action<IQuestHistory>,
+) => {
+  const payload = action.payload
+  const updatedState = structuredClone(state)
+  const participantQuestHistory =
+    updatedState.participantsQuestHistory[payload.questionId] || []
+
+  const questHistory = {
+    participantId: payload.participantId,
+    participantAnswer: payload.participantAnswer,
+    questionId: payload.questionId,
+    score: payload.score,
+    createdAt: payload.createdAt,
+  }
+
+  const participantQuestIndex = participantQuestHistory.findIndex(
+    (quest) => quest.participantId === payload.participantId,
+  )
+
+  if (participantQuestIndex === -1) {
+    participantQuestHistory.push(questHistory)
+  } else {
+    participantQuestHistory[participantQuestIndex] = questHistory
+  }
+
+  updatedState.participantsQuestHistory[payload.questionId] =
+    participantQuestHistory
+
+  return {
+    ...state,
+    participantsQuestHistory: updatedState.participantsQuestHistory,
+  }
+}
+
+/**
+ * Updates the state when a quest is finished.
+ *
+ * This function takes the current state and an action containing the updated participantsQuestHistory.
+ * It updates the state with the new history and changes the status to indicate waiting for next quest.
+ *
+ * @param state - The current state of the quiz challenge
+ * @param action - An action containing the updated participantsQuestHistory
+ * @returns A new state object with updated history and status
+ */
+const finishQuest = (
+  state: IQuizChallengeState,
+  action: Action<QuestResult>,
+) => {
+  const currentQuestStateIndex = state.playedChallenges.findIndex(
+    (challenge) => {
+      return challenge.questionId === state.currentChallenge
+    },
+  )
+
+  const playedChallenges = [...state.playedChallenges]
+  playedChallenges[currentQuestStateIndex] = action.payload.playedChallenge
+
+  return {
+    ...state,
+    participantsQuestHistory: {
+      ...state.participantsQuestHistory,
+      [state.currentChallenge]: action.payload.questHistory,
+    },
+    playedChallenges,
+    status: Status.AWAITING_NEXT_QUEST,
+  }
+}
+
+/**
+ * Handles the logic to start a quiz challenge.
+ *
+ * Updates the quiz challenge state to indicate that the challenge is starting,
+ * and sets the `startedAt` timestamp from the provided action payload.
+ *
+ * @param state - The current state of the quiz challenge.
+ * @param action - The action containing the payload with the challenge state and the current quest.
+ * @returns A new state object with updated status and startedAt properties.
+ */
+const startChallenge = (
+  state: IQuizChallengeState,
+  action: Action<IChallengeStateWithCurrentQuest>,
+) => {
+  return {
+    ...state,
+    status: Status.STARTING,
+    challenges: [],
+    startedAt: action.payload.startedAt,
   }
 }

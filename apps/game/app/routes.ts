@@ -20,6 +20,6 @@ export default [
         './challenger/challenge/quiz/quiz.page.tsx',
       ),
     ]),
-    route('challenge/not-found', './challenger/challenge/not-found.page.tsx'),
   ]),
+  route('/not-found', 'not-found.page.tsx'),
 ] satisfies RouteConfig

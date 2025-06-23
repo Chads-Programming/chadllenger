@@ -14,13 +14,11 @@ export class StartedChallengeEventHandler
 
   async handle(event: StartedChallengeEvent) {
     this.logger.log(
-      'Preparing auto quest to queue',
-      'StartedChallengeEvent::handle',
+      '[DEPRECATED] Calling: setupAutoQuestToQueue',
+      'StartedChallengeEventHandler::handle',
       event.codename,
     );
 
-    await Promise.all([
-      this.challengeQueue.setupAutoQuestToQueue(event.codename),
-    ]);
+    // await this.challengeQueue.setupAutoQuestToQueue(event.codename);
   }
 }

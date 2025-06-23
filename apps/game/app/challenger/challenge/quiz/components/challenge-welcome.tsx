@@ -2,7 +2,6 @@ import { useUser } from 'providers/user-provider'
 import ChallengeStrings from '~/challenger/common/strings/challenge'
 import { useQuiz } from '../quiz-provider'
 import { ArrowRightIcon, Users } from 'lucide-react'
-import { ShineBorder } from 'components/ui/shine-border'
 
 const ChallengeWelcome = () => {
   const { userID } = useUser()
@@ -11,25 +10,18 @@ const ChallengeWelcome = () => {
   const isHost = userID === challengeState.creator
 
   return (
-    <div className="card lg:card-side bg-base-100 shadow-sm border border-base-300 lg:max-w-4xl self-center">
-      <ShineBorder shineColor="oklch(62% 0.194 149.214)" />
-      <figure className="max-w-64 overflow-hidden">
-        <img src="/images/awaiting.png" alt="welcome challenge" />
+    <div className="card w-full rounded-lg card-side card-blur overflow-clip shadow-sm  self-center p-0 border border-base-300">
+      <figure className="hidden! lg:block! w-[15rem]">
+        <img src="/images/awaiting.png" alt="Awaiting for players" />
       </figure>
       <div className="card-body">
-        <div className="flex items-center gap-2 mb-2">
-          <Users className="h-6 w-6 text-primary" />
-          <span className="text-sm font-medium text-primary">
-            {isHost
-              ? ChallengeStrings.challenge.welcome.goat
-              : ChallengeStrings.challenge.welcome.guest}
-          </span>
-        </div>
-        <h2 className="card-title">
-          {ChallengeStrings.challenge.welcome.title}
+        <h2 className="card-title text-primary inline-flex items-center mt-2 text-2xl">
+          <Users /> {ChallengeStrings.challenge.welcome.title}
         </h2>
-        <p>{ChallengeStrings.challenge.welcome.description}</p>
-        <div className="card-actions justify-end">
+        <p className="mb-2 text-lg">
+          {ChallengeStrings.challenge.welcome.description}
+        </p>
+        <div className="card-actions justify-start">
           {isHost ? (
             <button
               className="btn btn-primary group"

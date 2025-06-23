@@ -3,13 +3,14 @@ import { Job } from 'bullmq';
 import { AI_EVENTS, CHALLENGE_QUEUE } from '../consts';
 import { ChadLogger } from '@/logger/chad-logger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { FinishChallengeCommand } from '../commands/impl/finish-challenge.command';
 import { IGeneratedQuizChallenge, IQuestQuizChallenge } from '@repo/schemas';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpdateQuizzChallengeCommand } from '../commands/impl/update-quizz-challenge.command';
 import { WithId } from '@/types/with-id.type';
 import { GetChallengeQuery } from '../queries/impl/get-challenge.query';
 import { FinishQuestCommand } from '../commands/impl/finish-quest.command';
+import { ConfirmStartChallengeCommand } from '../commands/impl/confirm-start-challenge.command';
+import { StartNextQuestCommand } from '../commands/impl/start-next-quest.command';
 
 @Processor(CHALLENGE_QUEUE.NAME)
 export class ChallengeConsumer extends WorkerHost {
@@ -26,14 +27,14 @@ export class ChallengeConsumer extends WorkerHost {
   async process(job: Job<any, void, string>): Promise<void> {
     this.logger.log('Processing job', 'ChallengeConsumer::process', job.name);
 
-    if (job.name === CHALLENGE_QUEUE.JOBS.FINISH_CHALLENGE) {
-      return this.processFinishChallenge(job);
-    }
     if (job.name === CHALLENGE_QUEUE.JOBS.GENERATED_CHALLENGE) {
       return this.processGeneratedChallenge(job);
     }
-    if (job.name === CHALLENGE_QUEUE.JOBS.SETUP_AUTO_QUEST) {
-      return this.processSetupAutoQuest(job);
+    if (job.name === CHALLENGE_QUEUE.JOBS.PREPARE_START_CHALLENGE) {
+      return this.processConfirmStartChallenge(job);
+    }
+    if (job.name === CHALLENGE_QUEUE.JOBS.FINISH_QUEST) {
+      return this.processFinishQuest(job);
     }
     if (job.name === CHALLENGE_QUEUE.JOBS.START_NEXT_QUEST) {
       return this.processNextQuest(job);
@@ -68,24 +69,32 @@ export class ChallengeConsumer extends WorkerHost {
     this.eventEmitter.emit(AI_EVENTS.CHALLENGE_GENERATED, res);
   }
 
-  async processFinishChallenge(job: Job<string, void, string>): Promise<void> {
+  async processConfirmStartChallenge(
+    job: Job<string, void, string>,
+  ): Promise<void> {
     const challengeCodename = job.data;
 
     try {
+      this.logger.log(
+        'Confirming start challenge',
+        'ChallengeConsumer::processConfirmStartChallenge',
+        challengeCodename,
+      );
+
       await this.commandBus.execute(
-        new FinishChallengeCommand(challengeCodename),
+        new ConfirmStartChallengeCommand(challengeCodename),
       );
     } catch (error) {
       this.logger.error(
         error,
         null,
-        'ChallengeConsumer::processFinishChallenge',
+        'ChallengeConsumer::processConfirmStartChallenge',
       );
       throw error;
     }
   }
 
-  async processSetupAutoQuest(job: Job<string, void, string>): Promise<void> {
+  async processFinishQuest(job: Job<string, void, string>): Promise<void> {
     const challengeCodename = job.data;
 
     try {
@@ -110,8 +119,9 @@ export class ChallengeConsumer extends WorkerHost {
     const challengeCodename = job.data;
 
     try {
-      // TODO: Setup the next quest Command
-      await this.commandBus.execute(new FinishQuestCommand(challengeCodename));
+      await this.commandBus.execute(
+        new StartNextQuestCommand(challengeCodename),
+      );
     } catch (error) {
       this.logger.error(error, null, 'ChallengeConsumer::processNextQuest');
       throw error;

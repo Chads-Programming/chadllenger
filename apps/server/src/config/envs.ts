@@ -19,6 +19,7 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string(),
   REDIS_PORT: PortSchema,
   CHALLENGE_TTL: NumberSchema,
+  PREPARING_CHALLENGE_TTL: NumberSchema,
   QUEST_TTL: NumberSchema,
   NEXT_QUEST_TTL: NumberSchema,
   FINISH_CHALLENGE_TIME_QUEUE_TIME_MILISECONDS: NumberSchema,
@@ -52,4 +53,5 @@ export const envs = {
   OPENAI_MODEL: envVars.OPENAI_MODEL,
   OPENAI_API_KEY: envVars.OPENAI_API_KEY,
   NEXT_QUEST_TTL: envVars.NEXT_QUEST_TTL,
+  PREPARING_CHALLENGE_TTL: envVars.PREPARING_CHALLENGE_TTL,
 } as EnvVars;

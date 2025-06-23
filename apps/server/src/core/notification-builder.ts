@@ -5,10 +5,11 @@ import {
   PlayerConnectedPayload,
   NotificationsType,
   CreatedRoomPayload,
-  ChallengeSummary,
   PlayerJoinedGame,
   ChallengeType,
   IChallengeStateWithCurrentQuest,
+  IChallengeState,
+  QuestResult,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -58,6 +59,18 @@ export const ChallengeNotificationBuilder = {
     };
   },
 
+  startingChallengeNotification(
+    challenge: IChallengeState,
+  ): ChallengeNotificationType<IChallengeState> {
+    return {
+      id: generateUniqueId(),
+      type: NotificationsType.STARTING_CHALLENGE,
+      messageType: 'system',
+      data: challenge,
+      createdAt: new Date(),
+    };
+  },
+
   startedRoundNotification(
     challenge: IChallengeStateWithCurrentQuest,
   ): ChallengeNotificationType<IChallengeStateWithCurrentQuest> {
@@ -72,22 +85,31 @@ export const ChallengeNotificationBuilder = {
 
   buildFinishChallengeNotification(
     challengeState: ChallengeStateBuilder,
-  ): ChallengeNotificationType<ChallengeSummary> {
+  ): ChallengeNotificationType<IChallengeState['participantsQuestHistory']> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.FINISH_CHALLENGE,
       messageType: 'system',
-      data: challengeState.toSummary(),
+      data: challengeState.participantsQuestHistory,
       createdAt: new Date(),
     };
   },
 
-  buildFinishQuestNotification(challengeState: ChallengeStateBuilder) {
+  buildFinishQuestNotification(
+    challengeState: ChallengeStateBuilder,
+  ): ChallengeNotificationType<QuestResult> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.FINISH_QUEST,
       messageType: 'system',
-      data: challengeState.toSummary(),
+      data: {
+        questionId: challengeState.currentChallenge,
+        playedChallenge: [...challengeState.playedChallenges].pop(),
+        questHistory:
+          challengeState.participantsQuestHistory[
+            challengeState.currentChallenge
+          ],
+      },
       createdAt: new Date(),
     };
   },
