@@ -8,8 +8,8 @@ import {
   PlayerJoinedGame,
   ChallengeType,
   IChallengeStateWithCurrentQuest,
-  SummaryWithState,
   IChallengeState,
+  QuestResult,
 } from '@repo/schemas';
 
 export const ChallengeNotificationBuilder = {
@@ -97,14 +97,18 @@ export const ChallengeNotificationBuilder = {
 
   buildFinishQuestNotification(
     challengeState: ChallengeStateBuilder,
-  ): ChallengeNotificationType<SummaryWithState> {
+  ): ChallengeNotificationType<QuestResult> {
     return {
       id: generateUniqueId(),
       type: NotificationsType.FINISH_QUEST,
       messageType: 'system',
       data: {
-        summary: challengeState.toSummary(),
-        challengeState: challengeState.getProps(),
+        questionId: challengeState.currentChallenge,
+        playedChallenge: [...challengeState.playedChallenges].pop(),
+        questHistory:
+          challengeState.participantsQuestHistory[
+            challengeState.currentChallenge
+          ],
       },
       createdAt: new Date(),
     };

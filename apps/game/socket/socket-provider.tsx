@@ -33,7 +33,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       ack?: (response: TResponse) => void,
     ) => {
       if (isConnected) {
-        console.log(`Emitting event: ${event}`, data)
         socketRef?.current?.emit(event, data, ack || (() => {}))
         return
       }

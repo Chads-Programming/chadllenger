@@ -5,6 +5,7 @@ import {
   type IQuestHistory,
   type IQuestQuizChallenge,
   type IQuizChallengeState,
+  type QuestResult,
 } from '@repo/schemas'
 
 export const ACTIONS = {
@@ -90,7 +91,6 @@ const loadInitialState = (
   _: IQuizChallengeState,
   action: Action<IQuizChallengeState>,
 ) => {
-  console.log(action.payload)
   return {
     ...action.payload,
   }
@@ -215,11 +215,24 @@ const markQuestAnswered = (
  */
 const finishQuest = (
   state: IQuizChallengeState,
-  action: Action<IQuizChallengeState['participantsQuestHistory']>,
+  action: Action<QuestResult>,
 ) => {
+  const currentQuestStateIndex = state.playedChallenges.findIndex(
+    (challenge) => {
+      return challenge.questionId === state.currentChallenge
+    },
+  )
+
+  const playedChallenges = [...state.playedChallenges]
+  playedChallenges[currentQuestStateIndex] = action.payload.playedChallenge
+
   return {
     ...state,
-    participantsQuestHistory: action.payload,
+    participantsQuestHistory: {
+      ...state.participantsQuestHistory,
+      [state.currentChallenge]: action.payload.questHistory,
+    },
+    playedChallenges,
     status: Status.AWAITING_NEXT_QUEST,
   }
 }

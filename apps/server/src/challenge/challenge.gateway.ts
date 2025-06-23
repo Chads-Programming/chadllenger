@@ -268,6 +268,11 @@ export class ChallengeGateway
 
   @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
   async finishQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting finished quest to participants',
+      'ChallengeGateway::finishQuest',
+      challenge.codename,
+    );
     this.server
       .to(challenge.codename)
       .emit(

@@ -1,6 +1,6 @@
 import type { IQuestHistory } from '@repo/schemas'
 import { useMemo } from 'react'
-import { Bar, BarChart, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, XAxis } from 'recharts'
 import * as emoji from 'utils/emoji'
 
 interface Props {
@@ -36,9 +36,10 @@ const QuestResultChart = ({ results }: Props) => {
   }, [results])
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart width={150} height={40} data={data}>
-        <Bar dataKey="uv" fill="var(--primary)" />
+    <ResponsiveContainer width={250} height={250} className="w-full h-full">
+      <BarChart width={150} height={150} data={data}>
+        <Bar dataKey="amt" fill="var(--color-primary)" />
+        <XAxis dataKey="name" />
       </BarChart>
     </ResponsiveContainer>
   )

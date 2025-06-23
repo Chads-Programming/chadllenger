@@ -1,4 +1,9 @@
-import type { ChallengeType, IChallengeState } from '@/models'
+import type {
+  ChallengeType,
+  IChallengeState,
+  IQuestChallengeState,
+  IQuestHistory,
+} from '@/models'
 
 export const NotificationsChannels = {
   CHALLENGE_NOTIFICATIONS: 'CHALLENGE_NOTIFICATIONS',
@@ -66,6 +71,12 @@ export type ChallengeSummary = {
 export type SummaryWithState = {
   summary: ChallengeSummary
   challengeState: IChallengeState
+}
+
+export type QuestResult = {
+  questionId: string
+  playedChallenge: IQuestChallengeState
+  questHistory: IQuestHistory[]
 }
 
 export type NotificationsChannelsType =

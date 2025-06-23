@@ -10,6 +10,7 @@ import {
   type IQuestHistory,
   type IQuizChallengeState,
   type PlayerJoinedGame,
+  type QuestResult,
 } from '@repo/schemas'
 import {
   createContext,
@@ -117,11 +118,7 @@ export const QuizProvider = ({ codename, children }: Props) => {
   )
 
   const handleFinishQuest = useCallback(
-    (
-      notification: ChallengeNotificationType<
-        IChallengeState['participantsQuestHistory']
-      >,
-    ) => {
+    (notification: ChallengeNotificationType<QuestResult>) => {
       dispatch({
         type: ACTIONS.FINISH_QUEST,
         payload: notification.data,
@@ -146,8 +143,6 @@ export const QuizProvider = ({ codename, children }: Props) => {
         MessageTypes.QUIZ_SEND_ANSWER,
         answer,
         (participantQuestHistory: IQuestHistory) => {
-          console.log('participantQuestHistory', participantQuestHistory)
-
           dispatch({
             type: ACTIONS.MARK_QUEST_ANSWERED,
             payload: participantQuestHistory,
