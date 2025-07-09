@@ -1,7 +1,7 @@
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetChallengeQuery } from '../impl/get-challenge.query';
 import { ChallengeStateBuilder } from '@/challenge/models/challenge-state.model';
 import { ChallengeCacheRepository } from '@/challenge/repositories/challenge-cache.repository';
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { GetChallengeQuery } from '../impl/get-challenge.query';
 
 @QueryHandler(GetChallengeQuery)
 export class GetChallengeQueryHandler

@@ -7,7 +7,9 @@ export class PlayerCacheRepository {
   constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   async getPlayerRoom(playerId: string): Promise<string | null> {
-    const room = await this.cache.get<string>(`player:${playerId}:room`);
+    const room = await this.cache.get<string>(
+      `player:${playerId}:room`,
+    );
 
     if (!room) {
       return null;
@@ -16,7 +18,10 @@ export class PlayerCacheRepository {
     return room;
   }
 
-  async setPlayerRoom(playerId: string, room: string): Promise<void> {
+  async setPlayerRoom(
+    playerId: string,
+    room: string,
+  ): Promise<void> {
     await this.cache.set<string>(
       `player:${playerId}:room`,
       room,

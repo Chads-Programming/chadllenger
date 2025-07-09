@@ -35,14 +35,14 @@ export class WsCustomExceptionFilter extends BaseWsExceptionFilter {
       return;
     }
 
-    const { type, origin, message } = exception.context;
+    const { type, origin, message, data } = exception.context;
 
     const errorResponse = {
       type,
       message,
     };
 
-    this.logger.error(exception, undefined, origin);
+    this.logger.error(exception, undefined, origin, data);
 
     client.emit('error', errorResponse);
   }

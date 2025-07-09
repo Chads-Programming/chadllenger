@@ -1,24 +1,13 @@
-export const Difficult = {
-  Easy: 'Easy',
-  Medium: 'Medium',
-  Hard: 'Hard',
-  Chad: 'Chad',
-} as const
+import type { IQuestChallenge } from "./quest-challenge.model"
 
-export type Difficult = (typeof Difficult)[keyof typeof Difficult]
-
-export interface ICodeChallenge {
-  id: string
-  title: string
-  description: string
-  codename: string
-  difficult: Difficult
-  createdAt: Date
-  updatedAt: Date
+export interface IQuestCodeChallenge extends IQuestChallenge {
+    code: string
+    testCases: ITestCase[]
 }
 
-export interface ICodeChallengeState {
-  id: string
-  startedAt?: Date
-  winner?: string
+export interface ITestCase {
+    id: string
+    args: string
+    expectedOutput: string
+    codeChallengeId: string
 }

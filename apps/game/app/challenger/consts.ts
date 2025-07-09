@@ -1,5 +1,5 @@
 import { Difficult } from '@repo/schemas'
-import ChallengeStrings from './strings/challenge'
+import ChallengeStrings from './common/strings/challenge'
 
 export const DIFFICULTIES = [
   { value: Difficult.Easy, label: ChallengeStrings.create.difficulty.easy },

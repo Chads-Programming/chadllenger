@@ -25,8 +25,10 @@ export class ChallengeCacheRepository {
       .setCreator(challenge.creator)
       .setStatus(challenge.status)
       .setExpiration(challenge.expiration)
-      .setCodeChallenges(challenge.codeChallenges)
-      .setParticipants(challenge.participants);
+      .setChallenges(challenge.challenges)
+      .setParticipants(challenge.participants)
+      .setDifficulties(challenge.difficulties)
+      .setType(challenge.type);
 
     const challengeKey = this.getKey(newChallenge.codename);
 
@@ -65,8 +67,9 @@ export class ChallengeCacheRepository {
   ): Promise<ChallengeStateBuilder> {
     const key = this.getKey(codename);
     const challenge = await this.cache.get<string>(key);
+    if (!challenge) throw ErrorCodes.CHALLENGE_NOT_FOUND;
 
-    return JSON.parse(challenge);
+    return ChallengeStateBuilder.fromProps(JSON.parse(challenge));
   }
 
   private getKey(id: string) {

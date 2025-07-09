@@ -1,4 +1,4 @@
-import { IParticipant, IChallengeState } from '@repo/schemas';
+import { IParticipant, IChallengeState, ChallengeType } from '@repo/schemas';
 
 export type CreateChallengeRequestType = Omit<
   IChallengeState,
@@ -8,9 +8,14 @@ export type CreateChallengeRequestType = Omit<
   | 'codename'
   | 'currentChallenge'
   | 'playedChallenges'
+  | 'participantsQuestHistory'
 >;
 
 export type UpdateChallengeRequestType = Partial<
+  Omit<IChallengeState, 'id' | 'createdAt' | 'updatedAt'>
+>;
+
+export type UpdateQuizzChallengeRequestType = Partial<
   Omit<IChallengeState, 'id' | 'createdAt' | 'updatedAt'>
 >;
 
@@ -22,6 +27,7 @@ export const JoinStatus = {
 export type JoinStatus = (typeof JoinStatus)[keyof typeof JoinStatus];
 
 export type JoinChallengeRequestType = {
+  type: ChallengeType;
   participantId: string;
   participantName: string;
   challengeCodename: string;
@@ -30,4 +36,24 @@ export type JoinChallengeRequestType = {
 export type JoinChallengeResponseType = {
   participant: IParticipant;
   status: JoinStatus;
+};
+
+export type AnswerQuestionRequestType = {
+  participantId: string;
+  codename: string;
+  answer: string;
+  questionId: string;
+};
+
+export type AnswerQuestionResponseType = {
+  codename: string;
+  answer: string;
+  questionId: string;
+};
+
+export type RegisterAnswerRequestType = {
+  participantId: string;
+  questionId: string;
+  answer: string;
+  correctAnswer: string;
 };

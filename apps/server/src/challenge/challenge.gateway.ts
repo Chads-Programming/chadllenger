@@ -8,27 +8,34 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { ChallengeNotificationBuilder } from '@/core/notification-builder';
 import {
   MessageTypes,
   CreateChallenge,
   NotificationsChannels,
   JoinChallengeRoom,
+  ChallengeType,
+  NotificationsType,
+  IChallengeState,
+  AnswerQuest,
 } from '@repo/schemas';
 import { envs } from '@/config/envs';
 import { WsCustomExceptionFilter } from '@/exception-filters/ws-custom-exception-filter';
 import { UseFilters } from '@nestjs/common';
 import { ChadLogger } from '@/logger/chad-logger';
-import { ChallengeQueueService } from './services/challenge-queue.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ChallengeStateBuilder } from './models/challenge-state.model';
-import { CHALLENGE_EVENTS } from './consts';
+import { AI_EVENTS, CHALLENGE_EVENTS } from './consts';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateChallengeCommand } from './commands/impl/create-challenge.comand';
+import { CreateClashChallengeCommand } from './commands/impl/create-clash-challenge.command';
 import { UpdateOnlineCountCommand } from './commands/impl/update-online-count.command';
 import { JoinChallengeCommand } from './commands/impl/join-challenge.command';
 import { AuthenticatedSocket } from '@/adapters/redis-io.adapter';
+import { CreateQuizChallengeCommand } from './commands/impl/create-quiz-challenge.command';
+import { StartChallengeCommand } from './commands/impl/start-challenge.comman';
+import { GetChallengeQuery } from './queries/impl/get-challenge.query';
+import { Server } from 'socket.io';
+import { AnswerQuestQuizCommand } from './commands/impl/answer-quest-quiz.command';
 
 @UseFilters(WsCustomExceptionFilter)
 @WebSocketGateway({
@@ -48,7 +55,6 @@ export class ChallengeGateway
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly challengeQueue: ChallengeQueueService,
     private readonly logger: ChadLogger,
   ) {}
 
@@ -76,24 +82,48 @@ export class ChallengeGateway
     @MessageBody() data: CreateChallenge,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    const challenge = await this.commandBus.execute(
-      new CreateChallengeCommand(client.auth.userId, data),
-    );
+    const challengeCommandStrategy = {
+      [ChallengeType.Clash]: () =>
+        new CreateClashChallengeCommand(client.auth.userId, data),
+      [ChallengeType.Quiz]: () =>
+        new CreateQuizChallengeCommand(client.auth.userId, data),
+    };
+
+    const creationCommand = challengeCommandStrategy[data.type]();
+    const challenge = await this.commandBus.execute(creationCommand);
 
     client.join(challenge.codename);
 
+    if (challenge.type === ChallengeType.Quiz) return;
+
+    return this.connectToChallenge(challenge, client);
+  }
+
+  connectToChallenge(challenge: IChallengeState, client: AuthenticatedSocket) {
     const notification =
       ChallengeNotificationBuilder.buildCreatedRoomNotification(
         challenge.codename,
+        challenge.type,
       );
 
-    this.server
-      .to(client.auth.userId)
-      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
+    this.logger.log(
+      'Client connected to challenge room',
+      'ChallengeGateway::connectToChallenge',
+      {
+        codename: challenge.codename,
+        type: challenge.type,
+      },
+    );
 
-    this.challengeQueue.finishChallengeToQueue(challenge.codename);
+    this.server
+      .to(client.id)
+      .emit(NotificationsType.CREATED_ROOM, notification);
 
     return notification;
+  }
+
+  async getChallengeByCodename(codename: string) {
+    return await this.queryBus.execute(new GetChallengeQuery(codename));
   }
 
   /**
@@ -121,6 +151,7 @@ export class ChallengeGateway
 
     const response = await this.commandBus.execute(
       new JoinChallengeCommand({
+        type: joinPayload.type,
         challengeCodename: joinPayload.codename,
         participantId: client.auth.userId,
         participantName: joinPayload.username,
@@ -142,6 +173,67 @@ export class ChallengeGateway
       .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
 
     return notification;
+  }
+
+  @SubscribeMessage(MessageTypes.QUIZ_SEND_ANSWER)
+  async handleAnswerQuest(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: AnswerQuest,
+  ) {
+    this.logger.log(
+      'Start answering quest',
+      'ChallengeQuizGateway::handleAnswerQuest',
+      data,
+    );
+
+    const challenge = await this.commandBus.execute(
+      new AnswerQuestQuizCommand({
+        participantId: client.auth.userId,
+        answer: data.answer,
+        codename: data.codename,
+        questionId: data.questionId,
+      }),
+    );
+
+    const participantQuest = challenge.findParticipantQuest(
+      data.questionId,
+      client.auth.userId,
+    );
+
+    this.logger.log(
+      'Current participant quest',
+      'ChallengeQuizGateway::handleAnswerQuest',
+      participantQuest,
+    );
+
+    return participantQuest;
+  }
+
+  @SubscribeMessage(MessageTypes.START_CHALLENGE)
+  async startChallenge(@MessageBody() codename: string) {
+    this.logger.log(
+      'Start challenge',
+      'ChallengeGateway::startChallenge',
+      codename,
+    );
+
+    const updatedChallenge = await this.commandBus.execute(
+      new StartChallengeCommand(codename),
+    );
+
+    this.logger.log(
+      'Start challenge OK, sending notification',
+      'ChallengeGateway::startChallenge',
+      codename,
+    );
+    const notification =
+      ChallengeNotificationBuilder.startingChallengeNotification(
+        updatedChallenge.withNotQuests(),
+      );
+
+    this.server
+      .to(updatedChallenge.codename)
+      .emit(NotificationsChannels.CHALLENGE_NOTIFICATIONS, notification);
   }
 
   /**
@@ -166,6 +258,48 @@ export class ChallengeGateway
       );
   }
 
+  @OnEvent(AI_EVENTS.CHALLENGE_GENERATED)
+  async generatedChallenge(challenge: IChallengeState) {
+    const creator = await this.getSocketByUserId(challenge.creator);
+    // TODO: handle when creator disconnected before challenge is generated
+    if (!creator) return;
+    return this.connectToChallenge(challenge, creator);
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.QUEST_FINISHED)
+  async finishQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting finished quest to participants',
+      'ChallengeGateway::finishQuest',
+      challenge.codename,
+    );
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.buildFinishQuestNotification(
+          ChallengeStateBuilder.fromProps(challenge),
+        ),
+      );
+  }
+
+  @OnEvent(CHALLENGE_EVENTS.NEW_QUEST_STARTED)
+  async startNextQuest(challenge: IChallengeState) {
+    this.logger.log(
+      'Emiting started quest to participants',
+      'ChallengeGateway::startNextQuest',
+      challenge.codename,
+    );
+
+    this.server
+      .to(challenge.codename)
+      .emit(
+        NotificationsChannels.CHALLENGE_NOTIFICATIONS,
+        ChallengeNotificationBuilder.startedRoundNotification(
+          ChallengeStateBuilder.fromProps(challenge).withOnlyCurrentQuest(),
+        ),
+      );
+  }
   /**
    * Retrieves the number of currently connected sockets to the server.
    *
@@ -175,6 +309,11 @@ export class ChallengeGateway
     return (this.server.sockets as unknown as { size: number }).size;
   }
 
+  private async getSocketByUserId(userId: string) {
+    const sockets =
+      (await this.server.fetchSockets()) as unknown as AuthenticatedSocket[];
+    return sockets.find((socket) => socket.auth.userId === userId);
+  }
   /**
    * Handles the rejoining of a challenge by a client.
    * This method checks if the client is currently associated with a room
